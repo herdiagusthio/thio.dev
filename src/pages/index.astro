@@ -1,0 +1,62 @@
+---
+import '../styles/global.css';
+import FeedEntry from '../components/FeedEntry.astro';
+import { getFeed } from '../lib/feed';
+
+const feed = getFeed();
+const year = 2026; // build-time constant; bump as needed
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Thio — System Changelog</title>
+    <meta
+      name="description"
+      content="Herdi Agusthio (Thio) — backend engineer in fintech/AI. A live changelog of engineering decisions, not a resume."
+    />
+    <link rel="icon" href={`${import.meta.env.BASE_URL}favicon.svg`} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="wrap">
+        <span class="brand">thio<span class="dot">.</span>dev</span>
+        <span class="status"><span class="pulse"></span> system online</span>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <section class="hero">
+        <p class="eyebrow">// backend engineer · fintech / ai</p>
+        <h1>Herdi <span class="grad">Agusthio</span></h1>
+        <p>
+          I build reliable backend systems. This isn't a resume — it's a live
+          changelog of the problems I've worked through and the architectural
+          decisions behind them, streamed straight from my engineering journal.
+        </p>
+      </section>
+
+      <h2 class="section-head">system changelog · {feed.length} entries</h2>
+
+      <section class="feed">
+        {feed.length === 0 ? (
+          <p class="empty">No entries yet. Run `npm run sync` to pull the latest.</p>
+        ) : (
+          feed.map((entry) => <FeedEntry entry={entry} />)
+        )}
+      </section>
+    </main>
+
+    <footer class="foot wrap">
+      <span>© {year} Herdi Agusthio</span>
+      <span>built with astro · deployed on github pages</span>
+    </footer>
+  </body>
+</html>

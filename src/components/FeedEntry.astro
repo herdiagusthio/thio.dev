@@ -1,0 +1,35 @@
+---
+import type { FeedEntry } from '../lib/feed';
+interface Props { entry: FeedEntry }
+const { entry } = Astro.props;
+const isDecision = entry.kind === 'decision';
+const statusClass = entry.status
+  ? `status-${entry.status.toLowerCase().split(/\s+/)[0]}`
+  : '';
+---
+<article class="entry">
+  <div class="entry-meta">
+    <span class={`tag ${isDecision ? 'tag-decision' : 'tag-session'}`}>
+      {isDecision ? 'Decision' : 'Session'}
+    </span>
+    <span class="date">{entry.date}</span>
+    {entry.status && (
+      <span class={`status-badge ${statusClass}`}>{entry.status}</span>
+    )}
+  </div>
+
+  <h3>{entry.title}</h3>
+  {entry.location && <p class="location">◍ {entry.location}</p>}
+
+  <div class="body" set:html={entry.summaryHtml} />
+
+  {entry.bulletsHtml.length > 0 && (
+    <ul class="decisions">
+      {entry.bulletsHtml.map((b) => <li set:html={b} />)}
+    </ul>
+  )}
+
+  {entry.nextFocus && (
+    <p class="next-focus"><b>next &rsaquo;</b> {entry.nextFocus}</p>
+  )}
+</article>
