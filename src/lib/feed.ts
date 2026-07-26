@@ -16,11 +16,9 @@ export interface FeedEntry {
   date: string; // YYYY-MM-DD
   kind: FeedKind;
   title: string;
-  location?: string;
   status?: string; // decisions only
   summaryHtml: string;
   bulletsHtml: string[]; // key decisions (journal only)
-  nextFocus?: string;
 }
 
 function readDir(dir: string): { name: string; body: string }[] {
@@ -39,6 +37,15 @@ function field(block: string, label: string): string | undefined {
   const re = new RegExp(`- \\*\\*${label}:\\*\\*\\s*(.+)`);
   const m = block.match(re);
   return m ? m[1].trim() : undefined;
+}
+
+/**
+ * Public/private gate: an entry is published only if its source explicitly
+ * opts in with `- **Public:** true` (or `yes`). Everything else stays private.
+ */
+function isPublic(block: string): boolean {
+  const v = field(block, 'Public');
+  return !!v && /^(true|yes)$/i.test(v);
 }
 
 /** Extract the indented list items that follow a `- **Key Decisions:**` field. */
@@ -68,17 +75,18 @@ function parseJournal(): FeedEntry[] {
       const block = parts[i + 1] ?? '';
       const summary = field(block, 'Session Summary') ?? '';
       if (!summary) continue;
+      if (!isPublic(block)) continue; // opt-in only
+      // Note: Location and Next Session Focus are intentionally NOT surfaced —
+      // they stay in the private journal and never render on the public site.
       entries.push({
         id: `journal-${date}`,
         date,
         kind: 'journal',
         title: `Session — ${date}`,
-        location: field(block, 'Location'),
         summaryHtml: marked.parseInline(summary) as string,
         bulletsHtml: decisionBullets(block).map(
           (b) => marked.parseInline(b) as string,
         ),
-        nextFocus: field(block, 'Next Session Focus'),
         status: undefined,
       });
     }
@@ -102,6 +110,7 @@ function parseDecisions(): FeedEntry[] {
     const status = field(body, 'Status') ?? 'Unknown';
     const context = section(body, 'Context');
     if (!date) continue;
+    if (!isPublic(body)) continue; // opt-in only
     entries.push({
       id: `decision-${name.replace(/\.md$/, '')}`,
       date,

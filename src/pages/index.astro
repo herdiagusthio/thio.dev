@@ -43,7 +43,9 @@ const year = 2026; // build-time constant; bump as needed
         </p>
       </section>
 
-      <h2 class="section-head">system changelog · {feed.length} entries</h2>
+      <h2 class="section-head">
+        system changelog · {feed.length} {feed.length === 1 ? 'entry' : 'entries'}
+      </h2>
 
       <section class="feed">
         {feed.length === 0 ? (

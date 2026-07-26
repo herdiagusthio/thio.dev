@@ -232,12 +232,6 @@ code {
   font-weight: 700;
   letter-spacing: -0.01em;
 }
-.entry .location {
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  color: var(--text-dim);
-  margin: 0 0 10px;
-}
 .entry .body {
   color: var(--text-muted);
   font-size: 0.96rem;
@@ -265,19 +259,6 @@ code {
   left: 0;
   color: var(--primary);
 }
-.next-focus {
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px dashed var(--border);
-  font-size: 0.85rem;
-  color: var(--text-dim);
-}
-.next-focus b {
-  color: var(--text-muted);
-  font-family: var(--mono);
-  font-weight: 600;
-}
-
 /* ---------- footer ---------- */
 .foot {
   border-top: 1px solid var(--border);
