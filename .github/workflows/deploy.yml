@@ -30,10 +30,13 @@ jobs:
         run: npm ci
       - name: Build
         # Content is committed to content/, so no second-brain checkout is needed.
-        # For a project page (user.github.io/thio.dev) set BASE_PATH here, e.g.:
-        #   env:
-        #     BASE_PATH: /thio.dev
+        # Project page (herdiagusthio.github.io/thio.dev) => assets served under /thio.dev.
+        # If you later move to the custom domain thio.dev, remove BASE_PATH and set
+        # SITE_URL: https://thio.dev (base returns to '/').
         run: npm run build
+        env:
+          BASE_PATH: /thio.dev
+          SITE_URL: https://herdiagusthio.github.io
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
