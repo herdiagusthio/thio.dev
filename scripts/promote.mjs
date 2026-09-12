@@ -3,7 +3,7 @@ import path from 'node:path';
 import matter from 'gray-matter';
 
 // Paths
-const BRAIN_DIR = path.resolve('/home/thiohermes/code-storage/second-brain');
+const BRAIN_DIR = path.resolve('/home/thiohermes/code-storage/second-brain/knowledge');
 const SITE_CONTENT_DIR = path.resolve('/home/thiohermes/code-storage/thio.dev/content');
 
 const CATEGORY_MAP = {
