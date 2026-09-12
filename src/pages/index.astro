@@ -6,6 +6,7 @@ import { getFeed } from '../lib/feed';
 
 const feed = getFeed();
 const year = 2026; // build-time constant; bump as needed
+const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`;
 ---
 <!doctype html>
 <html lang="en">
@@ -17,7 +18,7 @@ const year = 2026; // build-time constant; bump as needed
       name="description"
       content="Technical thinking, engineering experience, and professional journey of Herdi Agusthio."
     />
-    <link rel="icon" href={`${import.meta.env.BASE_URL.replace(/\\/$/, '')}/favicon.svg`} />
+    <link rel="icon" href={faviconHref} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
