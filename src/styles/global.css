@@ -81,6 +81,28 @@ code {
   justify-content: space-between;
   height: 56px;
 }
+
+.nav-links {
+  display: flex;
+  gap: 20px;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+}
+
+.nav-links a {
+  color: var(--text-muted);
+  transition: color 0.2s ease;
+}
+
+.nav-links a:hover {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.foot-tech {
+  font-family: var(--mono);
+  opacity: 0.6;
+}
 .brand {
   font-family: var(--mono);
   font-weight: 600;
