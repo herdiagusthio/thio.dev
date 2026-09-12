@@ -1,20 +1,20 @@
 :root {
-  --bg: #0b0f19;
-  --bg-elev: rgba(17, 24, 39, 0.6);
+  --bg: #0a0a0a;
+  --bg-elev: rgba(255, 255, 255, 0.03);
   --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.16);
-  --text: #e5e9f0;
-  --text-muted: #8b93a7;
-  --text-dim: #5b6478;
-  --primary: #00f2fe;
-  --primary-rgb: 0, 242, 254;
-  --secondary: #4facfe;
-  --accent: #10b981;
-  --warn: #f59e0b;
+  --border-strong: rgba(255, 255, 255, 0.15);
+  --text: #f5f5f7;
+  --text-muted: #a1a1aa;
+  --text-dim: #71717a;
+  --primary: #ffffff;
+  --primary-rgb: 255, 255, 255;
+  --secondary: #d4d4d8;
+  --accent: #ffffff;
+  --warn: #facc15;
   --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
   --sans: 'Outfit', 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
-  --radius: 14px;
-  --maxw: 780px;
+  --radius: 8px;
+  --maxw: 720px;
 }
 
 * {
@@ -32,13 +32,6 @@ body {
   font-family: var(--sans);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-  /* subtle console grid + glow */
-  background-image:
-    radial-gradient(circle at 15% -10%, rgba(0, 242, 254, 0.08), transparent 40%),
-    radial-gradient(circle at 90% 0%, rgba(79, 172, 254, 0.06), transparent 35%),
-    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-  background-size: 100% 100%, 100% 100%, 48px 48px, 48px 48px;
   min-height: 100vh;
 }
 
