@@ -1,0 +1,112 @@
+---
+import '../styles/global.css';
+import FeedEntry from '../components/FeedEntry.astro';
+import { getFeed } from '../lib/feed';
+
+// In a real production environment, we would use a middleware or 
+// environment variable to restrict this page. For the MVP,
+// it is a build-time route for the owner.
+const allEntries = getFeed();
+const drafts = allEntries.filter(e => e.status === 'draft');
+const published = allEntries.filter(e => e.status === 'published');
+const year = 2026;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Curation Desk — thio.dev</title>
+    <link rel="stylesheet" href="/src/styles/global.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="wrap">
+        <span class="brand">editorial <span class="dot">.</span> desk</span>
+        <a href="/" class="nav-links" style="color: var(--text-muted); font-family: var(--mono); font-size: 0.8rem;">← back to site</a>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <section class="hero">
+        <p class="eyebrow">// quality gate</p>
+        <h1>Curation <span class="grad">Dashboard</span></h1>
+        <p>Review promoted content from second-brain. Only entries marked "published" will be visible to the public.</p>
+      </section>
+
+      <div class="curation-container">
+        <div class="curation-section">
+          <h2 class="section-head">draft queue · {drafts.length}</h2>
+          {drafts.length === 0 ? (
+            <p class="empty">Queue is empty. Promote new content from second-brain.</p>
+          ) : (
+            <div class="feed">
+              {drafts.map(entry => (
+                <div class="entry draft-entry">
+                  <div class="entry-meta">
+                    <span class="status-badge status-proposed">Draft</span>
+                    <span class="date">{entry.date}</span>
+                  </div>
+                  <h3>{entry.title}</h3>
+                  <div class="entry-body" dangerouslySetInnerHTML={{ __html: entry.summaryHtml }} />
+                  <div class="curation-actions">
+                    <span class="action-hint">To publish: set status to "published" in content file.</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div class="curation-section">
+          <h2 class="section-head">live on site · {published.length}</h2>
+          <div class="feed">
+            {published.map(entry => (
+              <div class="entry published-entry">
+                <div class="entry-meta">
+                  <span class="status-badge status-accepted">Published</span>
+                  <span class="date">{entry.date}</span>
+                </div>
+                <h3>{entry.title}</h3>
+                <div class="entry-body" dangerouslySetInnerHTML={{ __html: entry.summaryHtml }} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <style>
+      .curation-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        padding-bottom: 72px;
+      }
+      .draft-entry {
+        border-left: 4px solid var(--warn);
+      }
+      .published-entry {
+        border-left: 4px solid var(--accent);
+        opacity: 0.7;
+      }
+      .curation-actions {
+        margin-top: 16px;
+        padding-top: 12px;
+        border-top: 1px solid var(--border);
+      }
+      .action-hint {
+        font-family: var(--mono);
+        font-size: 0.7rem;
+        color: var(--text-dim);
+        font-style: italic;
+      }
+      @media (max-width: 768px) {
+        .curation-container {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </body>
+</html>
