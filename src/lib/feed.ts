@@ -4,9 +4,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { marked } from 'marked';
+import matter from 'gray-matter';
 
-// Resolved from the project root — reliable during `astro build`/`dev`,
-// unlike import.meta.url which shifts once this module is bundled.
 const CONTENT = path.resolve(process.cwd(), 'content');
 
 export type FeedKind = 'journal' | 'decision';
@@ -18,7 +17,7 @@ export interface FeedEntry {
   title: string;
   status?: string; // decisions only
   summaryHtml: string;
-  bulletsHtml: string[]; // key decisions (journal only)
+  bulletsHtml: string[];
 }
 
 function readDir(dir: string): { name: string; body: string }[] {
@@ -32,61 +31,46 @@ function readDir(dir: string): { name: string; body: string }[] {
     }));
 }
 
-/** Grab the value after a `- **Label:**` field, single line. */
-function field(block: string, label: string): string | undefined {
-  const re = new RegExp(`- \\*\\*${label}:\\*\\*\\s*(.+)`);
-  const m = block.match(re);
-  return m ? m[1].trim() : undefined;
-}
-
-/**
- * Public/private gate: an entry is published only if its source explicitly
- * opts in with `- **Public:** true` (or `yes`). Everything else stays private.
- */
-function isPublic(block: string): boolean {
-  const v = field(block, 'Public');
-  return !!v && /^(true|yes)$/i.test(v);
-}
-
-/** Extract the indented list items that follow a `- **Key Decisions:**` field. */
-function decisionBullets(block: string): string[] {
-  const lines = block.split('\n');
-  const start = lines.findIndex((l) => /- \*\*Key Decisions:\*\*/.test(l));
-  if (start === -1) return [];
-  const items: string[] = [];
-  for (let i = start + 1; i < lines.length; i++) {
-    const line = lines[i];
-    // stop at the next top-level field or blank-then-field
-    if (/^- \*\*/.test(line)) break;
-    const m = line.match(/^\s+(?:\d+\.|[-*])\s+(.*)$/);
-    if (m && m[1].trim()) items.push(m[1].trim());
-  }
-  return items;
-}
-
 function parseJournal(): FeedEntry[] {
   const entries: FeedEntry[] = [];
   for (const { name, body } of readDir(path.join(CONTENT, 'journal'))) {
+    const { data, content } = matter(body);
+    
+    // Filter by the new schema: status must be 'published'
+    if (data.status !== 'published') continue;
+
     // Split into per-day blocks on `## YYYY-MM-DD` headings.
-    const parts = body.split(/^## (\d{4}-\d{2}-\d{2})\s*$/m);
-    // parts = [preamble, date1, block1, date2, block2, ...]
+    const parts = content.split(/^## (\\d{4}-\\d{2}-\\d{2})\\s*$/m);
     for (let i = 1; i < parts.length; i += 2) {
       const date = parts[i];
       const block = parts[i + 1] ?? '';
-      const summary = field(block, 'Session Summary') ?? '';
+      
+      // Extract session summary using a simple regex since we are inside a block
+      const summaryMatch = block.match(/- \\*\\*Session Summary:\\*\\*\\s*(.+)/);
+      const summary = summaryMatch ? summaryMatch[1].trim() : '';
+      
       if (!summary) continue;
-      if (!isPublic(block)) continue; // opt-in only
-      // Note: Location and Next Session Focus are intentionally NOT surfaced —
-      // they stay in the private journal and never render on the public site.
+
+      // Extract key decisions bullets
+      const bullets: string[] = [];
+      const lines = block.split('\\n');
+      const start = lines.findIndex((l) => /- \\*\\*Key Decisions:\\*\\*/.test(l));
+      if (start !== -1) {
+        for (let j = start + 1; j < lines.length; j++) {
+          const line = lines[j];
+          if (/^- \\*\\*/.test(line)) break;
+          const m = line.match(/^\\s+(?:\\d+\\.|[-*])\\s+(.*)$/);
+          if (m && m[1].trim()) bullets.push(m[1].trim());
+        }
+      }
+
       entries.push({
         id: `journal-${date}`,
         date,
         kind: 'journal',
         title: `Session — ${date}`,
         summaryHtml: marked.parseInline(summary) as string,
-        bulletsHtml: decisionBullets(block).map(
-          (b) => marked.parseInline(b) as string,
-        ),
+        bulletsHtml: bullets.map((b) => marked.parseInline(b) as string),
         status: undefined,
       });
     }
@@ -94,29 +78,23 @@ function parseJournal(): FeedEntry[] {
   return entries;
 }
 
-/** Pull the prose under a `## Heading` up to the next `## `. */
-function section(body: string, heading: string): string {
-  const re = new RegExp(`## ${heading}\\s*\\n([\\s\\S]*?)(?=\\n## |$)`);
-  const m = body.match(re);
-  return m ? m[1].trim() : '';
-}
-
 function parseDecisions(): FeedEntry[] {
   const entries: FeedEntry[] = [];
   for (const { name, body } of readDir(path.join(CONTENT, 'decisions'))) {
-    const titleLine = body.match(/^#\s+(.*)$/m)?.[1] ?? name.replace(/\.md$/, '');
-    const title = titleLine.replace(/^ADR:\s*/i, '').trim();
-    const date = field(body, 'Date') ?? '';
-    const status = field(body, 'Status') ?? 'Unknown';
-    const context = section(body, 'Context');
-    if (!date) continue;
-    if (!isPublic(body)) continue; // opt-in only
+    const { data, content } = matter(body);
+    
+    if (data.status !== 'published') continue;
+
+    // Extract the "Context" section for the summary
+    const contextMatch = content.match(/## Context\n([\s\S]*?)(?=\n## |$)/);
+    const context = contextMatch ? contextMatch[1].trim() : '';
+
     entries.push({
-      id: `decision-${name.replace(/\.md$/, '')}`,
-      date,
+      id: `decision-${name.replace('.md', '')}`,
+      date: data.date,
       kind: 'decision',
-      title,
-      status,
+      title: data.title,
+      status: data.status,
       summaryHtml: marked.parse(context) as string,
       bulletsHtml: [],
     });
@@ -126,7 +104,7 @@ function parseDecisions(): FeedEntry[] {
 
 export function getFeed(): FeedEntry[] {
   return [...parseJournal(), ...parseDecisions()].sort((a, b) => {
-    if (a.date !== b.date) return a.date < b.date ? 1 : -1; // newest first
+    if (a.date !== b.date) return a.date < b.date ? 1 : -1;
     return a.kind === b.kind ? 0 : a.kind === 'decision' ? -1 : 1;
   });
 }
