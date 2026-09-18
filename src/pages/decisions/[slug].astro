@@ -1,0 +1,126 @@
+---
+import fs from 'node:fs';
+import path from 'node:path';
+import matter from 'gray-matter';
+import { marked } from 'marked';
+import '../../styles/global.css';
+
+export async function getStaticPaths() {
+  const decisionsDir = path.resolve(process.cwd(), 'content/decisions');
+  const files = fs.readdirSync(decisionsDir).filter(f => f.endsWith('.md'));
+  
+  return files.map(file => {
+    const slug = file.replace('.md', '');
+    return { params: { slug } };
+  });
+}
+
+const { slug } = Astro.params;
+const filePath = path.resolve(process.cwd(), `content/decisions/${slug}.md`);
+const fileContent = fs.readFileSync(filePath, 'utf8');
+const { data, content } = matter(fileContent);
+const html = marked.parse(content);
+
+const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{data.title} — Technical Decision</title>
+    <link rel="icon" href={faviconHref} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="container">
+        <nav>
+          <a href="/showcase" class="nav-brand">← Back to Showcase</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      <article class="decision-content">
+        <header class="article-header">
+          <span class="eyebrow">Technical Decision — {data.date}</span>
+          <h1>{data.title}</h1>
+          <div class="status-pill">{data.status}</div>
+        </header>
+        
+        <div class="prose" set:html={html} />
+      </article>
+    </main>
+  </body>
+</html>
+
+<style>
+  .article-header {
+    padding: 6rem 0 3rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 3rem;
+  }
+  .eyebrow {
+    display: block;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  h1 {
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.5rem;
+  }
+  .status-pill {
+    display: inline-block;
+    padding: 4px 12px;
+    background: var(--gray-100);
+    border-radius: 20px;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .topbar {
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 0;
+    position: sticky;
+    top: 0;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    z-index: 100;
+  }
+  .nav-brand {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--text-dim);
+  }
+  .prose {
+    font-size: 1.125rem;
+    line-height: 1.7;
+    color: var(--text-muted);
+    max-width: 45rem;
+  }
+  .prose :global(h2) {
+    color: var(--text);
+    margin: 2.5rem 0 1rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+  .prose :global(ul) {
+    padding-left: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .prose :global(li) {
+    margin-bottom: 0.5rem;
+  }
+</style>
