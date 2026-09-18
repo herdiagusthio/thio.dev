@@ -1,0 +1,141 @@
+---
+import { getPulseData, resolveMetadata } from '../lib/telemetry';
+
+const pulse = getPulseData();
+const meta = resolveMetadata('Hero');
+---
+<section class="hero-console">
+  <div class="sys-header">
+    <div class="sys-pulse">
+      <span class="pulse-indicator"></span>
+      <span class="signal-text">{pulse.signal}</span>
+    </div>
+    <span class="auth-level">[AUTH_LEVEL:{pulse.auth_level}]</span>
+  </div>
+  
+  <div class="sys-content">
+    <h1 class="title">Herdi Agusthio</h1>
+    <p class="role">&gt; Principal Software Engineer</p>
+    <p class="bio">
+      Architecting high-leverage distributed systems and engineering patterns. 
+      Focusing on technical rigor, observability, and durable knowledge assets.
+    </p>
+    <div class="sys-meta">
+      <span>TS:{pulse.timestamp}</span>
+      <span>ID:{meta.component_id}</span>
+      <span>REV:C001</span>
+    </div>
+  </div>
+  
+  <div class="sys-actions">
+    <a href="/showcase" class="cmd-btn primary">[ EXEC: SHOWCASE ]</a>
+    <a href="#writing" class="cmd-btn secondary">[ READ: ARCHIVE ]</a>
+  </div>
+</section>
+
+<style>
+  .hero-console {
+    background: var(--gray-0);
+    color: var(--gray-100);
+    font-family: var(--font-mono);
+    border: 1px solid var(--gray-20);
+    padding: 2rem;
+    margin: 2rem 0;
+  }
+  
+  .sys-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: var(--gray-50);
+    border-bottom: 1px dashed var(--gray-20);
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .sys-pulse {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .pulse-indicator {
+    width: 8px;
+    height: 8px;
+    background: var(--gray-100);
+    border-radius: 50%;
+    animation: blink 2s steps(2, start) infinite;
+  }
+  
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+  
+  .sys-content {
+    margin-bottom: 2rem;
+  }
+  
+  .title {
+    font-family: var(--font-sans);
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.05em;
+    color: var(--gray-100);
+  }
+  
+  .role {
+    font-size: 0.9rem;
+    color: var(--gray-60);
+    margin-bottom: 1.5rem;
+  }
+  
+  .bio {
+    font-family: var(--font-sans);
+    font-size: 1.1rem;
+    color: var(--gray-80);
+    line-height: 1.6;
+    max-width: 600px;
+    margin-bottom: 1.5rem;
+  }
+  
+  .sys-meta {
+    display: flex;
+    gap: 1.5rem;
+    font-size: 0.75rem;
+    color: var(--gray-50);
+  }
+  
+  .sys-actions {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  .cmd-btn {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    transition: all 0.2s;
+  }
+  
+  .cmd-btn.primary {
+    background: var(--gray-100);
+    color: var(--gray-0);
+  }
+  
+  .cmd-btn.primary:hover {
+    background: var(--gray-80);
+  }
+  
+  .cmd-btn.secondary {
+    color: var(--gray-80);
+    border: 1px solid var(--gray-40);
+  }
+  
+  .cmd-btn.secondary:hover {
+    color: var(--gray-100);
+    border-color: var(--gray-80);
+  }
+</style>
