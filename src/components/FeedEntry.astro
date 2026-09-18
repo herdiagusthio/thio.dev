@@ -7,24 +7,103 @@ const statusClass = entry.status
   ? `status-${entry.status.toLowerCase().split(/\s+/)[0]}`
   : '';
 ---
-<article class="entry">
+<article class="entry-row" data-tags={entry.tags.join(',')}>
   <div class="entry-meta">
-    <span class={`tag ${isDecision ? 'tag-decision' : 'tag-session'}`}>
-      {isDecision ? 'Decision' : 'Session'}
-    </span>
-    <span class="date">{entry.date}</span>
+    <span class="mono-bracket">[{isDecision ? 'DECISION' : 'SESSION'}]</span>
+    <span class="mono-bracket">[{entry.date}]</span>
     {entry.status && (
-      <span class={`status-badge ${statusClass}`}>{entry.status}</span>
+      <span class={`mono-bracket ${statusClass}`}>[{entry.status.toUpperCase()}]</span>
     )}
+    {entry.tags && entry.tags.map(tag => (
+      <span class="mono-bracket tag-item">[{tag.toUpperCase()}]</span>
+    ))}
   </div>
 
-  <h3>{entry.title}</h3>
-
-  <div class="body" set:html={entry.summaryHtml} />
-
-  {entry.bulletsHtml.length > 0 && (
-    <ul class="decisions">
-      {entry.bulletsHtml.map((b) => <li set:html={b} />)}
-    </ul>
-  )}
+  <div class="entry-content">
+    <h3 class="mono-title">{entry.title}</h3>
+    <div class="body" set:html={entry.summaryHtml} />
+    {entry.bulletsHtml.length > 0 && (
+      <ul class="bracket-list">
+        {entry.bulletsHtml.map((b) => <li set:html={b} />)}
+      </ul>
+    )}
+  </div>
 </article>
+
+<style>
+  .entry-row {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 1.5rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--gray-20);
+  }
+  
+  .entry-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--gray-50);
+  }
+
+  .mono-bracket {
+    text-transform: uppercase;
+  }
+
+  .entry-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .mono-title {
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--gray-100);
+    margin: 0;
+  }
+
+  .body {
+    color: var(--gray-80);
+    font-size: 0.95rem;
+    font-family: var(--font-sans);
+    line-height: 1.5;
+  }
+
+  .bracket-list {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0 0 0;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--gray-60);
+  }
+
+  .bracket-list li {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .bracket-list li::before {
+    content: "[>]";
+    position: absolute;
+    left: 0;
+    color: var(--gray-40);
+  }
+
+  @media (max-width: 640px) {
+    .entry-row {
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+    }
+    .entry-meta {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+  }
+</style>
