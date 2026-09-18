@@ -13,3 +13,4 @@ export function resolveMetadata(component: string) {
     rendered_at: Date.now(),
   };
 }
+ponytail: minimal hardcoded telemetry.ts mock. add live ws/redis fetch when real backend exists.

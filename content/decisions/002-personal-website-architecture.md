@@ -1,11 +1,6 @@
----
-title: "Personal Website Concept & Architecture"
-date: 2026-07-25
-category: "engineering"
-status: "published"
-tags: ["architecture", "web-dev", "astro"]
----
 # ADR: 002: Personal Website Concept & Architecture
+- **Date:** 2026-07-25
+- **Status:** Proposed
 
 ## Context
 Thio (Herdi Agusthio) wants to design and build a personal website that is highly unique, personal, and represents his background as a backend engineer operating in the fintech/AI sector. The site should be cost-effective ($0 hosting on platforms like Vercel or GitHub Pages) and act as a professional developer profile that avoids generic resume templates. Family details are excluded from the public scope for privacy.
