@@ -1,0 +1,122 @@
+---
+import { getPulseData, resolveMetadata } from '../lib/telemetry';
+
+const pulse = getPulseData();
+const meta = resolveMetadata('Hero');
+---
+<section class="hero-telemetry">
+  <div class="telemetry-header">
+    <span class="auth-level">[AUTH_LEVEL: {pulse.auth_level}]</span>
+    <span class="system-signal">
+      <span class="pulse-dot"></span>
+      {pulse.signal}
+    </span>
+  </div>
+  
+  <div class="hero-content">
+    <h1 class="hero-title">Herdi Agusthio</h1>
+    <p class="role muted">Principal Software Engineer</p>
+    <p class="bio">
+      Architecting high-leverage distributed systems and engineering patterns. 
+      Focusing on technical rigor, observability, and durable knowledge assets.
+    </p>
+    <div class="metadata">
+      <span>[TS: {pulse.timestamp}] [ID: {meta.component_id}]</span>
+    </div>
+  </div>
+  
+  <div class="actions">
+    <a href="/showcase" class="btn primary">Engineering Showcase</a>
+    <a href="#writing" class="btn secondary">Archive</a>
+  </div>
+</section>
+
+<style>
+  .hero-telemetry {
+    background: var(--gray-0);
+    color: var(--gray-100);
+    padding: 2.5rem 0;
+    font-family: var(--font-mono);
+  }
+  .telemetry-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--gray-20);
+    padding-bottom: 0.5rem;
+    color: var(--gray-60);
+  }
+  .auth-level {
+    font-weight: 600;
+  }
+  .system-signal {
+    display: flex;
+    align-items: center;
+  }
+  .pulse-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background-color: var(--gray-100);
+    border-radius: 50%;
+    margin-right: 0.5rem;
+    animation: pulse 2s infinite ease-in-out;
+  }
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.2; }
+    100% { opacity: 1; }
+  }
+  .hero-content {
+    margin-bottom: 2rem;
+  }
+  .hero-title {
+    font-family: var(--font-sans);
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.05em;
+  }
+  .role {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    color: var(--gray-50);
+  }
+  .bio {
+    font-family: var(--font-sans);
+    font-size: 1.25rem;
+    max-width: 600px;
+    margin-bottom: 1.5rem;
+    color: var(--gray-80);
+    line-height: 1.6;
+  }
+  .metadata {
+    font-size: 0.75rem;
+    color: var(--gray-60);
+  }
+  .actions { 
+    display: flex; 
+    gap: 1rem; 
+  }
+  .btn { 
+    padding: 0.75rem 1.5rem; 
+    text-decoration: none; 
+    font-family: var(--font-sans);
+    font-weight: 600; 
+    font-size: 0.9rem; 
+    transition: 0.2s ease-out; 
+    border: 1px solid var(--gray-100); 
+  }
+  .primary { 
+    background: var(--gray-100); 
+    color: var(--gray-0); 
+  }
+  .secondary { 
+    background: transparent; 
+    color: var(--gray-100); 
+  }
+  .btn:hover { 
+    opacity: 0.8; 
+  }
+</style>
