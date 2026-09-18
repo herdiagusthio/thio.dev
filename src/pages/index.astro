@@ -5,6 +5,7 @@ import Portfolio from '../components/Portfolio.astro';
 import { getFeed } from '../lib/feed';
 
 const feed = getFeed();
+const allTags = Array.from(new Set(feed.flatMap((f) => f.tags || []))).sort();
 const year = 2026; // build-time constant; bump as needed
 const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`;
 ---
@@ -55,6 +56,15 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
         knowledge archive · {feed.length} {feed.length === 1 ? 'entry' : 'entries'}
       </h2>
 
+      <div class="feed-filters">
+        <span class="mono-bracket">[FILTER:</span>
+        <button class="filter-btn active" data-filter="all">ALL</button>
+        {allTags.map(tag => (
+          <button class="filter-btn" data-filter={tag}>{tag.toUpperCase()}</button>
+        ))}
+        <span class="mono-bracket">]</span>
+      </div>
+
       <section class="feed">
         {feed.length === 0 ? (
           <p class="empty">No entries yet. Run `npm run sync` to pull the latest.</p>
@@ -68,5 +78,60 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
       <span>© {year} Herdi Agusthio</span>
       <span class="foot-tech">built with astro · deployed on github pages</span>
     </footer>
+
+    <script>
+      const buttons = document.querySelectorAll('.filter-btn');
+      const entries = document.querySelectorAll('.entry-row') as NodeListOf<HTMLElement>;
+
+      buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          buttons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const filter = btn.getAttribute('data-filter');
+
+          entries.forEach(entry => {
+            if (filter === 'all') {
+              entry.style.display = '';
+            } else {
+              const tags = entry.getAttribute('data-tags')?.split(',') || [];
+              entry.style.display = tags.includes(filter!) ? '' : 'none';
+            }
+          });
+        });
+      });
+    </script>
+
+    <style>
+      .feed-filters {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+        font-family: var(--font-mono);
+        font-size: 0.85rem;
+        align-items: center;
+      }
+      .mono-bracket {
+        color: var(--gray-50);
+      }
+      .filter-btn {
+        background: none;
+        border: none;
+        color: var(--gray-50);
+        cursor: pointer;
+        padding: 0;
+        font-family: inherit;
+        font-size: inherit;
+        text-transform: uppercase;
+        transition: color 0.2s;
+      }
+      .filter-btn:hover {
+        color: var(--gray-80);
+      }
+      .filter-btn.active {
+        color: var(--gray-100);
+        font-weight: 600;
+      }
+    </style>
   </body>
 </html>

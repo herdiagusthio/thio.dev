@@ -7,13 +7,16 @@ const statusClass = entry.status
   ? `status-${entry.status.toLowerCase().split(/\s+/)[0]}`
   : '';
 ---
-<article class="entry-row">
+<article class="entry-row" data-tags={entry.tags.join(',')}>
   <div class="entry-meta">
     <span class="mono-bracket">[{isDecision ? 'DECISION' : 'SESSION'}]</span>
     <span class="mono-bracket">[{entry.date}]</span>
     {entry.status && (
       <span class={`mono-bracket ${statusClass}`}>[{entry.status.toUpperCase()}]</span>
     )}
+    {entry.tags && entry.tags.map(tag => (
+      <span class="mono-bracket tag-item">[{tag.toUpperCase()}]</span>
+    ))}
   </div>
 
   <div class="entry-content">
