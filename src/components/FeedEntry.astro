@@ -3,28 +3,76 @@ import type { FeedEntry } from '../lib/feed';
 interface Props { entry: FeedEntry }
 const { entry } = Astro.props;
 const isDecision = entry.kind === 'decision';
-const statusClass = entry.status
-  ? `status-${entry.status.toLowerCase().split(/\s+/)[0]}`
-  : '';
+const status = entry.status ? entry.status.toUpperCase() : '';
 ---
-<article class="entry">
-  <div class="entry-meta">
-    <span class={`tag ${isDecision ? 'tag-decision' : 'tag-session'}`}>
-      {isDecision ? 'Decision' : 'Session'}
-    </span>
-    <span class="date">{entry.date}</span>
-    {entry.status && (
-      <span class={`status-badge ${statusClass}`}>{entry.status}</span>
+<article class="feed-entry">
+  <div class="bracket">[</div>
+  <div class="content">
+    <div class="meta">
+      <span class="type">{isDecision ? 'DECISION' : 'SESSION'}</span>
+      <span class="date">{entry.date}</span>
+      {status && <span class="status">{status}</span>}
+    </div>
+    <h3 class="title">{entry.title}</h3>
+    <div class="body" set:html={entry.summaryHtml} />
+    {entry.bulletsHtml.length > 0 && (
+      <ul class="bullets">
+        {entry.bulletsHtml.map((b) => <li set:html={b} />)}
+      </ul>
     )}
   </div>
-
-  <h3>{entry.title}</h3>
-
-  <div class="body" set:html={entry.summaryHtml} />
-
-  {entry.bulletsHtml.length > 0 && (
-    <ul class="decisions">
-      {entry.bulletsHtml.map((b) => <li set:html={b} />)}
-    </ul>
-  )}
+  <div class="bracket">]</div>
 </article>
+
+<style>
+  .feed-entry {
+    display: grid;
+    grid-template-columns: min-content 1fr min-content;
+    gap: 0.75rem;
+    font-family: var(--font-mono);
+    color: var(--gray-80);
+    padding: 0.5rem 0;
+    align-items: start;
+    border-bottom: 1px solid var(--gray-20);
+  }
+  .bracket {
+    font-size: 1.25rem;
+    color: var(--gray-40);
+    line-height: 1;
+    margin-top: -0.1rem;
+  }
+  .content {
+    display: grid;
+    gap: 0.25rem;
+  }
+  .meta {
+    display: flex;
+    gap: 0.75rem;
+    font-size: 0.75rem;
+    color: var(--gray-50);
+  }
+  .type {
+    color: var(--gray-90);
+    font-weight: 700;
+  }
+  .status {
+    color: var(--gray-100);
+    background: var(--gray-30);
+    padding: 0 0.25rem;
+  }
+  .title {
+    font-size: 0.9rem;
+    color: var(--gray-100);
+    font-weight: normal;
+  }
+  .body {
+    font-size: 0.85rem;
+    color: var(--gray-60);
+  }
+  .bullets {
+    margin: 0 0 0 1rem;
+    padding: 0;
+    font-size: 0.85rem;
+    color: var(--gray-70);
+  }
+</style>
