@@ -9,7 +9,7 @@ const statusClass = entry.status
 ---
 <article class="entry-row" data-tags={entry.tags.join(',')}>
   <div class="entry-meta">
-    <span class="mono-bracket">[{isDecision ? 'DECISION' : 'SESSION'}]</span>
+    <span class="mono-bracket mono-category">[{isDecision ? 'DECISION' : 'SESSION'}]</span>
     <span class="mono-bracket">[{entry.date}]</span>
     {entry.status && (
       <span class={`mono-bracket ${statusClass}`}>[{entry.status.toUpperCase()}]</span>
@@ -29,14 +29,20 @@ const statusClass = entry.status
     )}
   </div>
 </article>
+<hr class="entry-divider" />
 
 <style>
   .entry-row {
     display: grid;
     grid-template-columns: 180px 1fr;
     gap: 1.5rem;
-    padding: 1rem 0;
+    padding: 1.5rem 0;
+  }
+  
+  .entry-divider {
+    border: none;
     border-bottom: 1px solid var(--gray-20);
+    margin: 0;
   }
   
   .entry-meta {
@@ -46,6 +52,11 @@ const statusClass = entry.status
     font-family: var(--font-mono);
     font-size: 0.85rem;
     color: var(--gray-50);
+  }
+
+  .mono-category {
+    font-weight: bold;
+    color: var(--gray-100);
   }
 
   .mono-bracket {
@@ -92,7 +103,7 @@ const statusClass = entry.status
     content: "[>]";
     position: absolute;
     left: 0;
-    color: var(--gray-40);
+    color: var(--gray-60);
   }
 
   @media (max-width: 640px) {
