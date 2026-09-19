@@ -9,10 +9,17 @@ export async function getStaticPaths() {
   const decisionsDir = path.resolve(process.cwd(), 'content/decisions');
   const files = fs.readdirSync(decisionsDir).filter(f => f.endsWith('.md'));
   
-  return files.map(file => {
-    const slug = file.replace('.md', '');
-    return { params: { slug } };
-  });
+  return files
+    .filter(file => {
+      const content = fs.readFileSync(path.join(decisionsDir, file), 'utf8');
+      const { data } = matter(content);
+      const status = (data.status || '').toLowerCase();
+      return status === 'published' || status === 'accepted';
+    })
+    .map(file => {
+      const slug = file.replace('.md', '');
+      return { params: { slug } };
+    });
 }
 
 function formatDate(val: unknown): string {
