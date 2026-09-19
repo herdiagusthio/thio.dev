@@ -1,50 +1,21 @@
-name: Deploy thio.dev to VPS
-
+name: Deploy to Thio.dev
 on:
   push:
-    branches: [main]
-  workflow_dispatch:
-
+    branches: [ main ]
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
         with:
-          node-version: '22'
-          cache: 'npm'
-
+          version: 8
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
       - name: Install dependencies
-        run: npm ci
-
+        run: pnpm install
       - name: Build
-        run: npm run build
-
-      - name: Deploy to VPS
-        uses: appleboy/scp-action@v1
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.VPS_PORT }}
-          source: "dist/"
-          target: "/var/www/thio.dev"
-          strip_components: 1
-
-      - name: Reload Web Server
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.VPS_PORT }}
-          script: |
-            if systemctl is-active --quiet caddy; then
-              sudo systemctl reload caddy
-            elif systemctl is-active --quiet nginx; then
-              sudo nginx -t && sudo systemctl reload nginx
-            fi
+        run: pnpm run build
+      # ponytail: Add deployment step (Vercel/CF) when credentials provided.

@@ -1,11 +1,12 @@
 ---
 import '../styles/global.css';
 import FeedEntry from '../components/FeedEntry.astro';
-import Portfolio from '../components/Portfolio.astro';
+import Hero from '../components/Hero.astro';
 import { getFeed } from '../lib/feed';
 
 const feed = getFeed();
-const year = 2026; // build-time constant; bump as needed
+const allTags = Array.from(new Set(feed.flatMap((f) => f.tags || []))).sort();
+const year = 2026;
 const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`;
 ---
 <!doctype html>
@@ -13,51 +14,49 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Herdi Agusthio — Software Engineer</title>
+    <title>Herdi Agusthio — Senior Software Engineer</title>
     <meta
       name="description"
-      content="Technical thinking, engineering experience, and professional journey of Herdi Agusthio."
+      content="Senior Software Engineer focusing on high-leverage distributed systems and engineering excellence."
     />
     <link rel="icon" href={faviconHref} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap"
       rel="stylesheet"
     />
   </head>
   <body>
     <header class="topbar">
       <div class="wrap">
-        <span class="brand">thio<span class="dot">.</span>dev</span>
+        <span class="brand">thio.dev</span>
         <nav class="nav-links">
-          <a href="#portfolio">Portfolio</a>
-          <a href="#writing">Writing</a>
-          <a href="#about">About</a>
+          <a href="#writing">Archive</a>
+          <a href="https://github.com/thiohermes">GitHub</a>
         </nav>
       </div>
     </header>
 
     <main class="wrap">
-      <section class="hero">
-        <p class="eyebrow">// Senior Backend Engineer · Distributed Systems · AI Infra</p>
-        <h1>Herdi <span class="grad">Agusthio</span></h1>
-        <p>
-          I build high-leverage backend systems. This platform is a living 
-          representation of my thinking, engineering capability, and the 
-          professional journey of solving complex distributed problems.
-        </p>
-      </section>
-
-      <Portfolio />
+      <Hero />
 
       <h2 class="section-head" id="writing">
-        knowledge archive · {feed.length} {feed.length === 1 ? 'entry' : 'entries'}
+        Knowledge Archive · {feed.length}
       </h2>
+
+      <div class="feed-filters">
+        <span class="mono-bracket">[FILTER:</span>
+        <button class="filter-btn active" data-filter="all">ALL</button>
+        {allTags.map(tag => (
+          <button class="filter-btn" data-filter={tag}>{tag.toUpperCase()}</button>
+        ))}
+        <span class="mono-bracket">]</span>
+      </div>
 
       <section class="feed">
         {feed.length === 0 ? (
-          <p class="empty">No entries yet. Run `npm run sync` to pull the latest.</p>
+          <p class="empty">No entries yet.</p>
         ) : (
           feed.map((entry) => <FeedEntry entry={entry} />)
         )}
@@ -66,7 +65,62 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
 
     <footer class="foot wrap">
       <span>© {year} Herdi Agusthio</span>
-      <span class="foot-tech">built with astro · deployed on github pages</span>
+      <span>Built with Astro</span>
     </footer>
+
+    <script>
+      const buttons = document.querySelectorAll('.filter-btn');
+      const entries = document.querySelectorAll('.entry-row') as NodeListOf<HTMLElement>;
+
+      buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          buttons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const filter = btn.getAttribute('data-filter');
+
+          entries.forEach(entry => {
+            if (filter === 'all') {
+              entry.style.display = '';
+            } else {
+              const tags = entry.getAttribute('data-tags')?.split(',') || [];
+              entry.style.display = tags.includes(filter!) ? '' : 'none';
+            }
+          });
+        });
+      });
+    </script>
+
+    <style>
+      .feed-filters {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+        font-family: var(--font-mono);
+        font-size: 0.85rem;
+        align-items: center;
+      }
+      .mono-bracket {
+        color: var(--gray-50);
+      }
+      .filter-btn {
+        background: none;
+        border: none;
+        color: var(--gray-50);
+        cursor: pointer;
+        padding: 0;
+        font-family: inherit;
+        font-size: inherit;
+        text-transform: uppercase;
+        transition: color 0.2s;
+      }
+      .filter-btn:hover {
+        color: var(--gray-80);
+      }
+      .filter-btn.active {
+        color: var(--gray-100);
+        font-weight: 600;
+      }
+    </style>
   </body>
 </html>

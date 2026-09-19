@@ -18,6 +18,7 @@ export interface FeedEntry {
   status?: string; // decisions only
   summaryHtml: string;
   bulletsHtml: string[];
+  tags: string[];
 }
 
 function readDir(dir: string): { name: string; body: string }[] {
@@ -72,6 +73,7 @@ function parseJournal(): FeedEntry[] {
         summaryHtml: marked.parseInline(summary) as string,
         bulletsHtml: bullets.map((b) => marked.parseInline(b) as string),
         status: undefined,
+        tags: data.tags || [],
       });
     }
   }
@@ -97,6 +99,7 @@ function parseDecisions(): FeedEntry[] {
       status: data.status,
       summaryHtml: marked.parse(context) as string,
       bulletsHtml: [],
+      tags: data.tags || [],
     });
   }
   return entries;
