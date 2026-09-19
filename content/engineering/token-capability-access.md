@@ -1,9 +1,10 @@
 ---
-title: "PROMOTED: token-capability-access"
-date: 2026-09-12
+title: "Token-Based Capability Access for Public Endpoints"
+date: "2026-09-12"
 category: "engineering"
-status: "draft" 
-tags: []
+status: "published"
+tags: ["security","api-design","auth","architecture"]
+summary: "Mitigating ID enumeration attacks on public endpoints using high-entropy UUID capability tokens instead of database primary keys."
 ---
 
 # Case Study: Token-Based Capability Access for Public Endpoints

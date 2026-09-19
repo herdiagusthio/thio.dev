@@ -1,35 +1,80 @@
 ---
-import { getPulseData, resolveMetadata } from "../lib/telemetry";
+import { getPulseData, resolveMetadata, getAgentFleet } from "../lib/telemetry";
 
 const pulse = getPulseData();
 const meta = resolveMetadata("Hero");
+const fleet = getAgentFleet();
 ---
 <section class="hero-console">
+  <!-- System Status Bar -->
   <div class="sys-header">
     <div class="sys-pulse">
       <span class="pulse-indicator"></span>
       <span class="signal-text">{pulse.signal}</span>
+      <span class="host-pill">[{pulse.host}]</span>
     </div>
-    <span class="auth-level">[AUTH_LEVEL:{pulse.auth_level}]</span>
-  </div>
-  
-  <div class="sys-content">
-    <h1 class="title">Herdi Agusthio</h1>
-    <p class="role">&gt; Principal Software Engineer</p>
-    <p class="bio">
-      Architecting high-leverage distributed systems and engineering patterns. 
-      Focusing on technical rigor, observability, and durable knowledge assets.
-    </p>
-    <div class="sys-meta">
-      <span>TS:{pulse.timestamp}</span>
-      <span>ID:{meta.component_id}</span>
-      <span>REV:C001</span>
+    <div class="sys-status-meta">
+      <span class="auth-level">[AUTH_LEVEL:{pulse.auth_level}]</span>
+      <span class="ts-label">[TS:{pulse.timestamp}]</span>
     </div>
   </div>
   
+  <!-- Operator Profile -->
+  <div class="sys-operator">
+    <div class="operator-dossier">
+      <h1 class="operator-name">Herdi Agusthio</h1>
+      <p class="operator-role">&gt; Principal Software Engineer &amp; Autonomous Agent Architect</p>
+      <p class="operator-bio">
+        Architecting high-concurrency distributed systems in Go and orchestrating autonomous multi-agent engineering fleets on lean infrastructure. Focused on architectural purity, zero-bloat runtime design, and durable knowledge assets.
+      </p>
+    </div>
+
+    <!-- Telemetry Specs Box -->
+    <div class="specs-box">
+      <div class="spec-row">
+        <span class="spec-label">RUNTIME</span>
+        <span class="spec-val">Go 1.23 / Bun / Astro</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-label">PROXY</span>
+        <span class="spec-val">Caddy v2 (HTTPS/TLS)</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-label">MEMORY_GUARD</span>
+        <span class="spec-val">&gt;= 500MB Free / 1.9GB</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-label">AGENT_FLEET</span>
+        <span class="spec-val">7 Autonomous Profiles</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Autonomous AI Engineering Org Telemetry -->
+  <div class="fleet-console">
+    <div class="fleet-header">
+      <span class="fleet-title">[AUTONOMOUS AI ENGINEERING TEAM TELEMETRY]</span>
+      <span class="fleet-counter">[ACTIVE_NODES: {fleet.length}]</span>
+    </div>
+    <div class="fleet-grid">
+      {fleet.map(agent => (
+        <div class="fleet-card">
+          <div class="agent-top">
+            <span class="agent-name">@{agent.name}</span>
+            <span class="agent-status">[{agent.status}]</span>
+          </div>
+          <p class="agent-role">{agent.role}</p>
+          <p class="agent-focus">&gt; {agent.focus}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+  
+  <!-- Action Commands -->
   <div class="sys-actions">
     <a href="/showcase" class="cmd-btn primary">[ EXEC: SHOWCASE ]</a>
     <a href="#writing" class="cmd-btn secondary">[ READ: ARCHIVE ]</a>
+    <a href="https://github.com/thiohermes" target="_blank" rel="noreferrer" class="cmd-btn secondary">[ GITHUB: THIOHERMES ]</a>
   </div>
 </section>
 
@@ -46,17 +91,18 @@ const meta = resolveMetadata("Hero");
   .sys-header {
     display: flex;
     justify-content: space-between;
-    font-size: 0.85rem;
+    align-items: center;
+    font-size: 0.82rem;
     color: var(--gray-50);
     border-bottom: 1px dashed var(--gray-20);
     padding-bottom: 1rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1.75rem;
   }
   
   .sys-pulse {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.6rem;
   }
   
   .pulse-indicator {
@@ -71,44 +117,147 @@ const meta = resolveMetadata("Hero");
     0%, 100% { opacity: 1; }
     50% { opacity: 0; }
   }
-  
-  .sys-content {
-    margin-bottom: 2rem;
+
+  .host-pill {
+    color: var(--gray-60);
+  }
+
+  .sys-status-meta {
+    display: flex;
+    gap: 1rem;
   }
   
-  .title {
+  .sys-operator {
+    display: grid;
+    grid-template-columns: minmax(0, 1.8fr) minmax(240px, 1fr);
+    gap: 2.5rem;
+    margin-bottom: 2rem;
+    align-items: start;
+  }
+
+  .operator-name {
     font-family: var(--font-sans);
     font-size: 2.5rem;
     font-weight: 800;
     margin-bottom: 0.5rem;
     letter-spacing: -0.05em;
     color: var(--gray-100);
+    line-height: 1.1;
   }
   
-  .role {
-    font-size: 0.9rem;
+  .operator-role {
+    font-family: var(--font-mono);
+    font-size: 0.92rem;
     color: var(--gray-60);
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.25rem;
+    font-weight: 600;
   }
   
-  .bio {
+  .operator-bio {
     font-family: var(--font-sans);
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     color: var(--gray-80);
-    line-height: 1.6;
-    max-width: 600px;
-    margin-bottom: 1.5rem;
+    line-height: 1.65;
   }
-  
-  .sys-meta {
+
+  .specs-box {
+    background: var(--gray-10);
+    border: 1px solid var(--gray-20);
+    padding: 1.25rem;
     display: flex;
-    gap: 1.5rem;
+    flex-direction: column;
+    gap: 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .spec-row {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px dotted var(--gray-20);
+    padding-bottom: 0.4rem;
+  }
+
+  .spec-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .spec-label {
+    color: var(--gray-50);
+  }
+
+  .spec-val {
+    color: var(--gray-100);
+    font-weight: 600;
+  }
+
+  /* Fleet Telemetry */
+  .fleet-console {
+    background: var(--gray-10);
+    border: 1px solid var(--gray-20);
+    padding: 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .fleet-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--gray-60);
+    border-bottom: 1px dashed var(--gray-20);
+    padding-bottom: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .fleet-title {
+    font-weight: 700;
+    color: var(--gray-100);
+  }
+
+  .fleet-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+  }
+
+  .fleet-card {
+    background: var(--gray-0);
+    border: 1px solid var(--gray-20);
+    padding: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .agent-top {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+  }
+
+  .agent-name {
+    font-weight: 700;
+    color: var(--gray-100);
+  }
+
+  .agent-status {
+    color: var(--gray-60);
+    font-size: 0.75rem;
+  }
+
+  .agent-role {
+    font-size: 0.8rem;
+    color: var(--gray-80);
+  }
+
+  .agent-focus {
     font-size: 0.75rem;
     color: var(--gray-50);
   }
   
   .sys-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 1rem;
   }
   
@@ -116,28 +265,45 @@ const meta = resolveMetadata("Hero");
     font-family: var(--font-mono);
     font-size: 0.85rem;
     text-decoration: none;
-    padding: 0.5rem 1rem;
+    padding: 0.6rem 1.2rem;
     transition: all 0.2s;
+    font-weight: 600;
   }
   
   .cmd-btn.primary {
     background: var(--gray-100);
     color: var(--gray-0);
+    border: 1px solid var(--gray-100);
   }
   
   .cmd-btn.primary:hover {
     background: var(--gray-80);
+    border-color: var(--gray-80);
   }
   
   .cmd-btn.secondary {
-    color: var(--gray-80);
-    border: 1px solid var(--gray-40);
+    color: var(--gray-90);
+    border: 1px solid var(--gray-30);
+    background: var(--gray-0);
   }
   
   .cmd-btn.secondary:hover {
     color: var(--gray-100);
-    border-color: var(--gray-80);
+    border-color: var(--gray-60);
+    background: var(--gray-10);
   }
-</style>
----
+
+  @media (max-width: 900px) {
+    .sys-operator {
+      grid-template-columns: 1fr;
+    }
+    .sys-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+    .sys-status-meta {
+      flex-wrap: wrap;
+    }
+  }
 </style>

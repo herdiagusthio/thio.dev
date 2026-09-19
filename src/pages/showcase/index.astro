@@ -1,0 +1,243 @@
+---
+import fs from 'node:fs';
+import path from 'node:path';
+import matter from 'gray-matter';
+import '../../styles/global.css';
+
+interface ShowcaseItem {
+  slug: string;
+  title: string;
+  date: string;
+  summary: string;
+  tags: string[];
+}
+
+const engDir = path.resolve(process.cwd(), 'content/engineering');
+const files = fs.readdirSync(engDir).filter(f => f.endsWith('.md') && f !== 'project-alpha.md');
+
+const items: ShowcaseItem[] = files.map(file => {
+  const slug = file.replace('.md', '');
+  const content = fs.readFileSync(path.join(engDir, file), 'utf8');
+  const { data } = matter(content);
+  return {
+    slug,
+    title: data.title || slug,
+    date: data.date ? (data.date instanceof Date ? data.date.toISOString().split('T')[0] : String(data.date).split('T')[0]) : '2026-09-12',
+    summary: data.summary || 'Deep-dive architectural patterns and production implementations.',
+    tags: data.tags || ['golang', 'distributed-systems'],
+  };
+}).sort((a, b) => a.title.localeCompare(b.title));
+
+const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Engineering Showcase & Architecture Lab — thio.dev</title>
+    <meta name="description" content="Production architectural blueprints, high-concurrency Go patterns, and distributed system case studies by Herdi Agusthio." />
+    <link rel="icon" href={faviconHref} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="wrap topbar-inner">
+        <nav class="nav-links">
+          <a href="/" class="nav-brand">← System Console</a>
+          <span class="sep">/</span>
+          <span class="active-nav">Showcase</span>
+        </nav>
+        <span class="topbar-tag">[SYSTEM ARCHITECTURE & LAB]</span>
+      </div>
+    </header>
+
+    <main class="wrap main-container">
+      <section class="showcase-hero">
+        <div class="meta-status">
+          <span class="status-indicator"></span>
+          <span class="mono-label">[SYS_LAB: PRODUCTION BLUEPRINTS]</span>
+          <span class="mono-label">[COUNT:{items.length}]</span>
+        </div>
+        <h1 class="page-title">Engineering Showcase & Lab</h1>
+        <p class="hero-desc">
+          High-fidelity architectural blueprints, concurrency patterns, and production case studies.
+          Focusing on fault-tolerant distributed systems in Go, Domain-Driven Design, and autonomous agent orchestration.
+        </p>
+      </section>
+
+      <div class="showcase-grid">
+        {items.map(item => (
+          <article class="showcase-card">
+            <div class="card-header">
+              <span class="card-date">[{item.date}]</span>
+              <span class="card-badge">[CASE STUDY]</span>
+            </div>
+            <h2 class="card-title">
+              <a href={`/showcase/${item.slug}`} class="title-link">{item.title}</a>
+            </h2>
+            <p class="card-summary">{item.summary}</p>
+            <div class="card-footer">
+              <div class="card-tags">
+                {item.tags.map(tag => (
+                  <span class="tag-item">#{tag}</span>
+                ))}
+              </div>
+              <a href={`/showcase/${item.slug}`} class="exec-link">[ READ CASE STUDY → ]</a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </main>
+
+    <footer class="foot wrap">
+      <span>© 2026 Herdi Agusthio · Principal Software Engineer</span>
+      <a href="/" class="back-link">[ ← RETURN TO CONSOLE ]</a>
+    </footer>
+  </body>
+</html>
+
+<style>
+  .topbar-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .topbar-tag {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--gray-50);
+  }
+  .sep {
+    color: var(--gray-40);
+  }
+  .active-nav {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    color: var(--gray-100);
+    font-weight: 600;
+  }
+  .main-container {
+    padding-top: 2rem;
+    padding-bottom: 4rem;
+  }
+  .showcase-hero {
+    border-bottom: 1px solid var(--gray-20);
+    padding-bottom: 2rem;
+    margin-bottom: 3rem;
+  }
+  .meta-status {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--gray-60);
+    margin-bottom: 1rem;
+  }
+  .status-indicator {
+    width: 8px;
+    height: 8px;
+    background: var(--gray-100);
+    border-radius: 50%;
+  }
+  .page-title {
+    font-family: var(--font-sans);
+    font-size: clamp(2.2rem, 5vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: var(--gray-100);
+    line-height: 1.2;
+    margin-bottom: 1rem;
+  }
+  .hero-desc {
+    font-family: var(--font-sans);
+    font-size: 1.15rem;
+    line-height: 1.6;
+    color: var(--gray-70);
+    max-width: 48rem;
+  }
+  .showcase-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 2rem;
+  }
+  .showcase-card {
+    background: var(--gray-0);
+    border: 1px solid var(--gray-20);
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .showcase-card:hover {
+    border-color: var(--gray-60);
+    background: var(--gray-10);
+  }
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--gray-50);
+    margin-bottom: 1rem;
+  }
+  .card-title {
+    font-family: var(--font-mono);
+    font-size: 1.2rem;
+    font-weight: 700;
+    line-height: 1.4;
+    margin-bottom: 0.75rem;
+  }
+  .title-link {
+    color: var(--gray-100);
+    text-decoration: none;
+  }
+  .title-link:hover {
+    text-decoration: underline;
+  }
+  .card-summary {
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--gray-70);
+    margin-bottom: 1.5rem;
+    flex-grow: 1;
+  }
+  .card-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    border-top: 1px dashed var(--gray-20);
+    padding-top: 1rem;
+  }
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--gray-60);
+  }
+  .exec-link {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--gray-100);
+    text-decoration: none;
+    font-weight: 600;
+    align-self: flex-start;
+  }
+  .exec-link:hover {
+    text-decoration: underline;
+  }
+  .back-link {
+    text-decoration: none;
+    color: var(--gray-80);
+  }
+  .back-link:hover {
+    color: var(--gray-100);
+  }
+</style>

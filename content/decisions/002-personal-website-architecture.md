@@ -1,3 +1,10 @@
+---
+title: "Personal Website Concept & System Console Architecture"
+date: "2026-07-25"
+status: "published"
+tags: ["architecture","astro","system-console","performance"]
+---
+
 # ADR: 002: Personal Website Concept & Architecture
 - **Date:** 2026-07-25
 - **Status:** Proposed

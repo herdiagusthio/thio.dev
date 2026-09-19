@@ -1,9 +1,10 @@
 ---
-title: "PROMOTED: primitive-obsession-hexagonal"
-date: 2026-09-12
+title: "Value Object Modeling in Domain-Driven Design"
+date: "2026-09-12"
 category: "engineering"
-status: "draft" 
-tags: []
+status: "published"
+tags: ["golang","domain-driven-design","value-objects","architecture"]
+summary: "Encapsulating validation rules within dedicated value types to eliminate primitive obsession and scattered validator checks."
 ---
 
 # Case Study: Eliminating Primitive Obsession in Domain-Driven Design

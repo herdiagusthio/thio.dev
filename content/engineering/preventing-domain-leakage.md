@@ -1,9 +1,10 @@
 ---
-title: "PROMOTED: preventing-domain-leakage"
-date: 2026-09-12
+title: "Preventing Domain Leakage via Hexagonal Ports & Adapters"
+date: "2026-09-12"
 category: "engineering"
-status: "draft" 
-tags: []
+status: "published"
+tags: ["golang","hexagonal-architecture","clean-architecture","api-design"]
+summary: "Decoupling core business logic from database ORMs by defining strict domain ports and translating infrastructure errors."
 ---
 
 # Case Study: Preventing Domain Leakage via Hexagonal Architecture

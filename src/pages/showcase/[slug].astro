@@ -6,8 +6,8 @@ import { marked } from 'marked';
 import '../../styles/global.css';
 
 export async function getStaticPaths() {
-  const decisionsDir = path.resolve(process.cwd(), 'content/decisions');
-  const files = fs.readdirSync(decisionsDir).filter(f => f.endsWith('.md'));
+  const engDir = path.resolve(process.cwd(), 'content/engineering');
+  const files = fs.readdirSync(engDir).filter(f => f.endsWith('.md') && f !== 'project-alpha.md');
   
   return files.map(file => {
     const slug = file.replace('.md', '');
@@ -24,7 +24,7 @@ function formatDate(val: unknown): string {
 }
 
 const { slug } = Astro.params;
-const filePath = path.resolve(process.cwd(), `content/decisions/${slug}.md`);
+const filePath = path.resolve(process.cwd(), `content/engineering/${slug}.md`);
 const fileContent = fs.readFileSync(filePath, 'utf8');
 const { data, content } = matter(fileContent);
 const html = marked.parse(content);
@@ -37,7 +37,7 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{data.title} — Architectural Decision</title>
+    <title>{data.title} — Engineering Case Study</title>
     <link rel="icon" href={faviconHref} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -51,19 +51,22 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
           <span class="sep">/</span>
           <a href="/showcase" class="nav-brand">Showcase</a>
         </nav>
-        <span class="topbar-tag">[ARCHITECTURAL DECISION]</span>
+        <span class="topbar-tag">[SYSTEM ARCHITECTURE & LAB]</span>
       </div>
     </header>
 
     <main class="wrap main-container">
-      <article class="decision-content">
+      <article class="case-study-content">
         <header class="article-header">
           <div class="meta-row">
-            <span class="eyebrow">[DECISION RECORD]</span>
+            <span class="eyebrow">[CASE STUDY]</span>
             {formattedDate && <span class="eyebrow">[{formattedDate}]</span>}
-            {data.status && <span class="status-pill">[{String(data.status).toUpperCase()}]</span>}
+            <span class="status-pill">[PUBLISHED]</span>
           </div>
           <h1>{data.title}</h1>
+          {data.summary && (
+            <p class="summary-lead">{data.summary}</p>
+          )}
           {data.tags && data.tags.length > 0 && (
             <div class="tags-row">
               {data.tags.map((t: string) => (
@@ -78,8 +81,8 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
     </main>
 
     <footer class="foot wrap">
-      <span>© 2026 Herdi Agusthio</span>
-      <a href="/" class="back-link">[ ← RETURN TO CONSOLE ]</a>
+      <span>© 2026 Herdi Agusthio · Principal Software Engineer</span>
+      <a href="/showcase" class="back-link">[ ← RETURN TO SHOWCASE ]</a>
     </footer>
   </body>
 </html>
@@ -132,6 +135,14 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
     line-height: 1.2;
     margin-bottom: 1rem;
   }
+  .summary-lead {
+    font-family: var(--font-sans);
+    font-size: 1.15rem;
+    line-height: 1.6;
+    color: var(--gray-80);
+    margin-bottom: 1.25rem;
+    max-width: 50rem;
+  }
   .tags-row {
     display: flex;
     gap: 0.5rem;
@@ -149,6 +160,9 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
     line-height: 1.75;
     color: var(--gray-80);
     max-width: 50rem;
+  }
+  .prose :global(h1) {
+    display: none; /* Hide duplicate h1 inside markdown if already rendered in header */
   }
   .prose :global(h2) {
     font-family: var(--font-mono);

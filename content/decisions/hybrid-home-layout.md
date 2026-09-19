@@ -1,7 +1,8 @@
 ---
 title: "Hybrid Home Layout UX"
-date: 2026-09-18
+date: "2026-09-18"
 status: "published"
+tags: ["ux","frontend","design-system"]
 ---
 
 ## Context

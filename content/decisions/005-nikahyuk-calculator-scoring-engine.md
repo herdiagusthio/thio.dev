@@ -1,3 +1,10 @@
+---
+title: "Scoring-Based Wedding Calculator Engine with 20/60/10/10 Budget"
+date: "2026-08-22"
+status: "published"
+tags: ["algorithms","scoring","architecture","optimization"]
+---
+
 # ADR: Scoring-Based Wedding Calculator Engine with 20/60/10/10 Budget Allocation
 - **Date:** 2026-08-22
 - **Status:** Accepted

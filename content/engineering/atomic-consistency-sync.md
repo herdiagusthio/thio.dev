@@ -1,9 +1,10 @@
 ---
-title: "PROMOTED: atomic-consistency-sync"
-date: 2026-09-12
+title: "Atomic Consistency in High-Concurrency State Sync"
+date: "2026-09-12"
 category: "engineering"
-status: "draft" 
-tags: []
+status: "published"
+tags: ["database","postgres","concurrency","distributed-systems"]
+summary: "Eliminating read-modify-write race conditions in shared state using PostgreSQL row-level locks (SELECT ... FOR UPDATE)."
 ---
 
 # Case Study: Atomic Consistency in High-Concurrency State Sync

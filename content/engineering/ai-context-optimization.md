@@ -1,9 +1,10 @@
 ---
-title: "PROMOTED: ai-context-optimization"
-date: 2026-09-12
+title: "Context Optimization for AI-Agent Tooling"
+date: "2026-09-12"
 category: "engineering"
-status: "draft" 
-tags: []
+status: "published"
+tags: ["ai-agents","llm-tooling","architecture","context-window"]
+summary: "Preventing context window saturation through bifurcated documentation: human docs vs dense machine-executable agent specs."
 ---
 
 # Case Study: Context Optimization for AI-Agent Tooling

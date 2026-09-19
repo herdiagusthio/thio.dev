@@ -1,9 +1,10 @@
 ---
-title: "PROMOTED: scatter-gather-aggregation"
-date: 2026-09-12
+title: "Scatter-Gather Concurrency Pattern for High-Latency APIs"
+date: "2026-09-12"
 category: "engineering"
-status: "draft" 
-tags: []
+status: "published"
+tags: ["golang","concurrency","distributed-systems","performance"]
+summary: "Aggregating slow upstream providers using parallel goroutines, context deadlines, panic recovery, and jittered exponential backoff."
 ---
 
 # Case Study: implementing the Scatter-Gather Pattern for High-Latency API Aggregation

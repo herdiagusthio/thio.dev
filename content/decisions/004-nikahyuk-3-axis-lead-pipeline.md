@@ -1,3 +1,10 @@
+---
+title: "3-Axis Lead Lifecycle Model vs Linear Quote Statuses"
+date: "2026-08-22"
+status: "published"
+tags: ["state-machine","architecture","crm","workflow"]
+---
+
 # ADR: 3-Axis Lead Model vs Linear Quote Statuses
 - **Date:** 2026-08-22
 - **Status:** Accepted

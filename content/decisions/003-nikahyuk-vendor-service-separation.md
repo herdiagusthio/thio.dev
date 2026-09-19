@@ -1,3 +1,10 @@
+---
+title: "Decouple Vendor Profile from Services in Marketplace"
+date: "2026-08-22"
+status: "published"
+tags: ["domain-modeling","architecture","marketplace","golang"]
+---
+
 # ADR: Separate Vendor Profile from Services in Nikah Yuk Marketplace
 - **Date:** 2026-08-22
 - **Status:** Accepted

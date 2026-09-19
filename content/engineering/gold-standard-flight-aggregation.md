@@ -1,29 +1,10 @@
 ---
-title: "PROMOTED: gold-standard-flight-aggregation"
-date: 2026-09-12
+title: "Fault-Tolerant Flight Aggregation Engine in Go"
+date: "2026-09-12"
 category: "engineering"
-status: "draft" 
-tags: []
----
-
----
-title: "Building a Fault-Tolerant Flight Aggregation Engine"
-date: 2026-09-12
-category: engineering
-tags: ["golang", "distributed-systems", "scatter-gather", "resilience-engineering", "chaos-testing"]
-status: published
-evidence:
-  - repo: "https://github.com/herdiagusthio/flight-search-system"
-    pr: "https://github.com/herdiagusthio/flight-search-system/pull/1"
-    files:
-      - "domain/flight.go"
-      - "domain/flight_factory.go"
-      - "domain/errors.go"
-      - "internal/usecase/flight_search.go"
-      - "internal/usecase/chaos_test.go"
-      - "internal/repository/provider/*/normalizer.go"
-      - "docs/adr/001-scatter-gather.md"
-      - "docs/adr/002-domain-hardening.md"
+status: "published"
+tags: ["golang","distributed-systems","scatter-gather","resilience","chaos-testing"]
+summary: "Production-grade aggregation engine with financial precision value objects, panic recovery, and chaos testing under slow provider degradation."
 ---
 
 ## Context

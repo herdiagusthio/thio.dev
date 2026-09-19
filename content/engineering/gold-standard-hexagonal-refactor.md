@@ -1,25 +1,10 @@
 ---
-title: "PROMOTED: gold-standard-hexagonal-refactor"
-date: 2026-09-12
+title: "Eliminating Primitive Obsession in Hexagonal Architecture"
+date: "2026-09-12"
 category: "engineering"
-status: "draft" 
-tags: []
----
-
----
-title: "Eliminating Primitive Obsession in Domain-Driven Design"
-date: 2026-09-12
-category: engineering
-tags: ["golang", "hexagonal-architecture", "domain-driven-design", "value-objects", "refactoring"]
-status: published
-evidence:
-  - repo: "https://github.com/herdiagusthio/hexagonal-architecture"
-    pr: "https://github.com/herdiagusthio/hexagonal-architecture/pull/1"
-    files:
-      - "business/user/user.go"
-      - "business/user/user_test.go"
-      - "repository/user/user_repo.go"
-      - "docs/adr/001-hexagonal-architecture.md"
+status: "published"
+tags: ["golang","hexagonal-architecture","domain-driven-design","value-objects"]
+summary: "Hardening domain boundaries by replacing raw strings with typed Value Objects, making invalid domain states unrepresentable."
 ---
 
 ## Context
