@@ -1,13 +1,10 @@
 ---
 title: "Token-Based Capability Access for Public Endpoints"
-date: "2026-09-12"
+date: "2026-09-19"
 category: "engineering"
 status: "published"
-tags: ["security","api-design","auth","architecture"]
-summary: "Mitigating ID enumeration attacks on public endpoints using high-entropy UUID capability tokens instead of database primary keys."
+tags: ["engineering"]
 ---
-
-# Case Study: Token-Based Capability Access for Public Endpoints
 
 ## The Problem
 When building public-facing interfaces for guests (e.g., an RSVP system), the goal is to allow users to update their own data without requiring a full account registration (OAuth/Password), while preventing "ID Enumeration" attacks where a malicious user could guess IDs to modify other people's data.
@@ -19,4 +16,3 @@ The API endpoint `/rsvp/{token}` treats the token as a temporary, single-purpose
 
 ## Key Takeaway
 For low-friction public interactions, use high-entropy tokens as a form of "implicit authentication." This provides a secure, account-less experience without exposing internal database IDs to the public web.
-

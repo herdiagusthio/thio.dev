@@ -1,13 +1,10 @@
 ---
 title: "Atomic Consistency in High-Concurrency State Sync"
-date: "2026-09-12"
+date: "2026-09-19"
 category: "engineering"
 status: "published"
-tags: ["database","postgres","concurrency","distributed-systems"]
-summary: "Eliminating read-modify-write race conditions in shared state using PostgreSQL row-level locks (SELECT ... FOR UPDATE)."
+tags: ["engineering"]
 ---
-
-# Case Study: Atomic Consistency in High-Concurrency State Sync
 
 ## The Problem
 In systems where multiple concurrent users modify a shared resource (e.g., a wedding guest total), a "read-modify-write" cycle in the application layer leads to race conditions. Two concurrent RSVP responses could read the same total, increment it, and write back the same value, leading to a "lost update" and inaccurate totals.
@@ -17,4 +14,3 @@ Implemented a database-level synchronization strategy using PostgreSQL's row-lev
 
 ## Key Takeaway
 For critical counters and state synchronization, never trust application-layer logic. Push the consistency guarantee to the database layer using atomic transactions and explicit locking to ensure data integrity under high concurrency.
-

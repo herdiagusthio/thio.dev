@@ -1,13 +1,10 @@
 ---
-title: "Scatter-Gather Concurrency Pattern for High-Latency APIs"
-date: "2026-09-12"
+title: "implementing the Scatter-Gather Pattern for High-Latency API Aggregation"
+date: "2026-09-19"
 category: "engineering"
 status: "published"
-tags: ["golang","concurrency","distributed-systems","performance"]
-summary: "Aggregating slow upstream providers using parallel goroutines, context deadlines, panic recovery, and jittered exponential backoff."
+tags: ["engineering"]
 ---
-
-# Case Study: implementing the Scatter-Gather Pattern for High-Latency API Aggregation
 
 ## The Problem
 When aggregating data from multiple external providers (e.g., flight search), the total response time is limited by the slowest provider. A sequential approach is unacceptable for user experience, and a naive parallel approach can lead to "resource exhaustion" if too many providers hang or panic.
@@ -21,4 +18,3 @@ Implemented a robust **Scatter-Gather Pattern** in Go.
 
 ## Key Takeaway
 When aggregating data from unreliable external systems, the goal is **Graceful Degradation**. By combining concurrency, strict timeouts, and jittered retries, you can provide the best possible result in the shortest amount of time, even when some providers fail.
-

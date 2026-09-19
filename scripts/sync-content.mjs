@@ -23,6 +23,7 @@ const TARGETS = [
     'decisions',
     (f) => f.endsWith('.md') && !/^000-/.test(f), // skip the ADR template
   ],
+  ['knowledge/engineering', 'engineering', (f) => f.endsWith('.md')],
 ];
 
 function copyDir(srcDir, destDir, filter) {

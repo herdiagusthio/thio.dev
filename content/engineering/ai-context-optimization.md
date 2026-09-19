@@ -1,13 +1,10 @@
 ---
 title: "Context Optimization for AI-Agent Tooling"
-date: "2026-09-12"
+date: "2026-09-19"
 category: "engineering"
 status: "published"
-tags: ["ai-agents","llm-tooling","architecture","context-window"]
-summary: "Preventing context window saturation through bifurcated documentation: human docs vs dense machine-executable agent specs."
+tags: ["engineering"]
 ---
-
-# Case Study: Context Optimization for AI-Agent Tooling
 
 ## The Problem
 When integrating LLMs into development workflows, providing the entire project structure as context often leads to "context window saturation." This increases latency, costs, and most importantly, introduces "noise" that causes the LLM to miss critical details or hallucinate.
@@ -21,4 +18,3 @@ By directing the AI agent only to the `.context.md` files, we reduced the inject
 
 ## Key Takeaway
 LLMs have different "reading" patterns than humans. To maximize AI efficiency, don't just give them your docs—create a specialized "context layer" that speaks the LLM's language of structure and density.
-
