@@ -1,7 +1,7 @@
 ---
 title: "Pengakuan Seorang Software Engineer: Dulu, Saya Bersumpah Takkan Pernah Jadi \"Kuli Koding\""
 date: "2025-06-09"
-category: "engineering"
+category: "blog"
 status: "published"
 tags: ["career", "craftsmanship", "software-engineering", "mindset"]
 summary: "Cerita reflektif tentang perjalanan karir tak terduga seorang software engineer—dari menolak coding hingga belajar bersyukur atas takdir yang dialaminya."

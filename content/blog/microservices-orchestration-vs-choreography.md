@@ -1,7 +1,7 @@
 ---
 title: "Should Your Microservices Dance Together, or Follow a Conductor?"
 date: "2025-07-07"
-category: "engineering"
+category: "blog"
 status: "published"
 tags: ["microservices", "architecture", "orchestration", "choreography", "distributed-systems"]
 summary: "Should your microservices dance or follow a conductor? A deep dive into the Saga Pattern, explaining Choreography vs. Orchestration for distributed systems."

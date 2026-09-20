@@ -1,7 +1,7 @@
 ---
 title: "Saya Belajar Koding Lagi—Tapi Kali Ini, Tanpa Menulis Kode"
 date: "2025-06-23"
-category: "engineering"
+category: "blog"
 status: "published"
 tags: ["ai-engineering", "coding", "software-architecture", "ai-tools"]
 summary: "Di era AI, kemampuan merangkai kalimat menjadi skill teknikal. Inilah masa depan coding yang tak lagi ditulis, tapi dideskripsikan."

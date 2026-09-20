@@ -8,7 +8,7 @@ import matter from 'gray-matter';
 
 const CONTENT = path.resolve(process.cwd(), 'content');
 
-export type FeedKind = 'journal' | 'decision' | 'engineering';
+export type FeedKind = 'journal' | 'decision' | 'engineering' | 'blog';
 
 export interface FeedEntry {
   id: string;
@@ -159,9 +159,40 @@ function parseEngineering(): FeedEntry[] {
   return entries;
 }
 
+function parseBlog(): FeedEntry[] {
+  const entries: FeedEntry[] = [];
+  for (const { name, body } of readDir(path.join(CONTENT, 'blog'))) {
+    const { data, content } = matter(body);
+
+    const status = (data.status || '').toLowerCase();
+    if (status !== 'published' && status !== 'accepted') continue;
+
+    const slug = name.replace(/\.md$/, '');
+    let summary = data.summary;
+    if (!summary) {
+      const pMatch = content.match(/\n\n([^\n#].*?)\n\n/);
+      summary = pMatch ? pMatch[1].trim() : '';
+    }
+
+    entries.push({
+      id: `blog-${slug}`,
+      slug,
+      date: formatDate(data.date),
+      kind: 'blog',
+      title: data.title || slug,
+      status: 'published',
+      summaryHtml: summary ? (marked.parse(summary) as string) : '',
+      bulletsHtml: [],
+      tags: data.tags || ['blog', 'engineering'],
+      url: `/blog/${slug}`,
+    });
+  }
+  return entries;
+}
+
 export function getFeed(): FeedEntry[] {
-  return [...parseEngineering(), ...parseDecisions(), ...parseJournal()].sort((a, b) => {
+  return [...parseBlog(), ...parseEngineering(), ...parseDecisions(), ...parseJournal()].sort((a, b) => {
     if (a.date !== b.date) return a.date < b.date ? 1 : -1;
-    return a.kind === b.kind ? 0 : a.kind === 'engineering' ? -1 : a.kind === 'decision' ? -1 : 1;
+    return a.kind === b.kind ? 0 : a.kind === 'blog' ? -1 : a.kind === 'engineering' ? -1 : a.kind === 'decision' ? -1 : 1;
   });
 }

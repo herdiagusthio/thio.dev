@@ -29,6 +29,7 @@ const TARGETS = [
     },
   ],
   ['knowledge/engineering', 'engineering', (f) => f.endsWith('.md')],
+  ['knowledge/blog', 'blog', (f) => f.endsWith('.md')],
 ];
 
 function copyDir(srcDir, destDir, filter) {
@@ -37,12 +38,20 @@ function copyDir(srcDir, destDir, filter) {
     return 0;
   }
   fs.mkdirSync(destDir, { recursive: true });
+  const validFiles = new Set();
   let count = 0;
   for (const name of fs.readdirSync(srcDir)) {
     const fullPath = path.join(srcDir, name);
     if (!filter(name, fullPath)) continue;
     fs.copyFileSync(fullPath, path.join(destDir, name));
+    validFiles.add(name);
     count++;
+  }
+  // Prune files in destination that no longer exist in source
+  for (const name of fs.readdirSync(destDir)) {
+    if (name.endsWith('.md') && !validFiles.has(name)) {
+      fs.unlinkSync(path.join(destDir, name));
+    }
   }
   return count;
 }

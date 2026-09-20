@@ -1,7 +1,7 @@
 ---
 title: "Concurrency in Go always felt ‘magical’—until I asked what’s really happening inside."
 date: "2025-08-04"
-category: "engineering"
+category: "blog"
 status: "published"
 tags: ["golang", "concurrency", "runtime", "goroutines", "distributed-systems"]
 summary: "Go"

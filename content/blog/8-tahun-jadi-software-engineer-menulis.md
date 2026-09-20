@@ -1,7 +1,7 @@
 ---
 title: "8 Tahun Jadi Software Engineer, Baru Sekarang Saya Sadar: Pekerjaan Utama Saya Ternyata Menulis"
 date: "2025-06-02"
-category: "engineering"
+category: "blog"
 status: "published"
 tags: ["career", "software-engineering", "writing", "ai-era"]
 summary: "Setelah 8 tahun jadi software engineer, saya sadar bahwa menulis adalah kunci untuk tetap relevan di era AI yang terus berubah. Ini refleksi dan cerita saya."

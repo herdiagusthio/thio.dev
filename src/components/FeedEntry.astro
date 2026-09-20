@@ -8,6 +8,8 @@ const categoryLabel =
     ? 'DECISION'
     : entry.kind === 'engineering'
     ? 'CASE STUDY'
+    : entry.kind === 'blog'
+    ? 'BLOG'
     : 'SESSION';
 
 const statusClass = entry.status

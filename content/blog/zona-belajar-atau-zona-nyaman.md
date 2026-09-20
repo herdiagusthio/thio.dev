@@ -1,7 +1,7 @@
 ---
 title: "Saya Kira Zona Belajar, Ternyata Hanya Zona Nyaman yang Tersamar"
 date: "2025-06-16"
-category: "engineering"
+category: "blog"
 status: "published"
 tags: ["career", "learning", "growth", "software-engineering"]
 summary: "Dari zona nyaman di konsultan IT ke Tokopedia. Kisah seorang engineer yang sadar bahwa"
