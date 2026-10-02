@@ -59,11 +59,12 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
         <div class="virtual-office-stage-col">
           <!-- Top HUD Bar -->
           <div class="office-stage-header">
-            <!-- Left: Gateway running pill -->
-            <div class="stage-gateway-pill">
+            <!-- Left: Gateway running pill (LIVE-004) -->
+            <div class="stage-gateway-pill live" id="gatewayPill">
               <span class="gateway-pulse-icon">∿</span>
-              <span>Swarm Fleet Active</span>
+              <span id="gatewayStatusText">Swarm Fleet — Live Telemetry</span>
               <span class="gateway-live-dot"></span>
+              <span class="freshness-label" id="freshnessLabel">Updated just now</span>
             </div>
 
             <!-- Center: Room Navigator & 2D/3D View Toggle -->
@@ -420,8 +421,19 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
 
     <!-- Interactive Client Script -->
     <script is:inline>
-      // Sanitized Agent Roster (Zero private VPS credentials, Zero Telegram chat IDs, Zero internal paths)
-      const AGENTS = [
+      // ==========================================================================
+      // Live Office Client — thio.dev/office
+      // Fetches sanitized live state from VPS public API every 30 seconds.
+      // Falls back to static HUD data on any network/API failure.
+      // Zero private data: no internal paths, no Telegram IDs, no session titles.
+      // ==========================================================================
+
+      // --------------------------------------------------------------------------
+      // Static Fallback HUD Data
+      // Used on first render and whenever live fetch fails.
+      // Matches PublicStation shape from /api/public/office.
+      // --------------------------------------------------------------------------
+      const STATIC_AGENTS = [
         {
           id: 'root',
           name: 'LEADYA',
@@ -433,6 +445,7 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
           room: 'Workspace',
           currentTask: 'Orchestrating engineering workstreams & review gates',
           recentActivity: 'Verified architecture review gate for Go AI verification stream',
+          activityLabel: 'Orchestrating mission-critical sprint workstreams',
           mission: 'Executive orchestration between Founder intent and specialist engineering workforce. Decomposes high-leverage roadmaps, delegates implementation with isolated contexts, reviews technical outcomes, and enforces system integrity.',
           skills: ['workstream-decomposition', 'delegation-protocol', 'cost-model-optimization', 'outcome-verification', 'memory-governance'],
           colors: { hair: '#1d293c', skin: '#fed7aa', shirt: '#e6b34e', pants: '#1e3a8a' }
@@ -448,6 +461,7 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
           room: 'Workspace',
           currentTask: 'Authoring Go AI Verification Harness ADR & review gate',
           recentActivity: 'Drafted ADR in second-brain/decisions for multi-threaded harness',
+          activityLabel: 'Authoring architecture ADR & review gate',
           mission: 'Lead engineering excellence, author ADRs/RFCs, enforce architectural purity, manage technical task decomposition, and conduct rigorous code and MR reviews across Goder, Pixel, and Sysca.',
           skills: ['architecture-governance', 'adr-rfc-authoring', 'code-review-gatekeeper', 'concurrency-design', 'domain-driven-design'],
           colors: { hair: '#11151c', skin: '#e9b57d', shirt: '#5a8dee', pants: '#36475d' }
@@ -462,7 +476,8 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
           state: 'Working',
           room: 'Workspace',
           currentTask: 'Implementing Go scatter-gather aggregator PoC',
-          recentActivity: 'Benchmarked table-driven test suite with zero race conditions (go test -race)',
+          recentActivity: 'Benchmarked table-driven test suite with zero race conditions',
+          activityLabel: 'Active code implementation session',
           mission: 'Implement, refactor, and maintain high-performance backend services, APIs, databases, worker pools, and system tools across Go, Python, TypeScript, and Rust with idiomatic design, explicit error handling, and zero lint errors.',
           skills: ['go-concurrency', 'scatter-gather-apis', 'table-driven-tests', 'pprof-profiling', 'sqlite-wal-pgvector', 'zero-alloc-routines'],
           colors: { hair: '#3b2a20', skin: '#c98e5a', shirt: '#93ca67', pants: '#344349' }
@@ -476,8 +491,9 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
           model: 'Fast Standard (gemini-3.1-flash-lite-preview)',
           state: 'Working',
           room: 'Workspace',
-          currentTask: 'Auditing host memory headroom (free -m >= 500MB)',
-          recentActivity: 'Audited Caddy reverse proxy TLS handshakes and automated log rotations',
+          currentTask: 'Auditing host memory headroom (>= 500MB)',
+          recentActivity: 'Audited Caddy reverse proxy and automated log rotations',
+          activityLabel: 'Monitoring VPS telemetry & infrastructure',
           mission: 'Maintain 100% uptime, robust security, and optimal resource performance for the host VPS, Caddy reverse proxy, systemd services, and local inference routing. Enforces >= 500 MB RAM headroom invariant.',
           skills: ['vps-telemetry', 'caddy-tls-proxy', 'systemd-lifecycle', 'memory-guardrail', 'network-hygiene', 'automated-backups'],
           colors: { hair: '#2f4f3a', skin: '#f1c9a0', shirt: '#70bdcb', pants: '#374052' }
@@ -493,6 +509,7 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
           room: 'Workspace',
           currentTask: 'Polishing Virtual Office Three.js shaders & tokens',
           recentActivity: 'Optimized Astro SSG bundle size and Lighthouse accessibility scores (98+)',
+          activityLabel: 'Active UI/UX engineering session',
           mission: 'Design and build distinctive, production-grade frontend interfaces across modern frameworks (Astro, React, Next.js, Vue, Tailwind CSS, Three.js) — ensuring accessible, performant, visually unforgettable applications that reject generic AI aesthetics.',
           skills: ['astro-ssg', 'threejs-isometric-rendering', 'tailwind-tokens', 'wcag-aa-accessibility', 'css-animations', 'lighthouse-95+'],
           colors: { hair: '#6a4d8d', skin: '#fed7aa', shirt: '#f4a3b4', pants: '#4a3b2f' }
@@ -504,10 +521,11 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
           avatar: '🌙',
           seat: 6,
           model: 'Fast Standard (gemini-3.1-flash-lite-preview)',
-          state: 'Standby',
-          room: 'Workspace',
+          state: 'Idle',
+          room: 'Lounge',
           currentTask: 'Synthesizing Go verification harness syllabus',
           recentActivity: 'Compiled acceptance criteria and PRD milestone roadmap',
+          activityLabel: 'On standby · Lounge',
           mission: 'Own product vision, feature prioritization (ROI), PRDs, roadmaps, and UX research synthesis. Bridge technical capabilities with high-leverage outcomes.',
           skills: ['prd-authoring', 'backlog-prioritization', 'ux-journey-mapping', 'product-roadmaps', 'feature-roi-analysis'],
           colors: { hair: '#8b5a2b', skin: '#dca06e', shirt: '#8f7ae6', pants: '#2f3a44' }
@@ -519,10 +537,11 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
           avatar: '✍️',
           seat: 7,
           model: 'Fast Standard (gemini-3.1-flash-lite-preview)',
-          state: 'Standby',
+          state: 'Idle',
           room: 'Lounge',
           currentTask: 'Drafting Go AI Verification case study for thio.dev/blog',
           recentActivity: 'Structured JSON-LD schema markup for engineering architecture series',
+          activityLabel: 'On standby · Lounge',
           mission: 'Create and maintain technical copy, AI search optimization (AI SEO), JSON-LD schema, and technical blogging (thio.dev/blog). Guardian of Thio\'s authentic software engineering voice.',
           skills: ['technical-blogging', 'ai-seo-optimization', 'json-ld-schema', 'architecture-case-studies', 'canonical-attribution'],
           colors: { hair: '#b54b45', skin: '#f1c9a0', shirt: '#e76f51', pants: '#3d2f4a' }
@@ -534,20 +553,37 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
           avatar: '💼',
           seat: 8,
           model: 'Balanced Standard (agenticprojectcombo)',
-          state: 'Standby',
+          state: 'Idle',
           room: 'Lounge',
           currentTask: 'Coordinating engineering calendar & workout routines',
-          recentActivity: 'Synchronized weekly engineering milestones with high-intensity training schedule',
+          recentActivity: 'Synchronized weekly engineering milestones with training schedule',
+          activityLabel: 'On standby · Lounge',
           mission: 'Manage Thio\'s financial intelligence, health and fitness programs, and schedule operations as a proactive personal executive assistant.',
           skills: ['calendar-coordination', 'financial-intelligence', 'habit-tracking', 'executive-ops', 'proactive-alerts'],
           colors: { hair: '#c9a24a', skin: '#a8714a', shirt: '#4f9c7a', pants: '#36475d' }
+        },
+        {
+          id: 'agy',
+          name: 'Antigravity',
+          role: 'Lead Agentic Engineer (AGY)',
+          avatar: '⚡',
+          seat: 9,
+          model: 'Google Antigravity Engine',
+          state: 'Working',
+          room: 'Workspace',
+          currentTask: 'Agentic Systems Refactoring & Verification',
+          recentActivity: 'Executing commands and refactoring codebase',
+          activityLabel: 'Active code generation session',
+          mission: 'Lead agentic engineering: code generation, refactoring, test coverage, and architecture verification across all projects.',
+          skills: ['agentic-coding', 'refactoring', 'test-coverage', 'architecture-verification', 'ci-cd'],
+          colors: { hair: '#0f172a', skin: '#e2e8f0', shirt: '#38bdf8', pants: '#0369a1' }
         }
       ];
 
-      const LIVE_ACTIVITIES = [
+      const STATIC_LIVE_ACTIVITIES = [
         { icon: '⚡', agent: 'Prime', role: 'Principal Engineer', action: 'Approved architecture review for Go AI harness', timeAgo: '2m ago' },
         { icon: '🛠️', agent: 'Goder', role: 'Senior Go Engineer', action: 'Passed table-driven tests (go test -race ./...)', timeAgo: '5m ago' },
-        { icon: '🛡️', agent: 'Sysca', role: 'Infraguard / DevOps', action: 'VPS memory headroom verified (free -m >= 500MB)', timeAgo: '11m ago' },
+        { icon: '🛡️', agent: 'Sysca', role: 'Infraguard / DevOps', action: 'VPS memory headroom verified (>= 500MB)', timeAgo: '11m ago' },
         { icon: '👑', agent: 'LEADYA', role: 'Chief Orchestrator', action: 'Synchronized sprint backlog and task dispatch queue', timeAgo: '18m ago' },
         { icon: '🎨', agent: 'Pixel', role: 'Frontend & UI/UX', action: 'Audited WCAG AA color tokens for dark mode console', timeAgo: '24m ago' },
         { icon: '✍️', agent: 'Lexa', role: 'Content Specialist', action: 'Synced architecture case study to thio.dev/showcase', timeAgo: '35m ago' },
@@ -555,7 +591,7 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
         { icon: '💼', agent: 'Caren', role: 'Executive Assistant', action: 'Scheduled deep-work blocks in developer calendar', timeAgo: '1h ago' }
       ];
 
-      const CHANNELS = [
+      const STATIC_CHANNELS = [
         { name: '#engineering-architecture', target: 'Go systems, concurrency patterns, ADR review gate', status: 'ACTIVE' },
         { name: '#tech-intelligence', target: 'AI breakthroughs, distributed systems radar', status: 'ACTIVE' },
         { name: '#systems-reliability', target: 'VPS telemetry, Caddy proxy, memory guardrail', status: 'ACTIVE' },
@@ -563,6 +599,178 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
         { name: '#content-narrative', target: 'Technical blogging, case studies, JSON-LD schema', status: 'ACTIVE' },
         { name: '#executive-ops', target: 'Executive coordination, calendar, habits', status: 'ACTIVE' }
       ];
+
+      // --------------------------------------------------------------------------
+      // Live State (merged from API or fallback)
+      // --------------------------------------------------------------------------
+
+      const FALLBACK_AGENTS = STATIC_AGENTS;
+      const LIVE_API_URL = 'https://api.thio.103.217.144.64.nip.io/office';
+      const FETCH_TIMEOUT_MS = 4000;
+      const REFRESH_INTERVAL_MS = 30000;
+
+      let AGENTS = FALLBACK_AGENTS.slice();
+      let LIVE_ACTIVITIES = STATIC_LIVE_ACTIVITIES.slice();
+      let CHANNELS = STATIC_CHANNELS.slice();
+      let isLiveMode = false;
+      let lastUpdatedAt = null;
+
+      // --------------------------------------------------------------------------
+      // Live Fetch (LIVE-003)
+      // --------------------------------------------------------------------------
+
+      async function loadLiveAgentState() {
+        try {
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+          const res = await fetch(LIVE_API_URL, {
+            cache: 'no-cache',
+            signal: controller.signal,
+            headers: { 'Accept': 'application/json' },
+          });
+          clearTimeout(timeout);
+
+          if (!res.ok) {
+            throw new Error(`HTTP ${res.status}`);
+          }
+
+          const data = await res.json();
+          const rawStations = data.agents || data.stations;
+
+          if (!Array.isArray(rawStations) || rawStations.length === 0) {
+            throw new Error('Invalid snapshot shape');
+          }
+
+          return {
+            agents: rawStations,
+            data,
+            isLive: true,
+            updatedAt: data.updatedAt || data.fetchedAt || new Date().toISOString(),
+          };
+        } catch (e) {
+          console.warn('[Office] Live state unavailable, using static fallback:', e);
+          return {
+            agents: FALLBACK_AGENTS,
+            data: null,
+            isLive: false,
+            updatedAt: null,
+          };
+        }
+      }
+
+      async function fetchLiveOffice() {
+        const result = await loadLiveAgentState();
+        isLiveMode = result.isLive;
+        lastUpdatedAt = result.updatedAt;
+
+        if (result.isLive && result.data) {
+          const data = result.data;
+
+          // Merge live stations with static mission/skills (not exposed by public API)
+          AGENTS = result.agents.map(liveStation => {
+            const staticAgent = FALLBACK_AGENTS.find(a => a.id === liveStation.id);
+            return {
+              ...(staticAgent || {}),
+              ...liveStation,
+              mission: staticAgent?.mission || '',
+              skills: staticAgent?.skills || [],
+            };
+          });
+
+          // Merge live activities
+          if (Array.isArray(data.liveActivity) && data.liveActivity.length > 0) {
+            LIVE_ACTIVITIES = data.liveActivity.map(item => ({
+              icon: item.icon || '⚡',
+              agent: item.agent,
+              role: item.role || '',
+              action: item.action,
+              timeAgo: item.timeAgo || 'recently',
+            }));
+          }
+
+          // Merge channels
+          if (data.channels && Array.isArray(data.channels.topics)) {
+            CHANNELS = data.channels.topics.map(t => ({
+              name: typeof t === 'string' ? t : `#${t.category || t.name.toLowerCase().replace(/\s+/g, '-')}`,
+              target: typeof t === 'string' ? t : t.name,
+              status: typeof t === 'object' && t.status === 'Active' ? 'ACTIVE' : 'IDLE',
+            }));
+          }
+        } else {
+          // Revert to fallback arrays
+          AGENTS = FALLBACK_AGENTS.slice();
+          LIVE_ACTIVITIES = STATIC_LIVE_ACTIVITIES.slice();
+          CHANNELS = STATIC_CHANNELS.slice();
+        }
+
+        updateHudStatus(result.data?.summary || null);
+        updateFreshness();
+        return result.isLive;
+      }
+
+      function updateFreshness() {
+        const freshnessLabel = document.getElementById('freshnessLabel');
+        if (!freshnessLabel) return;
+
+        if (!isLiveMode || !lastUpdatedAt) {
+          freshnessLabel.textContent = isLiveMode ? 'Updated just now' : 'Static Fallback';
+          return;
+        }
+
+        const elapsedSec = Math.max(0, Math.floor((Date.now() - new Date(lastUpdatedAt).getTime()) / 1000));
+        if (elapsedSec < 10) {
+          freshnessLabel.textContent = 'Updated just now';
+        } else if (elapsedSec < 60) {
+          freshnessLabel.textContent = `Updated ${elapsedSec}s ago`;
+        } else if (elapsedSec < 3600) {
+          freshnessLabel.textContent = `Updated ${Math.floor(elapsedSec / 60)}m ago`;
+        } else {
+          freshnessLabel.textContent = `Updated ${Math.floor(elapsedSec / 3600)}h ago`;
+        }
+      }
+
+      function updateHudStatus(summary) {
+        // Update the stage gateway pill (LIVE-004)
+        const gatewayPill = document.getElementById('gatewayPill');
+        const gatewayStatusText = document.getElementById('gatewayStatusText');
+        if (gatewayPill) {
+          if (isLiveMode) {
+            gatewayPill.classList.remove('static');
+            gatewayPill.classList.add('live');
+            if (gatewayStatusText) gatewayStatusText.textContent = 'Swarm Fleet — Live Telemetry';
+          } else {
+            gatewayPill.classList.remove('live');
+            gatewayPill.classList.add('static');
+            if (gatewayStatusText) gatewayStatusText.textContent = 'Swarm Fleet — Static Fallback';
+          }
+        }
+
+        // Update the SWARM_TELEMETRY status in the hero HUD
+        const monoLabels = document.querySelectorAll('.mono-label');
+        if (monoLabels.length >= 1) {
+          monoLabels[0].textContent = isLiveMode
+            ? '[SWARM_TELEMETRY: LIVE]'
+            : '[SWARM_TELEMETRY: STATIC FALLBACK]';
+        }
+        if (summary && monoLabels.length >= 2) {
+          monoLabels[1].textContent = `[AGENTS: ${summary.totalAgents} TRACKED · ${summary.active || summary.working} ACTIVE]`;
+        }
+
+        // Update working/idle count pills
+        const workingCount = document.getElementById('officeHeaderWorkingCount');
+        const idleCount = document.getElementById('officeHeaderIdleCount');
+        if (workingCount) {
+          workingCount.textContent = summary ? (summary.active || summary.working) : AGENTS.filter(a => ['Working', 'Reviewing', 'Collaborating'].includes(a.state)).length;
+        }
+        if (idleCount) {
+          idleCount.textContent = summary ? summary.idle : AGENTS.filter(a => a.state === 'Idle').length;
+        }
+      }
+
+      // --------------------------------------------------------------------------
+      // Render Engine (unchanged from previous implementation)
+      // --------------------------------------------------------------------------
 
       let currentRoom = 'workspace';
       let currentMode = '2D';
@@ -686,7 +894,7 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
                 <strong>${a.name}</strong>
                 <small>${a.role}</small>
               </div>
-              <span class="badge ${a.state === 'Working' ? 'active' : 'standby'}">${a.state}</span>
+              <span class="badge ${['Working', 'Reviewing', 'Collaborating'].includes(a.state) ? 'active' : 'standby'}">${a.state}</span>
             </div>
           `).join('');
         }
@@ -829,11 +1037,11 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
         document.getElementById('modalModelVal').textContent = agent.model;
         document.getElementById('modalCurrentTask').textContent = agent.currentTask;
         document.getElementById('modalRecentActivity').textContent = agent.recentActivity;
-        document.getElementById('modalMission').textContent = agent.mission;
+        document.getElementById('modalMission').textContent = agent.mission || '';
 
         const skillsEl = document.getElementById('modalSkills');
         if (skillsEl) {
-          skillsEl.innerHTML = agent.skills.map(s => `
+          skillsEl.innerHTML = (agent.skills || []).map(s => `
             <span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 11px;">#${s}</span>
           `).join('');
         }
@@ -846,11 +1054,36 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
         if (modal) modal.style.display = 'none';
       }
 
-      // Event Bindings
-      document.addEventListener('DOMContentLoaded', () => {
+      // --------------------------------------------------------------------------
+      // Live Refresh Loop
+      // --------------------------------------------------------------------------
+
+      async function refreshAndRender() {
+        await fetchLiveOffice();
         renderOffice2D();
         updateClockAndLighting();
+      }
+
+      // --------------------------------------------------------------------------
+      // Event Bindings & Initialization
+      // --------------------------------------------------------------------------
+      document.addEventListener('DOMContentLoaded', () => {
+        // Render with static fallback immediately (no flash of empty content)
+        renderOffice2D();
+        updateClockAndLighting();
+        updateHudStatus(null);
+
+        // Kick off live fetch — renders again with live data if successful
+        refreshAndRender();
+
+        // Clock updates every 5s (cheap, local)
         setInterval(updateClockAndLighting, 5000);
+
+        // Freshness label updates every 5s
+        setInterval(updateFreshness, 5000);
+
+        // Live office refresh every 30s (aligned with API expiresAt TTL)
+        setInterval(refreshAndRender, REFRESH_INTERVAL_MS);
 
         document.getElementById('officeNavPrev')?.addEventListener('click', () => {
           switchRoom(currentRoom === 'workspace' ? 'lounge' : 'workspace');
@@ -870,8 +1103,7 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
         });
 
         document.getElementById('refreshOfficeBtn')?.addEventListener('click', () => {
-          renderOffice2D();
-          updateClockAndLighting();
+          refreshAndRender();
         });
       });
 

@@ -127,6 +127,28 @@
   border: 1px solid rgba(56, 189, 248, 0.25);
   border-radius: 9999px;
   padding: 4px 12px;
+  transition: all 0.3s ease;
+}
+
+.stage-gateway-pill.live {
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.08);
+  border-color: rgba(56, 189, 248, 0.3);
+}
+
+.stage-gateway-pill.static {
+  color: #94a3b8;
+  background: rgba(148, 163, 184, 0.06);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+.stage-gateway-pill.static .gateway-pulse-icon {
+  color: #94a3b8;
+}
+
+.stage-gateway-pill.static .gateway-live-dot {
+  background: #64748b;
+  box-shadow: none;
 }
 
 .gateway-pulse-icon {
@@ -141,6 +163,14 @@
   border-radius: 50%;
   background: #10b981;
   box-shadow: 0 0 6px #10b981;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.freshness-label {
+  font-size: 10px;
+  color: #94a3b8;
+  margin-left: 4px;
+  white-space: nowrap;
 }
 
 .stage-room-navigator {
