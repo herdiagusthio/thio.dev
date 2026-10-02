@@ -1,0 +1,1129 @@
+---
+import '../styles/global.css';
+import '../styles/office.css';
+
+const year = 2026;
+const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Autonomous Multi-Agent Office & Telemetry — thio.dev</title>
+    <meta
+      name="description"
+      content="Real-time interactive command bridge and 2D/3D spatial telemetry for Herdi Agusthio's autonomous multi-agent engineering division."
+    />
+    <link rel="icon" href={faviconHref} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <!-- Topbar Navigation -->
+    <header class="topbar">
+      <div class="wrap topbar-inner">
+        <span class="brand"><a href="/" class="nav-brand" style="text-decoration:none; color:inherit;">thio.dev</a></span>
+        <nav class="nav-links">
+          <a href="/showcase">Showcase</a>
+          <a href="/office" class="active-nav">Office</a>
+          <a href="/blog">Blog</a>
+          <a href="/about">About</a>
+          <a href="/contact">Contact</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="wrap main-container">
+      <!-- Telemetry Header -->
+      <section class="office-page-hero">
+        <div class="meta-status">
+          <span class="status-indicator"></span>
+          <span class="mono-label">[SWARM_TELEMETRY: OPERATIONAL]</span>
+          <span class="mono-label">[AGENTS: 8 ACTIVE]</span>
+          <span class="mono-label">[MEM_INVARIANT: &gt;=500MB HEADROOM OK]</span>
+        </div>
+        <h1 class="page-title">Autonomous Multi-Agent Command Bridge</h1>
+        <p class="hero-desc">
+          Live spatial telemetry and mission control for Thio's specialist engineering workforce.
+          Featuring dual <strong>2D Pixel-Art</strong> and <strong>3D Three.js</strong> environments with interactive agent dossiers.
+        </p>
+      </section>
+
+      <!-- MAIN OFFICE STAGE CONTAINER -->
+      <div class="virtual-office-layout">
+        <div class="virtual-office-stage-col">
+          <!-- Top HUD Bar -->
+          <div class="office-stage-header">
+            <!-- Left: Gateway running pill -->
+            <div class="stage-gateway-pill">
+              <span class="gateway-pulse-icon">∿</span>
+              <span>Swarm Fleet Active</span>
+              <span class="gateway-live-dot"></span>
+            </div>
+
+            <!-- Center: Room Navigator & 2D/3D View Toggle -->
+            <div class="stage-room-navigator">
+              <div class="room-nav-control" id="roomNavControlWrap">
+                <button type="button" id="officeNavPrev" class="room-nav-arrow" title="Previous Room">‹</button>
+                <div class="room-nav-title-box">
+                  <span id="officeRoomTitle">Workspace</span>
+                  <span id="officeRoomCount" class="room-nav-count-badge">5</span>
+                </div>
+                <button type="button" id="officeNavNext" class="room-nav-arrow" title="Next Room">›</button>
+                <span id="officeDayNightPill" class="day-night-chip">☀️ daytime</span>
+              </div>
+              <div class="room-nav-dots" id="roomNavDotsWrap">
+                <span id="dotWorkspace" class="nav-dot active" title="Go to Workspace"></span>
+                <span id="dotLounge" class="nav-dot" title="Go to Lounge"></span>
+              </div>
+              <div class="view-toggle" id="officeViewToggle">
+                <button type="button" id="toggleView2D" class="active" title="2D Pixel-Art Office">2D</button>
+                <button type="button" id="toggleView3D" title="Interactive 3D Isometric Office">3D</button>
+              </div>
+            </div>
+
+            <!-- Right: Status Summary Pills -->
+            <div class="stage-status-pills">
+              <span class="status-summary-pill working"><span class="summary-dot green"></span> <b id="officeHeaderWorkingCount">5</b> working</span>
+              <span class="status-summary-pill idle"><span class="summary-dot gray"></span> <b id="officeHeaderIdleCount">3</b> standby</span>
+              <span class="status-summary-pill offline"><span class="summary-dot dark"></span> <b>0</b> offline</span>
+              <button type="button" id="refreshOfficeBtn" class="office-refresh-btn" title="Refresh Live State">🔄</button>
+            </div>
+          </div>
+
+          <!-- THE VIRTUAL OFFICE VIEWPORT (2D STAGE) -->
+          <div id="virtualOffice2DStage" class="virtual-office-viewport">
+            <!-- WORKSPACE ROOM -->
+            <div id="officeWorkspaceRoom" class="office-room-stage workspace-stage">
+              <!-- Back Wall Decor -->
+              <div class="office-back-wall">
+                <!-- Left Window -->
+                <div class="office-window window-left">
+                  <div class="window-glass">
+                    <div class="cloud-drift c1"></div>
+                    <div class="cloud-drift c2"></div>
+                    <div class="night-sky-element moon"></div>
+                    <div class="night-sky-element star s1"></div>
+                    <div class="night-sky-element star s2"></div>
+                  </div>
+                  <div class="window-frame-bar h"></div>
+                  <div class="window-frame-bar v"></div>
+                </div>
+
+                <!-- Digital Wall Clock -->
+                <div class="office-wall-clock" id="officeWallClock" title="WIB Local Time (UTC+7)">
+                  <span class="clock-icon">🕒</span>
+                  <span id="clockDigits" class="clock-digits">14:40</span>
+                </div>
+
+                <!-- Center Door -->
+                <div class="office-door">
+                  <div class="door-frame">
+                    <div class="door-panel">
+                      <div class="door-window"></div>
+                      <div class="door-knob"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Water Dispenser ("Galon Air") -->
+                <div class="office-galon" title="Water Dispenser · Hot & Cold">
+                  <div class="galon-bottle">
+                    <div class="galon-water-level"></div>
+                    <div class="galon-bubble"></div>
+                  </div>
+                  <div class="galon-body">
+                    <div class="galon-faucet hot"></div>
+                    <div class="galon-faucet cold"></div>
+                    <div class="galon-drip"></div>
+                  </div>
+                </div>
+
+                <!-- Right Window -->
+                <div class="office-window window-right">
+                  <div class="window-glass">
+                    <div class="cloud-drift c1"></div>
+                    <div class="cloud-drift c2"></div>
+                    <div class="night-sky-element moon"></div>
+                    <div class="night-sky-element star s1"></div>
+                    <div class="night-sky-element star s2"></div>
+                  </div>
+                  <div class="window-frame-bar h"></div>
+                  <div class="window-frame-bar v"></div>
+                </div>
+              </div>
+
+              <!-- Left Wall Bookshelf -->
+              <div class="office-bookshelf" title="Engineering SSOT Library (second-brain)">
+                <div class="shelf-row"><span class="book b1"></span><span class="book b2"></span><span class="book b3"></span><span class="book b4"></span><span class="book b5"></span></div>
+                <div class="shelf-row"><span class="book b6"></span><span class="book b7"></span><span class="book b1"></span><span class="book b8"></span></div>
+                <div class="shelf-row"><span class="book b3"></span><span class="book b5"></span><span class="book b2"></span><span class="book b4"></span></div>
+              </div>
+
+              <!-- Right Wall Whiteboard -->
+              <div class="office-whiteboard" title="Sprint Architecture: CEO → PRIME → AGENTS">
+                <div class="wb-header">AUTONOMOUS FLEET TOPOLOGY</div>
+                <div class="wb-diagram">
+                  <span class="wb-box">LEADYA</span><span class="wb-arrow">→</span><span class="wb-box">PRIME</span><span class="wb-arrow">→</span><span class="wb-box">GODER / SYSCA / PIXEL</span>
+                </div>
+                <div class="wb-stickies">
+                  <span class="sticky yellow"></span><span class="sticky pink"></span><span class="sticky cyan"></span>
+                </div>
+              </div>
+
+              <!-- Parquet Floor Surface -->
+              <div class="office-floor">
+                <!-- Potted Plants in Corners -->
+                <div class="office-plant plant-bottom-left" title="Monstera Deliciosa">
+                  <div class="plant-pot"></div>
+                  <div class="plant-leaves"><i></i><i></i><i></i><i></i></div>
+                </div>
+                <div class="office-plant plant-bottom-right" title="Snake Plant">
+                  <div class="plant-pot"></div>
+                  <div class="plant-leaves"><i></i><i></i><i></i><i></i></div>
+                </div>
+
+                <!-- 12 Hot Desks Grid (2 rows x 6 desks) -->
+                <div class="hot-desks-grid">
+                  <!-- Top Row: Desks 1-6 -->
+                  <div class="desks-row top-row" id="desksRowTop"></div>
+                  
+                  <!-- Central Walkway / Meeting Table Area -->
+                  <div class="walkway-meeting-area" id="walkwayMeetingArea">
+                    <div class="meeting-table" title="Sync Station">
+                      <div class="table-surface"></div>
+                    </div>
+                  </div>
+
+                  <!-- Bottom Row: Desks 7-12 -->
+                  <div class="desks-row bottom-row" id="desksRowBottom"></div>
+                </div>
+              </div>
+
+              <!-- Footer Hint -->
+              <div class="stage-footer-bar">
+                <span>💡 Click any workstation or agent character to view architecture dossier & charter</span>
+              </div>
+            </div>
+
+            <!-- LOUNGE ROOM -->
+            <div id="officeLoungeRoom" class="office-room-stage lounge-stage" style="display: none;">
+              <!-- Lounge Back Wall -->
+              <div class="office-back-wall lounge-wall">
+                <!-- Left Window -->
+                <div class="office-window window-left">
+                  <div class="window-glass">
+                    <div class="cloud-drift c1"></div>
+                    <div class="cloud-drift c2"></div>
+                    <div class="night-sky-element moon"></div>
+                    <div class="night-sky-element star s1"></div>
+                    <div class="night-sky-element star s2"></div>
+                  </div>
+                  <div class="window-frame-bar h"></div>
+                  <div class="window-frame-bar v"></div>
+                </div>
+
+                <!-- Digital Wall Clock -->
+                <div class="office-wall-clock" title="WIB Local Time (UTC+7)">
+                  <span class="clock-icon">🕒</span>
+                  <span class="clock-digits clock-digits-lounge">14:40</span>
+                </div>
+
+                <!-- Smart Wall TV in the center -->
+                <div class="lounge-wall-tv" title="Smart TV · Live Swarm Code Display">
+                  <div class="tv-screen">
+                    <div class="tv-code-line line-1"><code>const fleet = new AutonomousOrg();</code></div>
+                    <div class="tv-code-line line-2"><code>await fleet.sync(&#123; memorySafe: true &#125;);</code></div>
+                    <div class="tv-code-line line-3"><code>console.log("Memory Headroom: >= 500MB OK");</code></div>
+                    <div class="tv-scanlines"></div>
+                  </div>
+                  <div class="tv-mount"></div>
+                </div>
+
+                <!-- Right Window -->
+                <div class="office-window window-right">
+                  <div class="window-glass">
+                    <div class="cloud-drift c1"></div>
+                    <div class="cloud-drift c2"></div>
+                    <div class="night-sky-element moon"></div>
+                    <div class="night-sky-element star s1"></div>
+                    <div class="night-sky-element star s2"></div>
+                  </div>
+                  <div class="window-frame-bar h"></div>
+                  <div class="window-frame-bar v"></div>
+                </div>
+              </div>
+
+              <!-- Lounge Floor -->
+              <div class="office-floor lounge-floor">
+                <!-- Corner Plants -->
+                <div class="office-plant plant-bottom-left"><div class="plant-pot"></div><div class="plant-leaves"><i></i><i></i><i></i><i></i></div></div>
+                <div class="office-plant plant-bottom-right"><div class="plant-pot"></div><div class="plant-leaves"><i></i><i></i><i></i><i></i></div></div>
+
+                <!-- Lounge Seating Group -->
+                <div class="lounge-seating-group">
+                  <!-- Left Executive Armchair -->
+                  <div class="lounge-armchair-wrap" id="loungeArmchairSlot"></div>
+
+                  <!-- Center Multi-Seater Sofa -->
+                  <div class="lounge-sofa-wrap">
+                    <div class="lounge-sofa-furniture">
+                      <div class="sofa-backrest"></div>
+                      <div class="sofa-cushions" id="loungeSofaCrew"></div>
+                      <div class="sofa-base"></div>
+                    </div>
+
+                    <!-- Coffee Table in Front of Sofa -->
+                    <div class="lounge-coffee-table">
+                      <div class="coffee-cup" title="Fresh Toraja Coffee"><span class="steam">~</span>☕</div>
+                      <div class="coffee-cup" title="Green Tea"><span class="steam">~</span>🍵</div>
+                      <div class="table-magazine">TECH ARCHITECTURE</div>
+                    </div>
+                  </div>
+
+                  <!-- Right Side Table / Lamp -->
+                  <div class="lounge-side-table" title="Reading Lamp & Radio">
+                    <div class="side-lamp"><div class="lamp-shade"></div><div class="lamp-pole"></div></div>
+                    <div class="side-table-base"></div>
+                  </div>
+                </div>
+
+                <!-- Bottom Status Subtitle -->
+                <div class="lounge-footer-status">
+                  <span class="lounge-idle-dot">●</span>
+                  <span>off the clock · standby mode · token conservation protocol active</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3D VIRTUAL OFFICE STAGE -->
+          <div id="virtualOffice3DStage" class="office-3d-wrapper" style="display: none;"></div>
+        </div>
+
+        <!-- SIDEBAR PANEL -->
+        <div class="virtual-office-sidebar">
+          <!-- 1. Fleet Roster Quick Nav -->
+          <div class="office-sidebar-card">
+            <div class="sidebar-card-header">
+              <div class="sidebar-card-title">
+                <span>🤖 Fleet Roster (8)</span>
+              </div>
+              <span class="badge active" style="font-size: 10px;">8 Online</span>
+            </div>
+            <div class="agent-chip-list" id="agentRosterChips">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- 2. Live Activity Card -->
+          <div class="office-sidebar-card">
+            <div class="sidebar-card-header">
+              <div class="sidebar-card-title">
+                <span class="sidebar-pulse-icon">∿</span>
+                <span>Live Engineering Activity</span>
+              </div>
+              <span class="badge active" style="font-size: 10px;">Live Stream</span>
+            </div>
+            <div class="live-activity-list" id="sidebarActivityList">
+              <!-- Dynamically populated with sanitized engineering activities -->
+            </div>
+          </div>
+
+          <!-- 3. Channels Card -->
+          <div class="office-sidebar-card">
+            <div class="sidebar-card-header">
+              <div class="sidebar-card-title">
+                <span>💬 Architecture Channels (6)</span>
+              </div>
+              <span class="badge active" style="font-size: 10px;">Connected</span>
+            </div>
+            <div class="sidebar-channels-list" id="sidebarChannelsList">
+              <!-- Dynamically populated with sanitized topic routes -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- AGENT DOSSIER INSPECTOR MODAL -->
+    <div id="stationDetailModal" class="modal-backdrop" style="display: none;">
+      <div class="cyber-modal-card">
+        <div class="cyber-modal-head">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <div class="holo-avatar-pod" style="width: 44px; height: 44px;">
+              <div class="holo-avatar-ring"></div>
+              <div id="modalAvatar" class="holo-avatar-core" style="width: 36px; height: 36px; font-size: 18px;">👑</div>
+            </div>
+            <div>
+              <h3 id="modalAgentName" style="font-size: 18px; margin-bottom: 2px; font-weight: 700; color: #f8fafc;">LEADYA</h3>
+              <div id="modalAgentRole" style="font-size: 12px; color: var(--accent);">CEO & Chief Orchestrator</div>
+            </div>
+          </div>
+          <button type="button" id="closeStationModalBtn" class="btn-secondary">✕ Close</button>
+        </div>
+        <div class="cyber-modal-body">
+          <div class="cyber-meta-grid">
+            <div class="cyber-meta-cell">
+              <label>Current Status</label>
+              <strong id="modalStateVal" style="color: #38bdf8;">Working</strong>
+            </div>
+            <div class="cyber-meta-cell">
+              <label>Location / Zone</label>
+              <strong id="modalRoomVal">Command Bridge (Station #1)</strong>
+            </div>
+            <div class="cyber-meta-cell">
+              <label>Inference Engine & Tier</label>
+              <strong id="modalModelVal">Frontier Reasoning (agenticprojectcombo)</strong>
+            </div>
+            <div class="cyber-meta-cell">
+              <label>Execution Invariant</label>
+              <strong id="modalProvenanceVal" style="font-size: 11px;">Deterministic Memory & Review Gate</strong>
+            </div>
+          </div>
+
+          <div class="cyber-meta-cell">
+            <label>Current Attributed Task</label>
+            <div id="modalCurrentTask" style="font-size: 13px; font-weight: 600; color: #38bdf8; font-family: var(--font-mono);">None</div>
+          </div>
+
+          <div class="cyber-meta-cell">
+            <label>Recent Live Activity Trace</label>
+            <div id="modalRecentActivity" style="font-size: 12px; color: var(--text-muted); font-family: var(--font-mono);">None</div>
+          </div>
+
+          <div class="cyber-meta-cell">
+            <label>Public Mission Charter & Philosophy</label>
+            <div id="modalMission" style="font-size: 12px; line-height: 1.5; color: var(--text-main); max-height: 140px; overflow-y: auto; white-space: pre-wrap; font-family: var(--font-sans);"></div>
+          </div>
+
+          <div class="cyber-meta-cell">
+            <label>Domain Skills & Operational Protocols</label>
+            <div id="modalSkills" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="foot wrap">
+      <span>© {year} Herdi Agusthio · Software Engineer</span>
+      <a href="/showcase/autonomous-agent-office" class="back-link">[ READ ARCHITECTURE CASE STUDY → ]</a>
+    </footer>
+
+    <!-- Three.js 3D Virtual Office Bundle -->
+    <script is:inline src="/js/office3d.bundle.js"></script>
+
+    <!-- Interactive Client Script -->
+    <script is:inline>
+      // Sanitized Agent Roster (Zero private VPS credentials, Zero Telegram chat IDs, Zero internal paths)
+      const AGENTS = [
+        {
+          id: 'root',
+          name: 'LEADYA',
+          role: 'CEO & Chief Orchestrator',
+          avatar: '👑',
+          seat: 1,
+          model: 'Frontier Reasoning (agenticprojectcombo)',
+          state: 'Working',
+          room: 'Workspace',
+          currentTask: 'Orchestrating engineering workstreams & review gates',
+          recentActivity: 'Verified architecture review gate for Go AI verification stream',
+          mission: 'Executive orchestration between Founder intent and specialist engineering workforce. Decomposes high-leverage roadmaps, delegates implementation with isolated contexts, reviews technical outcomes, and enforces system integrity.',
+          skills: ['workstream-decomposition', 'delegation-protocol', 'cost-model-optimization', 'outcome-verification', 'memory-governance'],
+          colors: { hair: '#1d293c', skin: '#fed7aa', shirt: '#e6b34e', pants: '#1e3a8a' }
+        },
+        {
+          id: 'prime',
+          name: 'Prime',
+          role: 'Principal Engineer & Head of Eng',
+          avatar: '⚡',
+          seat: 2,
+          model: 'Smart High-Reasoning (gemini-3.1-pro-preview)',
+          state: 'Working',
+          room: 'Workspace',
+          currentTask: 'Authoring Go AI Verification Harness ADR & review gate',
+          recentActivity: 'Drafted ADR in second-brain/decisions for multi-threaded harness',
+          mission: 'Lead engineering excellence, author ADRs/RFCs, enforce architectural purity, manage technical task decomposition, and conduct rigorous code and MR reviews across Goder, Pixel, and Sysca.',
+          skills: ['architecture-governance', 'adr-rfc-authoring', 'code-review-gatekeeper', 'concurrency-design', 'domain-driven-design'],
+          colors: { hair: '#11151c', skin: '#e9b57d', shirt: '#5a8dee', pants: '#36475d' }
+        },
+        {
+          id: 'gosenior',
+          name: 'Goder',
+          role: 'Senior Polyglot Backend Engineer',
+          avatar: '🛠️',
+          seat: 3,
+          model: 'Smart High-Reasoning (gemini-3.1-pro-preview)',
+          state: 'Working',
+          room: 'Workspace',
+          currentTask: 'Implementing Go scatter-gather aggregator PoC',
+          recentActivity: 'Benchmarked table-driven test suite with zero race conditions (go test -race)',
+          mission: 'Implement, refactor, and maintain high-performance backend services, APIs, databases, worker pools, and system tools across Go, Python, TypeScript, and Rust with idiomatic design, explicit error handling, and zero lint errors.',
+          skills: ['go-concurrency', 'scatter-gather-apis', 'table-driven-tests', 'pprof-profiling', 'sqlite-wal-pgvector', 'zero-alloc-routines'],
+          colors: { hair: '#3b2a20', skin: '#c98e5a', shirt: '#93ca67', pants: '#344349' }
+        },
+        {
+          id: 'infraguard',
+          name: 'Sysca',
+          role: 'Infrastructure & DevOps Specialist',
+          avatar: '🛡️',
+          seat: 4,
+          model: 'Fast Standard (gemini-3.1-flash-lite-preview)',
+          state: 'Working',
+          room: 'Workspace',
+          currentTask: 'Auditing host memory headroom (free -m >= 500MB)',
+          recentActivity: 'Audited Caddy reverse proxy TLS handshakes and automated log rotations',
+          mission: 'Maintain 100% uptime, robust security, and optimal resource performance for the host VPS, Caddy reverse proxy, systemd services, and local inference routing. Enforces >= 500 MB RAM headroom invariant.',
+          skills: ['vps-telemetry', 'caddy-tls-proxy', 'systemd-lifecycle', 'memory-guardrail', 'network-hygiene', 'automated-backups'],
+          colors: { hair: '#2f4f3a', skin: '#f1c9a0', shirt: '#70bdcb', pants: '#374052' }
+        },
+        {
+          id: 'pixel',
+          name: 'Pixel',
+          role: 'Senior Frontend & UI/UX Specialist',
+          avatar: '🎨',
+          seat: 5,
+          model: 'Smart High-Reasoning (gemini-3.1-pro-preview)',
+          state: 'Working',
+          room: 'Workspace',
+          currentTask: 'Polishing Virtual Office Three.js shaders & tokens',
+          recentActivity: 'Optimized Astro SSG bundle size and Lighthouse accessibility scores (98+)',
+          mission: 'Design and build distinctive, production-grade frontend interfaces across modern frameworks (Astro, React, Next.js, Vue, Tailwind CSS, Three.js) — ensuring accessible, performant, visually unforgettable applications that reject generic AI aesthetics.',
+          skills: ['astro-ssg', 'threejs-isometric-rendering', 'tailwind-tokens', 'wcag-aa-accessibility', 'css-animations', 'lighthouse-95+'],
+          colors: { hair: '#6a4d8d', skin: '#fed7aa', shirt: '#f4a3b4', pants: '#4a3b2f' }
+        },
+        {
+          id: 'luna',
+          name: 'Luna',
+          role: 'Product Owner & Strategist',
+          avatar: '🌙',
+          seat: 6,
+          model: 'Fast Standard (gemini-3.1-flash-lite-preview)',
+          state: 'Standby',
+          room: 'Workspace',
+          currentTask: 'Synthesizing Go verification harness syllabus',
+          recentActivity: 'Compiled acceptance criteria and PRD milestone roadmap',
+          mission: 'Own product vision, feature prioritization (ROI), PRDs, roadmaps, and UX research synthesis. Bridge technical capabilities with high-leverage outcomes.',
+          skills: ['prd-authoring', 'backlog-prioritization', 'ux-journey-mapping', 'product-roadmaps', 'feature-roi-analysis'],
+          colors: { hair: '#8b5a2b', skin: '#dca06e', shirt: '#8f7ae6', pants: '#2f3a44' }
+        },
+        {
+          id: 'lexa',
+          name: 'Lexa',
+          role: 'Content & Narrative Specialist',
+          avatar: '✍️',
+          seat: 7,
+          model: 'Fast Standard (gemini-3.1-flash-lite-preview)',
+          state: 'Standby',
+          room: 'Lounge',
+          currentTask: 'Drafting Go AI Verification case study for thio.dev/blog',
+          recentActivity: 'Structured JSON-LD schema markup for engineering architecture series',
+          mission: 'Create and maintain technical copy, AI search optimization (AI SEO), JSON-LD schema, and technical blogging (thio.dev/blog). Guardian of Thio\'s authentic software engineering voice.',
+          skills: ['technical-blogging', 'ai-seo-optimization', 'json-ld-schema', 'architecture-case-studies', 'canonical-attribution'],
+          colors: { hair: '#b54b45', skin: '#f1c9a0', shirt: '#e76f51', pants: '#3d2f4a' }
+        },
+        {
+          id: 'caren',
+          name: 'Caren',
+          role: 'Executive Coordinator & Life Operations',
+          avatar: '💼',
+          seat: 8,
+          model: 'Balanced Standard (agenticprojectcombo)',
+          state: 'Standby',
+          room: 'Lounge',
+          currentTask: 'Coordinating engineering calendar & workout routines',
+          recentActivity: 'Synchronized weekly engineering milestones with high-intensity training schedule',
+          mission: 'Manage Thio\'s financial intelligence, health and fitness programs, and schedule operations as a proactive personal executive assistant.',
+          skills: ['calendar-coordination', 'financial-intelligence', 'habit-tracking', 'executive-ops', 'proactive-alerts'],
+          colors: { hair: '#c9a24a', skin: '#a8714a', shirt: '#4f9c7a', pants: '#36475d' }
+        }
+      ];
+
+      const LIVE_ACTIVITIES = [
+        { icon: '⚡', agent: 'Prime', role: 'Principal Engineer', action: 'Approved architecture review for Go AI harness', timeAgo: '2m ago' },
+        { icon: '🛠️', agent: 'Goder', role: 'Senior Go Engineer', action: 'Passed table-driven tests (go test -race ./...)', timeAgo: '5m ago' },
+        { icon: '🛡️', agent: 'Sysca', role: 'Infraguard / DevOps', action: 'VPS memory headroom verified (free -m >= 500MB)', timeAgo: '11m ago' },
+        { icon: '👑', agent: 'LEADYA', role: 'Chief Orchestrator', action: 'Synchronized sprint backlog and task dispatch queue', timeAgo: '18m ago' },
+        { icon: '🎨', agent: 'Pixel', role: 'Frontend & UI/UX', action: 'Audited WCAG AA color tokens for dark mode console', timeAgo: '24m ago' },
+        { icon: '✍️', agent: 'Lexa', role: 'Content Specialist', action: 'Synced architecture case study to thio.dev/showcase', timeAgo: '35m ago' },
+        { icon: '🌙', agent: 'Luna', role: 'Product Owner', action: 'Finalized 4-week Go learning syllabus specifications', timeAgo: '48m ago' },
+        { icon: '💼', agent: 'Caren', role: 'Executive Assistant', action: 'Scheduled deep-work blocks in developer calendar', timeAgo: '1h ago' }
+      ];
+
+      const CHANNELS = [
+        { name: '#engineering-architecture', target: 'Go systems, concurrency patterns, ADR review gate', status: 'ACTIVE' },
+        { name: '#tech-intelligence', target: 'AI breakthroughs, distributed systems radar', status: 'ACTIVE' },
+        { name: '#systems-reliability', target: 'VPS telemetry, Caddy proxy, memory guardrail', status: 'ACTIVE' },
+        { name: '#product-strategy', target: 'PRDs, backlog prioritization, user journey flows', status: 'ACTIVE' },
+        { name: '#content-narrative', target: 'Technical blogging, case studies, JSON-LD schema', status: 'ACTIVE' },
+        { name: '#executive-ops', target: 'Executive coordination, calendar, habits', status: 'ACTIVE' }
+      ];
+
+      let currentRoom = 'workspace';
+      let currentMode = '2D';
+      let office3DInitialized = false;
+
+      function renderPixelCharacterHtml(colors, state = 'idle') {
+        const c = colors || { hair: '#18181b', skin: '#fed7aa', shirt: '#3b82f6', pants: '#1e3a8a' };
+        return `
+          <div class="pixel-character state-${state.toLowerCase()}" style="--hair: ${c.hair}; --skin: ${c.skin}; --shirt: ${c.shirt}; --pants: ${c.pants};">
+            <span class="character-hair"></span>
+            <span class="character-head"><i></i><b></b></span>
+            <span class="character-torso"></span>
+            <span class="character-arm left"></span>
+            <span class="character-arm right"></span>
+            <span class="character-leg left"></span>
+            <span class="character-leg right"></span>
+          </div>
+        `;
+      }
+
+      function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+      }
+
+      function renderOffice2D() {
+        const workspaceStations = AGENTS.filter(a => a.room === 'Workspace');
+        const loungeStations = AGENTS.filter(a => a.room === 'Lounge');
+
+        // Render Hot Desks
+        const desksRowTop = document.getElementById('desksRowTop');
+        const desksRowBottom = document.getElementById('desksRowBottom');
+
+        const renderDeskCell = (deskNum) => {
+          const agent = workspaceStations.find(a => a.seat === deskNum);
+          const isOccupied = Boolean(agent);
+
+          return `
+            <div class="office-desk-cell" onclick="${isOccupied ? `openDossierModal('${agent.id}')` : ''}" title="${isOccupied ? `Workstation #${deskNum}: ${agent.name} (${agent.state})` : `Available Hot-Desk #${deskNum}`}">
+              ${
+                isOccupied
+                  ? `
+                <div class="desk-speech-bubble" title="${escapeHtml(agent.currentTask)}">
+                  <span class="speech-text">${escapeHtml(agent.currentTask)}</span>
+                  <span class="speech-badge badge-${agent.state.toLowerCase()}">${agent.state} · ${agent.name}</span>
+                </div>
+                ${renderPixelCharacterHtml(agent.colors, agent.state)}
+              `
+                  : ''
+              }
+              <div class="office-desk-furniture ${isOccupied ? 'occupied' : 'vacant'}">
+                <div class="monitor-screen">
+                  <div class="screen-content ${isOccupied ? 'screen-on' : 'screen-standby'}">
+                    ${isOccupied ? '<div class="code-stream"></div>' : '<div class="standby-dot"></div>'}
+                  </div>
+                  <div class="monitor-stand"></div>
+                </div>
+                <div class="desk-surface">
+                  <div class="keyboard"></div>
+                </div>
+                <div class="desk-legs">
+                  <div class="leg"></div>
+                  <div class="pc-tower"><span class="pc-led ${isOccupied ? 'blinking' : ''}"></span></div>
+                  <div class="leg"></div>
+                </div>
+                <div class="desk-chair ${isOccupied ? 'occupied' : ''}"></div>
+              </div>
+              <div class="desk-slot-label">Desk #${deskNum}${isOccupied ? ` · ${agent.name}` : ''}</div>
+            </div>
+          `;
+        };
+
+        if (desksRowTop) desksRowTop.innerHTML = [1, 2, 3, 4, 5, 6].map(renderDeskCell).join('');
+        if (desksRowBottom) desksRowBottom.innerHTML = [7, 8, 9, 10, 11, 12].map(renderDeskCell).join('');
+
+        // Lounge Rendering
+        const armchairSlot = document.getElementById('loungeArmchairSlot');
+        const sofaSlot = document.getElementById('loungeSofaCrew');
+
+        const leadAgent = loungeStations.find(a => a.id === 'root') || null;
+        const sofaAgents = loungeStations.filter(a => a.id !== leadAgent?.id);
+
+        if (armchairSlot) {
+          if (leadAgent) {
+            armchairSlot.innerHTML = `
+              <div style="position: relative; display: flex; flex-direction: column; align-items: center;" onclick="openDossierModal('${leadAgent.id}')" title="Inspect ${leadAgent.name} (Armchair)">
+                <div style="position: absolute; bottom: 36px; z-index: 10;">
+                  ${renderPixelCharacterHtml(leadAgent.colors, 'idle')}
+                </div>
+                <div class="lounge-armchair"></div>
+                <div class="seated-agent-tag" style="margin-top: 4px;">${leadAgent.name}</div>
+              </div>
+            `;
+          } else {
+            armchairSlot.innerHTML = `<div class="lounge-armchair" title="Reserved for Executive Lead"></div>`;
+          }
+        }
+
+        if (sofaSlot) {
+          sofaSlot.innerHTML = sofaAgents
+            .map(
+              a => `
+            <div class="lounge-seated-agent" onclick="openDossierModal('${a.id}')" title="Inspect ${a.name} (Standby on sofa)">
+              <div class="seated-char-wrap">
+                ${renderPixelCharacterHtml(a.colors, 'idle')}
+              </div>
+              <div class="seated-agent-tag">${a.name}</div>
+            </div>
+          `
+            )
+            .join('');
+        }
+
+        // Sidebar Roster Chips
+        const rosterChips = document.getElementById('agentRosterChips');
+        if (rosterChips) {
+          rosterChips.innerHTML = AGENTS.map(a => `
+            <div class="agent-chip-item" onclick="openDossierModal('${a.id}')" title="Inspect ${a.name}">
+              <span class="chip-avatar">${a.avatar}</span>
+              <div class="chip-details">
+                <strong>${a.name}</strong>
+                <small>${a.role}</small>
+              </div>
+              <span class="badge ${a.state === 'Working' ? 'active' : 'standby'}">${a.state}</span>
+            </div>
+          `).join('');
+        }
+
+        // Sidebar Live Activity
+        const activityList = document.getElementById('sidebarActivityList');
+        if (activityList) {
+          activityList.innerHTML = LIVE_ACTIVITIES.map(item => `
+            <div class="sidebar-activity-item">
+              <div class="activity-top">
+                <span class="activity-agent">${item.icon} ${item.agent}</span>
+                <span class="activity-time">${item.timeAgo}</span>
+              </div>
+              <div class="activity-action">${escapeHtml(item.action)}</div>
+            </div>
+          `).join('');
+        }
+
+        // Sidebar Channels
+        const channelsList = document.getElementById('sidebarChannelsList');
+        if (channelsList) {
+          channelsList.innerHTML = CHANNELS.map(c => `
+            <div class="sidebar-channel-row">
+              <div class="channel-left">
+                <div class="channel-dot"></div>
+                <div class="channel-info-wrap">
+                  <strong>${c.name}</strong>
+                  <small>${c.target}</small>
+                </div>
+              </div>
+              <span class="badge active" style="font-size: 9px;">CONNECTED</span>
+            </div>
+          `).join('');
+        }
+      }
+
+      function updateClockAndLighting() {
+        const now = new Date();
+        const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+        const wib = new Date(utc + 7 * 3600000);
+        const hours = String(wib.getHours()).padStart(2, '0');
+        const minutes = String(wib.getMinutes()).padStart(2, '0');
+        const timeStr = `${hours}:${minutes}`;
+
+        const clockEl = document.getElementById('clockDigits');
+        const loungeClockEl = document.querySelector('.clock-digits-lounge');
+        if (clockEl) clockEl.textContent = timeStr;
+        if (loungeClockEl) loungeClockEl.textContent = timeStr;
+
+        const isNight = wib.getHours() < 6 || wib.getHours() >= 18;
+        const dayNightPill = document.getElementById('officeDayNightPill');
+        if (dayNightPill) {
+          dayNightPill.textContent = isNight ? '🌙 nighttime' : '☀️ daytime';
+          dayNightPill.className = `day-night-chip ${isNight ? 'night' : 'day'}`;
+        }
+
+        const stages = document.querySelectorAll('.office-room-stage');
+        stages.forEach(st => {
+          if (isNight) st.classList.add('is-night');
+          else st.classList.remove('is-night');
+        });
+
+        if (office3DInitialized && window.Office3D) {
+          window.Office3D.update(AGENTS, isNight);
+        }
+      }
+
+      function switchRoom(targetRoom) {
+        currentRoom = targetRoom;
+        const wsEl = document.getElementById('officeWorkspaceRoom');
+        const loungeEl = document.getElementById('officeLoungeRoom');
+        const titleEl = document.getElementById('officeRoomTitle');
+        const countEl = document.getElementById('officeRoomCount');
+        const dotWs = document.getElementById('dotWorkspace');
+        const dotLg = document.getElementById('dotLounge');
+
+        if (targetRoom === 'workspace') {
+          if (wsEl) wsEl.style.display = 'block';
+          if (loungeEl) loungeEl.style.display = 'none';
+          if (titleEl) titleEl.textContent = 'Workspace';
+          if (countEl) countEl.textContent = AGENTS.filter(a => a.room === 'Workspace').length;
+          dotWs?.classList.add('active');
+          dotLg?.classList.remove('active');
+        } else {
+          if (wsEl) wsEl.style.display = 'none';
+          if (loungeEl) loungeEl.style.display = 'block';
+          if (titleEl) titleEl.textContent = 'Lounge';
+          if (countEl) countEl.textContent = AGENTS.filter(a => a.room === 'Lounge').length;
+          dotLg?.classList.add('active');
+          dotWs?.classList.remove('active');
+        }
+      }
+
+      function switchOfficeMode(mode) {
+        currentMode = mode;
+        const stage2D = document.getElementById('virtualOffice2DStage');
+        const stage3D = document.getElementById('virtualOffice3DStage');
+        const btn2D = document.getElementById('toggleView2D');
+        const btn3D = document.getElementById('toggleView3D');
+        const navWrap = document.getElementById('roomNavControlWrap');
+        const dotsWrap = document.getElementById('roomNavDotsWrap');
+
+        if (mode === '3D') {
+          btn2D?.classList.remove('active');
+          btn3D?.classList.add('active');
+          if (stage2D) stage2D.style.display = 'none';
+          if (stage3D) stage3D.style.display = 'block';
+          if (navWrap) navWrap.style.display = 'none';
+          if (dotsWrap) dotsWrap.style.display = 'none';
+
+          if (!office3DInitialized && window.Office3D) {
+            window.Office3D.init(stage3D, (station) => {
+              openDossierModal(station.id);
+            });
+            office3DInitialized = true;
+          }
+          updateClockAndLighting();
+        } else {
+          btn3D?.classList.remove('active');
+          btn2D?.classList.add('active');
+          if (stage3D) stage3D.style.display = 'none';
+          if (stage2D) stage2D.style.display = 'block';
+          if (navWrap) navWrap.style.display = 'flex';
+          if (dotsWrap) dotsWrap.style.display = 'flex';
+        }
+      }
+
+      function openDossierModal(agentId) {
+        const agent = AGENTS.find(a => a.id === agentId);
+        if (!agent) return;
+
+        const modal = document.getElementById('stationDetailModal');
+        if (!modal) return;
+
+        document.getElementById('modalAvatar').textContent = agent.avatar;
+        document.getElementById('modalAgentName').textContent = agent.name;
+        document.getElementById('modalAgentRole').textContent = agent.role;
+        document.getElementById('modalStateVal').textContent = agent.state;
+        document.getElementById('modalRoomVal').textContent = `${agent.room} (Desk #${agent.seat})`;
+        document.getElementById('modalModelVal').textContent = agent.model;
+        document.getElementById('modalCurrentTask').textContent = agent.currentTask;
+        document.getElementById('modalRecentActivity').textContent = agent.recentActivity;
+        document.getElementById('modalMission').textContent = agent.mission;
+
+        const skillsEl = document.getElementById('modalSkills');
+        if (skillsEl) {
+          skillsEl.innerHTML = agent.skills.map(s => `
+            <span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 11px;">#${s}</span>
+          `).join('');
+        }
+
+        modal.style.display = 'flex';
+      }
+
+      function closeDossierModal() {
+        const modal = document.getElementById('stationDetailModal');
+        if (modal) modal.style.display = 'none';
+      }
+
+      // Event Bindings
+      document.addEventListener('DOMContentLoaded', () => {
+        renderOffice2D();
+        updateClockAndLighting();
+        setInterval(updateClockAndLighting, 5000);
+
+        document.getElementById('officeNavPrev')?.addEventListener('click', () => {
+          switchRoom(currentRoom === 'workspace' ? 'lounge' : 'workspace');
+        });
+        document.getElementById('officeNavNext')?.addEventListener('click', () => {
+          switchRoom(currentRoom === 'workspace' ? 'lounge' : 'workspace');
+        });
+        document.getElementById('dotWorkspace')?.addEventListener('click', () => switchRoom('workspace'));
+        document.getElementById('dotLounge')?.addEventListener('click', () => switchRoom('lounge'));
+
+        document.getElementById('toggleView2D')?.addEventListener('click', () => switchOfficeMode('2D'));
+        document.getElementById('toggleView3D')?.addEventListener('click', () => switchOfficeMode('3D'));
+
+        document.getElementById('closeStationModalBtn')?.addEventListener('click', closeDossierModal);
+        document.getElementById('stationDetailModal')?.addEventListener('click', (e) => {
+          if (e.target.id === 'stationDetailModal') closeDossierModal();
+        });
+
+        document.getElementById('refreshOfficeBtn')?.addEventListener('click', () => {
+          renderOffice2D();
+          updateClockAndLighting();
+        });
+      });
+
+      // Global hook for inline onclicks
+      window.openDossierModal = openDossierModal;
+      window.switchOfficeMode = switchOfficeMode;
+    </script>
+
+    <style>
+      .topbar-inner {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .active-nav {
+        font-family: var(--font-mono);
+        font-size: 0.9rem;
+        color: var(--gray-100);
+        font-weight: 600;
+      }
+      .main-container {
+        padding-top: 2rem;
+        padding-bottom: 4rem;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+      .office-page-hero {
+        border-bottom: 1px solid var(--gray-20);
+        padding-bottom: 1.5rem;
+        margin-bottom: 2rem;
+      }
+      .meta-status {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.75rem;
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        color: var(--gray-60);
+        margin-bottom: 1rem;
+      }
+      .status-indicator {
+        width: 8px;
+        height: 8px;
+        background: #10b981;
+        border-radius: 50%;
+        box-shadow: 0 0 8px #10b981;
+      }
+      .page-title {
+        font-family: var(--font-sans);
+        font-size: clamp(2rem, 4vw, 2.75rem);
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        margin-bottom: 0.5rem;
+      }
+      .hero-desc {
+        color: var(--gray-60);
+        font-size: 1.05rem;
+        max-width: 800px;
+        line-height: 1.6;
+      }
+
+      /* 2-Column Office Layout */
+      .virtual-office-layout {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 24px;
+        align-items: start;
+      }
+
+      @media (max-width: 1080px) {
+        .virtual-office-layout {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .virtual-office-stage-col {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .virtual-office-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .office-sidebar-card {
+        background: #090e17;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 16px;
+      }
+
+      .sidebar-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 14px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .sidebar-card-title {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        font-weight: 700;
+        color: #f8fafc;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      /* Roster Chips */
+      .agent-chip-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .agent-chip-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .agent-chip-item:hover {
+        background: rgba(56, 189, 248, 0.08);
+        border-color: rgba(56, 189, 248, 0.3);
+        transform: translateX(2px);
+      }
+
+      .chip-avatar {
+        font-size: 18px;
+      }
+
+      .chip-details {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .chip-details strong {
+        font-size: 13px;
+        color: #f8fafc;
+      }
+
+      .chip-details small {
+        font-size: 11px;
+        color: var(--gray-60);
+      }
+
+      /* Activity List */
+      .live-activity-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .sidebar-activity-item {
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 8px;
+        border-left: 2px solid #38bdf8;
+      }
+
+      .activity-top {
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px;
+        margin-bottom: 4px;
+      }
+
+      .activity-agent {
+        font-family: var(--font-mono);
+        font-weight: 700;
+        color: #f8fafc;
+      }
+
+      .activity-time {
+        color: var(--gray-50);
+        font-family: var(--font-mono);
+      }
+
+      .activity-action {
+        font-size: 12px;
+        color: var(--gray-70);
+        line-height: 1.4;
+      }
+
+      /* Channel Rows */
+      .sidebar-channels-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .sidebar-channel-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 10px;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.04);
+      }
+
+      .channel-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .channel-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #10b981;
+      }
+
+      .channel-info-wrap {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .channel-info-wrap strong {
+        font-size: 12px;
+        font-family: var(--font-mono);
+        color: #f8fafc;
+      }
+
+      .channel-info-wrap small {
+        font-size: 10px;
+        color: var(--gray-60);
+      }
+
+      .back-link {
+        font-family: var(--font-mono);
+        font-size: 0.85rem;
+        color: var(--gray-60);
+        text-decoration: none;
+      }
+      .back-link:hover {
+        color: var(--gray-100);
+      }
+    </style>
+  </body>
+</html>

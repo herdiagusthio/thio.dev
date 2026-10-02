@@ -1,0 +1,287 @@
+---
+import '../styles/global.css';
+
+const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About Operator — thio.dev</title>
+    <meta name="description" content="Software Engineer specializing in high-concurrency Go systems and distributed architecture." />
+    <link rel="icon" href={faviconHref} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="wrap topbar-inner">
+        <span class="brand"><a href="/" class="nav-brand" style="text-decoration:none; color:inherit;">thio.dev</a></span>
+        <nav class="nav-links">
+          <a href="/showcase">Showcase</a>
+          <a href="/office">Office</a>
+          <a href="/blog">Blog</a>
+          <a href="/about" class="active-nav">About</a>
+          <a href="/contact">Contact</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="wrap main-container">
+      <section class="page-hero">
+        <div class="meta-status">
+          <span class="status-indicator"></span>
+          <span class="mono-label">[SYS_OPERATOR: BIO_DATA]</span>
+        </div>
+        <h1 class="page-title">Herdi Agusthio Putra Darmawan</h1>
+        <div class="prose">
+          <p>
+            I am a Software Engineer based in West Java, Indonesia, currently building high-performance systems at <strong>Flip</strong>.
+          </p>
+          <p>
+            With nearly a decade of experience across leading tech companies (ByteDance, Tokopedia, GoTo), my core focus is on architectural purity, distributed systems, and orchestrating complex backend services.
+          </p>
+          <p>
+            This site serves as my system console—a durable knowledge base and architecture lab where I document production blueprints and engineering reflections.
+          </p>
+        </div>
+      </section>
+
+      <div class="content-grid">
+        <!-- Skills -->
+        <section class="content-section">
+          <h2 class="section-head">Core Protocols (Skills)</h2>
+          <div class="skills-grid">
+            <div class="skill-block">
+              <h3 class="skill-title">[ LANGUAGES / FRAMEWORKS ]</h3>
+              <p class="skill-list">Go, Java (gRPC), Ruby on Rails</p>
+            </div>
+            <div class="skill-block">
+              <h3 class="skill-title">[ DATABASES ]</h3>
+              <p class="skill-list">PostgreSQL, Redis</p>
+            </div>
+            <div class="skill-block">
+              <h3 class="skill-title">[ MESSAGE BROKERS ]</h3>
+              <p class="skill-list">NSQ</p>
+            </div>
+            <div class="skill-block">
+              <h3 class="skill-title">[ EDUCATION ]</h3>
+              <p class="skill-list">B.S. Computer Science — IPB</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Experience -->
+        <section class="content-section">
+          <h2 class="section-head">Execution History</h2>
+          
+          <div class="timeline">
+            <!-- Flip -->
+            <div class="timeline-item">
+              <div class="timeline-meta">
+                <span class="timeline-date">[ 2026 - PRES ]</span>
+              </div>
+              <div class="timeline-content">
+                <h3 class="timeline-role">Software Engineer</h3>
+                <p class="timeline-company">Flip</p>
+                <p class="timeline-desc">Part of the Lifestyle Team.</p>
+              </div>
+            </div>
+
+            <!-- ByteDance / GoTo Logistics -->
+            <div class="timeline-item">
+              <div class="timeline-meta">
+                <span class="timeline-date">[ 2024 - 2025 ]</span>
+              </div>
+              <div class="timeline-content">
+                <h3 class="timeline-role">Software Engineer</h3>
+                <p class="timeline-company">ByteDance & GoTo Logistics</p>
+                <p class="timeline-desc">Global E-Commerce – Supply Chain and Logistics (Dilayani Tokopedia).</p>
+              </div>
+            </div>
+
+            <!-- Tokopedia / GoTo Financial -->
+            <div class="timeline-item">
+              <div class="timeline-meta">
+                <span class="timeline-date">[ 2022 - 2024 ]</span>
+              </div>
+              <div class="timeline-content">
+                <h3 class="timeline-role">Software Engineer</h3>
+                <p class="timeline-company">Tokopedia & GoTo Financial</p>
+                <p class="timeline-desc">Core Payment team and GoPay Merchant Gateway.</p>
+              </div>
+            </div>
+
+            <!-- Nusantara Baskara Jaya -->
+            <div class="timeline-item">
+              <div class="timeline-meta">
+                <span class="timeline-date">[ 2016 - 2021 ]</span>
+              </div>
+              <div class="timeline-content">
+                <h3 class="timeline-role">Backend Developer</h3>
+                <p class="timeline-company">Nusantara Baskara Jaya</p>
+                <p class="timeline-desc">Ruby on Rails developer for ilmupedia.co.id.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="foot wrap">
+      <span>© 2026 Herdi Agusthio</span>
+      <a href="/" class="back-link">[ ← RETURN TO CONSOLE ]</a>
+    </footer>
+  </body>
+</html>
+
+<style>
+  .topbar-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .active-nav {
+    color: var(--gray-100);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    font-weight: 600;
+  }
+  .main-container {
+    padding-top: 2rem;
+    padding-bottom: 4rem;
+    max-width: 800px;
+  }
+  .page-hero {
+    border-bottom: 1px dashed var(--gray-30);
+    padding-bottom: 2rem;
+    margin-bottom: 3rem;
+  }
+  .meta-status {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--gray-60);
+    margin-bottom: 1rem;
+  }
+  .status-indicator {
+    width: 8px;
+    height: 8px;
+    background: var(--gray-100);
+    border-radius: 50%;
+  }
+  .page-title {
+    font-family: var(--font-sans);
+    font-size: clamp(2.2rem, 5vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: var(--gray-100);
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+  }
+  .prose {
+    font-family: var(--font-sans);
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: var(--gray-80);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .prose strong {
+    color: var(--gray-100);
+  }
+  
+  .content-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 4rem;
+  }
+  .section-head {
+    font-family: var(--font-sans);
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.02em;
+    border-bottom: 2px solid var(--gray-20);
+    padding-bottom: 0.5rem;
+  }
+
+  .skills-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+  @media (max-width: 600px) {
+    .skills-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .skill-title {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--gray-60);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+  .skill-list {
+    font-family: var(--font-sans);
+    font-size: 1.05rem;
+    color: var(--gray-90);
+  }
+
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+  .timeline-item {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 1.5rem;
+  }
+  @media (max-width: 600px) {
+    .timeline-item {
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+    }
+  }
+  .timeline-meta {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--gray-50);
+    padding-top: 0.2rem;
+  }
+  .timeline-role {
+    font-family: var(--font-sans);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--gray-100);
+    margin-bottom: 0.25rem;
+  }
+  .timeline-company {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    color: var(--gray-60);
+    margin-bottom: 1rem;
+  }
+  .timeline-desc {
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--gray-70);
+  }
+  
+  .back-link {
+    text-decoration: none;
+    color: var(--gray-80);
+    font-family: var(--font-mono);
+  }
+  .back-link:hover {
+    color: var(--gray-100);
+  }
+</style>

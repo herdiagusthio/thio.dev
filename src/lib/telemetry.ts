@@ -11,9 +11,9 @@ export function getPulseData() {
   return {
     active: true,
     signal: 'SYSTEM ACTIVE',
-    auth_level: 'PRINCIPAL',
+    auth_level: 'SYS_ADMIN',
     timestamp: new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
-    host: 'VPS 103.217.144.64',
+    host: 'VPS-MAIN',
     proxy: 'Caddy v2',
     runtime: 'Go 1.23 / Bun 1.4 / Astro SSG',
     memoryGuard: 'RAM <= 1.9GB (Headroom >= 500MB)',

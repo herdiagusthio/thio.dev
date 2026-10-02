@@ -45,14 +45,14 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
   <body>
     <header class="topbar">
       <div class="wrap topbar-inner">
+        <span class="brand"><a href="/" class="nav-brand" style="text-decoration:none; color:inherit;">thio.dev</a></span>
         <nav class="nav-links">
-          <a href="/" class="nav-brand">← System Console</a>
-          <span class="sep">/</span>
-          <span class="active-nav">Blog</span>
-          <span class="sep">/</span>
-          <a href="/showcase" class="nav-brand">Showcase</a>
+          <a href="/showcase">Showcase</a>
+          <a href="/office">Office</a>
+          <a href="/blog" class="active-nav">Blog</a>
+          <a href="/about">About</a>
+          <a href="/contact">Contact</a>
         </nav>
-        <span class="topbar-tag">[ENGINEERING ESSAYS &amp; REFLECTIONS]</span>
       </div>
     </header>
 
@@ -94,7 +94,7 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
     </main>
 
     <footer class="foot wrap">
-      <span>© 2026 Herdi Agusthio · Principal Software Engineer</span>
+      <span>© 2026 Herdi Agusthio · Software Engineer</span>
       <a href="/" class="back-link">[ ← RETURN TO CONSOLE ]</a>
     </footer>
   </body>
@@ -162,7 +162,7 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
   }
   .blog-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
     gap: 2rem;
   }
   .blog-card {
