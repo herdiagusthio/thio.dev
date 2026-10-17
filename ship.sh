@@ -1,16 +1,15 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
-# Promotion (Goder placeholder/logic)
-echo "Promoting..."
-# Goder promotion logic would go here
-
-# Build
-echo "Building..."
+echo "=== [1/2] Syncing second-brain content & building Astro SSG ==="
 npm run build
 
-# Deploy (Sysca/Local)
-echo "Deploying..."
+if [ ! -f "dist/index.html" ] || [ ! -f "dist/k8s/index.html" ]; then
+  echo "ERROR: Build verification failed (missing dist/index.html or dist/k8s/index.html)"
+  exit 1
+fi
+
+echo "=== [2/2] Deploying dist/ to /var/www/thio.dev/ ==="
 rsync -avz --delete dist/ /var/www/thio.dev/
 
-echo "Done."
+echo "=== Deployment complete ==="

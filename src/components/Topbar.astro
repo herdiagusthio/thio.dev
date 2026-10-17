@@ -1,0 +1,75 @@
+---
+export interface Props {
+  active?: 'home' | 'showcase' | 'office' | 'blog' | 'about' | 'contact';
+  wide?: boolean;
+}
+
+const { active = 'home', wide = false } = Astro.props;
+---
+<header class="topbar">
+  <div class:list={['wrap', 'topbar-inner', { 'wrap-wide': wide }]}>
+    <span class="brand">
+      <a href="/" class="nav-brand">
+        <span class="brand-dot"></span>thio.dev
+      </a>
+    </span>
+    <nav class="nav-links" aria-label="Primary Navigation">
+      <a href="/showcase" class:list={[{ 'active-nav': active === 'showcase' }]}>Showcase</a>
+      <a href="/office" class:list={[{ 'active-nav': active === 'office' }]}>Office</a>
+      <a href="/blog" class:list={[{ 'active-nav': active === 'blog' }]}>Blog</a>
+      <a href="/k8s/" class="nav-lab-pill" title="KubeQuest Interactive Kubernetes Odyssey">KubeQuest ☸️</a>
+      <a href="/about" class:list={[{ 'active-nav': active === 'about' }]}>About</a>
+      <a href="/contact" class:list={[{ 'active-nav': active === 'contact' }]}>Contact</a>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .topbar-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+  .wrap-wide {
+    max-width: 1400px;
+  }
+  .nav-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: var(--gray-100);
+    transition: opacity 0.2s;
+  }
+  .nav-brand:hover {
+    opacity: 0.85;
+  }
+  .brand-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.7);
+  }
+  .active-nav {
+    color: var(--gray-100) !important;
+    font-weight: 600;
+    border-bottom: 2px solid var(--gray-100);
+    padding-bottom: 2px;
+  }
+  .nav-lab-pill {
+    font-size: 0.78rem;
+    padding: 0.2rem 0.55rem;
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    background: rgba(56, 189, 248, 0.08);
+    color: #38bdf8 !important;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+  .nav-lab-pill:hover {
+    background: rgba(56, 189, 248, 0.18);
+    border-color: #38bdf8;
+    color: #ffffff !important;
+  }
+</style>

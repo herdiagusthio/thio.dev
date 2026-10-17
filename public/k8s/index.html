@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>KubeQuest — The Fun Interactive Kubernetes Odyssey</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☸️</text></svg>">
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: #111827;
+      --card-border: #1f2937;
+      --accent: #326ce5;
+      --accent-light: #60a5fa;
+      --accent-glow: rgba(50, 108, 229, 0.25);
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --code-bg: #030712;
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      touch-action: pan-y;
+    }
+
+    #app {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    /* Top Header */
+    header {
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--card-border);
+      background: rgba(17, 24, 39, 0.85);
+      backdrop-filter: blur(12px);
+      z-index: 20;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 17px;
+      color: #fff;
+    }
+
+    .brand span {
+      background: linear-gradient(135deg, #326ce5, #38bdf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .progress-bar-container {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: rgba(255,255,255,0.08);
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #326ce5, #00d2ff);
+      transition: width 0.3s ease;
+    }
+
+    .header-btns {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .icon-btn {
+      background: transparent;
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .icon-btn:hover, .icon-btn:active {
+      background: rgba(255,255,255,0.08);
+      border-color: var(--accent);
+    }
+
+    /* Slide Content Viewport */
+    #slide-viewport {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 20px 16px 90px;
+      position: relative;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .slide-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 24px 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(14px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .badge-chapter {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: var(--accent-glow);
+      color: var(--accent-light);
+      border: 1px solid rgba(50, 108, 229, 0.4);
+      margin-bottom: 12px;
+    }
+
+    h1.slide-title {
+      font-size: 24px;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 14px;
+      color: #fff;
+    }
+
+    p.lead {
+      font-size: 15px;
+      line-height: 1.6;
+      color: #d1d5db;
+      margin-bottom: 18px;
+    }
+
+    .story-box {
+      background: rgba(50, 108, 229, 0.1);
+      border-left: 4px solid var(--accent);
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #93c5fd;
+      margin-bottom: 18px;
+    }
+
+    .interactive-diagram {
+      background: var(--code-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      margin: 18px 0;
+      text-align: center;
+    }
+
+    .diagram-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .diagram-item {
+      background: #1f2937;
+      border: 1px solid #374151;
+      padding: 12px 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .diagram-item:hover, .diagram-item.active {
+      border-color: #38bdf8;
+      background: rgba(56, 189, 248, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .diagram-item .icon { font-size: 24px; margin-bottom: 4px; }
+    .diagram-item .label { font-size: 12px; font-weight: 600; color: #f3f4f6; }
+
+    .diagram-detail {
+      margin-top: 12px;
+      padding: 10px;
+      background: #111827;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #38bdf8;
+      border: 1px dashed #374151;
+    }
+
+    .key-points {
+      list-style: none;
+      margin: 16px 0;
+    }
+
+    .key-points li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 12px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #e5e7eb;
+    }
+
+    .key-points li span.icon {
+      font-size: 18px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* Code block styling */
+    pre.code-card {
+      background: var(--code-bg);
+      border: 1px solid #1f2937;
+      border-radius: 10px;
+      padding: 14px;
+      font-family: 'SF Mono', Consolas, Monaco, monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #38bdf8;
+      overflow-x: auto;
+      margin: 16px 0;
+      white-space: pre;
+    }
+
+    /* Interactive Quiz Card */
+    .quiz-card {
+      margin-top: 16px;
+      padding: 16px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid #374151;
+      border-radius: 12px;
+    }
+
+    .quiz-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #facc15;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .quiz-opt {
+      background: #1f2937;
+      border: 1px solid #374151;
+      color: #e5e7eb;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .quiz-opt:hover { background: #374151; }
+    .quiz-opt.correct { background: rgba(16, 185, 129, 0.2); border-color: #10b981; color: #6ee7b7; font-weight: 600; }
+    .quiz-opt.wrong { background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #fca5a5; }
+
+    .quiz-feedback {
+      margin-top: 10px;
+      font-size: 12px;
+      line-height: 1.4;
+      display: none;
+    }
+
+    /* Bottom Navigation Bar */
+    nav.bottom-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding: 12px 16px;
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
+      background: rgba(17, 24, 39, 0.95);
+      border-top: 1px solid var(--card-border);
+      backdrop-filter: blur(16px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 30;
+    }
+
+    .nav-btn {
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-prev {
+      background: #1f2937;
+      color: #d1d5db;
+    }
+
+    .btn-prev:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .btn-next {
+      background: linear-gradient(135deg, #326ce5, #0284c7);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(50, 108, 229, 0.4);
+    }
+
+    .btn-next:active {
+      transform: scale(0.97);
+    }
+
+    .slide-indicator {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    /* Drawer / Table of Contents */
+    .drawer-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .drawer-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .drawer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 85%;
+      max-width: 380px;
+      height: 100%;
+      background: #111827;
+      border-right: 1px solid var(--card-border);
+      z-index: 101;
+      transform: translateX(-100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+    }
+
+    .drawer.open {
+      transform: translateX(0);
+    }
+
+    .drawer-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .drawer-header h3 { font-size: 16px; font-weight: 700; color: #fff; }
+
+    .drawer-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+    }
+
+    .drawer-item {
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #9ca3af;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 4px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .drawer-item:hover, .drawer-item.active {
+      background: rgba(50, 108, 229, 0.15);
+      color: #60a5fa;
+      font-weight: 600;
+    }
+
+    .drawer-item .num {
+      font-size: 11px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #1f2937;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #d1d5db;
+    }
+
+    .resume-toast {
+      position: absolute;
+      top: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(16, 185, 129, 0.95);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 30px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+      z-index: 50;
+      animation: toastIn 0.3s ease, toastOut 0.3s ease 3s forwards;
+    }
+
+    @keyframes toastIn { from { opacity: 0; transform: translate(-50%, -10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+    @keyframes toastOut { to { opacity: 0; transform: translate(-50%, -10px); pointer-events: none; } }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header>
+      <div class="brand">
+        <span style="font-size: 22px;">☸️</span>
+        <div>Kube<span>Quest</span></div>
+      </div>
+      <div class="header-btns">
+        <button class="icon-btn" id="btn-toc" title="Chapters">📑</button>
+        <button class="icon-btn" id="btn-restart" title="Reset Progress">🔄</button>
+      </div>
+      <div class="progress-bar-container">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+    </header>
+
+    <!-- Slide Viewport -->
+    <main id="slide-viewport">
+      <div id="slide-container"></div>
+    </main>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-bar">
+      <button class="nav-btn btn-prev" id="btn-prev">◀ Prev</button>
+      <div class="slide-indicator" id="slide-indicator">1 / 25</div>
+      <button class="nav-btn btn-next" id="btn-next">Next ▶</button>
+    </nav>
+
+    <!-- Drawer TOC -->
+    <div class="drawer-overlay" id="drawer-overlay"></div>
+    <aside class="drawer" id="drawer">
+      <div class="drawer-header">
+        <h3>🗺️ Flight Plan / Modules</h3>
+        <button class="icon-btn" id="btn-close-drawer">✕</button>
+      </div>
+      <div class="drawer-list" id="drawer-list"></div>
+    </aside>
+
+    <div id="toast-slot"></div>
+  </div>
+
+  <script>
+    // --- Course Slides Definition ---
+    const slides = [
+      // ACT I: BASICS & CONTAINER ROOTS
+      {
+        chapter: "Module 1: The Container Horizon",
+        title: "Welcome to KubeQuest ☸️",
+        lead: "You are embarking on an interactive journey to master Kubernetes from zero to cloud-native architect. Optimized for learning anywhere on your phone!",
+        story: "💡 Fun Metaphor: Imagine you run a cargo shipping company. You packed your cargo into standardized containers (Docker). But who steers the ship when storms hit? Who replaces damaged containers automatically? That ship captain is Kubernetes (K8s)!",
+        keyPoints: [
+          { icon: "📦", text: "Containers pack apps and dependencies into portable units." },
+          { icon: "⚓", text: "Kubernetes (Greek for 'Helmsman' or 'Pilot') automates deploying, scaling, and managing containerized applications." },
+          { icon: "💾", text: "Your progress is saved automatically. Resume reading or quizzes anytime right on your phone!" }
+        ]
+      },
+      {
+        chapter: "Module 1: The Container Horizon",
+        title: "Why Containers Aren't Enough",
+        lead: "Running `docker run` on a VPS is easy. Running 200 services across 10 servers with auto-failover and zero downtime is a nightmare.",
+        story: "In raw Docker, if server #3 loses power at 3:00 AM, your apps on it stay dead until you wake up. Kubernetes constantly watches and resurrects them on healthy servers in seconds.",
+        keyPoints: [
+          { icon: "💥", text: "Host Crash Resilience: Automatic node failure detection and pod relocation." },
+          { icon: "🔄", text: "Zero-Downtime Rollouts: Canary & Rolling updates without dropping user connections." },
+          { icon: "📈", text: "Horizontal Autoscaling: Spin up more replicas when traffic spikes, scale to zero when idle." }
+        ],
+        quiz: {
+          question: "What is the primary role of a container orchestrator like Kubernetes?",
+          options: [
+            "Compile code into binary executables",
+            "Automate deployment, scaling, healing, and networking of containers",
+            "Replace Linux kernel namespaces",
+            "Act as a physical hardware hypervisor"
+          ],
+          answer: 1,
+          explanation: "Correct! Kubernetes acts as an operating system for your cluster, orchestrating distributed container workloads."
+        }
+      },
+      {
+        chapter: "Module 1: The Container Horizon",
+        title: "The Paradigm Shift: Pets vs. Cattle 🐾🐮",
+        lead: "Traditional server management treated servers like Pets. Cloud-native architecture treats them like Cattle.",
+        story: "If your pet cat 'Snowball' gets sick, you take her to the vet and nurse her back to health. If cow #42 in a herd gets sick, you replace it without mourning. Cloud-native servers & containers are cattle: ephemeral and disposable.",
+        keyPoints: [
+          { icon: "🐶", text: "Pets: Handcrafted servers, static IPs, snowflake configurations, manual SSH fixes." },
+          { icon: "🐄", text: "Cattle: Identical worker nodes, automated replacement, immutable images, stateless instances." },
+          { icon: "🎯", text: "Invariant: Never fall in love with a container or a node. They can die anytime!" }
+        ]
+      },
+      {
+        chapter: "Module 1: The Container Horizon",
+        title: "The Atomic Unit: The Pod 🫘",
+        lead: "Surprise: Kubernetes does NOT run individual Docker containers directly! The smallest deployable unit in K8s is a Pod.",
+        story: "Think of a Pod like a pea pod holding one or more peas (containers). Containers in the same pod share the exact same network namespace (localhost) and storage volumes.",
+        keyPoints: [
+          { icon: "🌐", text: "Single IP per Pod: Every pod gets its own unique IP within the cluster." },
+          { icon: "🤝", text: "Sidecar Pattern: Main app container + helper container (logging, proxy, sync) talking via localhost." },
+          { icon: "⚠️", text: "Ephemeral Nature: When a pod dies, its IP changes. Never hardcode Pod IPs!" }
+        ],
+        diagram: {
+          title: "Tap an element inside the Pod:",
+          items: [
+            { icon: "🚀", label: "App Container", desc: "Your primary web server or API binary running in its container." },
+            { icon: "🕵️", label: "Sidecar Container", desc: "Helper container (e.g. log shipper, envoy proxy, cache syncer)." },
+            { icon: "🖧", label: "Shared Localhost", desc: "Containers in the same pod communicate using 127.0.0.1 with zero network hops!" },
+            { icon: "💾", label: "Shared Volume", desc: "Storage mounted into both containers for fast file exchange." }
+          ]
+        }
+      },
+      {
+        chapter: "Module 2: Cluster Architecture",
+        title: "The Control Plane (The Brains) 🧠",
+        lead: "A Kubernetes cluster is divided into two distinct planes: the Control Plane (masters) and Worker Nodes.",
+        story: "The Control Plane is the bridge of the starship. It makes global decisions, detects failures, and directs workers.",
+        keyPoints: [
+          { icon: "📡", text: "kube-apiserver: The only front door. Everything (kubectl, controllers, nodes) talks via REST API." },
+          { icon: "🗄️", text: "etcd: The single source of truth. Highly consistent, distributed key-value store (Raft consensus)." },
+          { icon: "🧩", text: "kube-scheduler: Matches unscheduled pods to optimal worker nodes based on resources & affinity." },
+          { icon: "⚙️", text: "kube-controller-manager: The feedback engine running NodeController, ReplicaController, etc." }
+        ],
+        diagram: {
+          title: "Control Plane Components:",
+          items: [
+            { icon: "🚪", label: "API Server", desc: "Exposes REST endpoints, validates authn/authz, updates etcd." },
+            { icon: "💾", label: "etcd", desc: "Distributed raft database storing complete cluster state." },
+            { icon: "🧭", label: "Scheduler", desc: "Decides WHICH node gets WHICH pod based on CPU, RAM, & affinity." },
+            { icon: "🔄", label: "Controllers", desc: "Continuously drives actual state toward desired state." }
+          ]
+        }
+      },
+      {
+        chapter: "Module 2: Cluster Architecture",
+        title: "Worker Nodes (The Muscle) 💪",
+        lead: "Worker nodes are the virtual machines or bare-metal servers that actually run your application pods.",
+        story: "Every worker node runs three vital agents to obey commands issued by the master Control Plane.",
+        keyPoints: [
+          { icon: "👮", text: "kubelet: The node captain. Takes PodSpecs from API server and ensures containers are running healthy." },
+          { icon: "🚦", text: "kube-proxy: The network traffic cop. Manages IP routing rules (iptables / IPVS) for Kubernetes Services." },
+          { icon: "📦", text: "Container Runtime (CRI): containerd or CRI-O that pulls images and runs Linux namespaces/cgroups." }
+        ],
+        quiz: {
+          question: "Which component on a worker node directly interacts with the container runtime to start/stop pods?",
+          options: [
+            "kube-proxy",
+            "kube-scheduler",
+            "kubelet",
+            "etcd"
+          ],
+          answer: 2,
+          explanation: "Correct! The kubelet is the primary node agent that watches for PodSpecs from the API Server and drives container creation."
+        }
+      },
+      {
+        chapter: "Module 2: Cluster Architecture",
+        title: "The Magic: The Reconciliation Loop ♾️",
+        lead: "Kubernetes is strictly Declarative, not Imperative. You describe the DESIRED state; K8s maintains it forever.",
+        story: "In imperative programming: 'Start container X'. In declarative Kubernetes: 'I declare there should always be 3 replicas of X'. If one crashes, K8s observes Actual (2) != Desired (3) and immediately launches 1 more.",
+        code: `// The core mental model of Kubernetes:
+for {
+    desired = getDesiredState() // from etcd via YAML
+    actual  = getActualState()  // from worker nodes
+    if actual != desired {
+        reconcile(actual, desired)
+    }
+    sleep(interval)
+}`,
+        keyPoints: [
+          { icon: "📋", text: "Desired State: Manifests written in YAML or Helm charts committed to Git." },
+          { icon: "👁️", text: "Observed State: Real-time telemetry from Kubelets and health probes." },
+          { icon: "⚡", text: "Self-Healing: Automatic drift detection and corrective action without human paging." }
+        ]
+      },
+      {
+        chapter: "Module 3: Workload Primitives",
+        title: "Deployments & ReplicaSets 🚀",
+        lead: "Never deploy raw Pods in production! If a bare pod dies, it stays dead. Always wrap pods in a Deployment.",
+        story: "A Deployment manages ReplicaSets, which in turn manage Pods. It enables automated zero-downtime rolling updates and instant rollbacks with `kubectl rollout undo`.",
+        code: `apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+      - name: api
+        image: nginx:alpine`,
+        keyPoints: [
+          { icon: "🛡️", text: "Desired Replicas: Guarantees N instances are always running." },
+          { icon: "🔄", text: "Rolling Updates: Spins up Pod v2, verifies health, then terminates Pod v1." },
+          { icon: "⏪", text: "Rollback History: One command reverts instantly if bug is detected in production." }
+        ]
+      },
+      {
+        chapter: "Module 3: Workload Primitives",
+        title: "StatefulSets & DaemonSets 💾",
+        lead: "Not everything is a stateless web API. Some apps need sticky identities, ordered startups, or node-level agents.",
+        story: "Deployments give pods random names like `web-7d4f9b-xk2`. But databases (PostgreSQL, Kafka) need stable names and persistent storage binding. Enter StatefulSets!",
+        keyPoints: [
+          { icon: "🏛️", text: "StatefulSet: Deterministic names (db-0, db-1), dedicated PersistentVolumes that survive pod deletion, ordered startup." },
+          { icon: "🛰️", text: "DaemonSet: Guarantees EXACTLY ONE pod runs on every single worker node (ideal for Log collectors, Node monitors, CNI agents)." },
+          { icon: "⏱️", text: "Job & CronJob: Run batch workloads to completion (data migrations, nightly backups) rather than long-running servers." }
+        ]
+      },
+      {
+        chapter: "Module 3: Workload Primitives",
+        title: "Health Probes: Surviving the Wild 🩺",
+        lead: "How does Kubernetes know your app is genuinely working, and not deadlocked in an infinite loop?",
+        story: "A container process might stay running (`PID 1 alive`), but your database connection pool is frozen. Kubernetes uses three distinct probes to inspect internal vitality.",
+        keyPoints: [
+          { icon: "🍼", text: "Startup Probe: For slow-starting legacy apps. Disables other probes until app initializes." },
+          { icon: "💓", text: "Liveness Probe: 'Are you deadlocked?' If this fails, K8s kills and restarts the container." },
+          { icon: "🚪", text: "Readiness Probe: 'Are you ready for user traffic?' If this fails, K8s stops routing traffic without killing the pod." }
+        ],
+        quiz: {
+          question: "Your app is temporarily overloaded with a burst of DB queries and cannot take new traffic. Which probe should fail?",
+          options: [
+            "Liveness Probe (so K8s kills the process)",
+            "Readiness Probe (so K8s stops sending new traffic until it recovers)",
+            "Startup Probe",
+            "Cgroup Memory Controller"
+          ],
+          answer: 1,
+          explanation: "Spot on! If you fail Liveness, K8s restarts your already overloaded app making things worse. Failing Readiness gently pauses traffic until the backlog clears!"
+        }
+      },
+      {
+        chapter: "Module 4: Networking & Services",
+        title: "The K8s Network Model 🌐",
+        lead: "Every Pod in Kubernetes gets its own IP address. Pods communicate across nodes without NAT (Network Address Translation).",
+        story: "Because Pods are ephemeral, their IPs change whenever they restart. You cannot point clients directly to Pod IPs. You need a stable front door: a Service!",
+        keyPoints: [
+          { icon: "🎯", text: "Service Abstraction: A stable virtual IP (ClusterIP) and DNS name that load-balances traffic across matching Pods." },
+          { icon: "🏷️", text: "Labels & Selectors: The glue of K8s. A service finds pods via labels, e.g. `app: web`." },
+          { icon: "📚", text: "CoreDNS: Built-in cluster DNS. A pod can call `http://order-service.default.svc.cluster.local` directly!" }
+        ]
+      },
+      {
+        chapter: "Module 4: Networking & Services",
+        title: "Service Types Demystified 🚦",
+        lead: "There are three primary Service types depending on how far you want to expose your pods.",
+        diagram: {
+          title: "Choose a Service Type:",
+          items: [
+            { icon: "🔒", label: "ClusterIP", desc: "Default. Internal-only IP accessible strictly inside the cluster. Perfect for DBs & microservices." },
+            { icon: "🚪", label: "NodePort", desc: "Opens a static port (30000-32767) on EVERY worker node IP. Good for on-prem debugging." },
+            { icon: "☁️", label: "LoadBalancer", desc: "Provisions a real Cloud Provider Load Balancer (AWS ALB, GCP NLB) with a public IP." },
+            { icon: "📭", label: "Headless (None)", desc: "Returns direct Pod IPs for StatefulSets instead of virtual IP (ideal for Kafka/Cassandra)." }
+          ]
+        },
+        keyPoints: [
+          { icon: "💡", text: "Rule of thumb: Internal APIs = ClusterIP. External HTTP websites = Ingress / Gateway API." }
+        ]
+      },
+      {
+        chapter: "Module 4: Networking & Services",
+        title: "Ingress & Gateway API 🚪",
+        lead: "Spinning up a cloud LoadBalancer for every microservice costs a fortune. Ingress gives you a single entry point for all HTTP routes.",
+        story: "Ingress is an L7 reverse proxy (like Caddy or NGINX) sitting in front of your cluster, routing traffic based on hostnames and URL paths.",
+        code: `apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: shop-routes
+spec:
+  rules:
+  - host: shop.example.com
+    http:
+      paths:
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: api-svc
+            port:
+              number: 8080`,
+        keyPoints: [
+          { icon: "🛣️", text: "Path Routing: /api goes to backend, / goes to frontend." },
+          { icon: "🔐", text: "TLS Termination: Automatic Let's Encrypt certificates via cert-manager." },
+          { icon: "🚀", text: "Gateway API: The next-gen standard succeeding Ingress with expressive cross-namespace routing." }
+        ]
+      },
+      {
+        chapter: "Module 5: Storage & Config",
+        title: "ConfigMaps & Secrets 🔑",
+        lead: "The Twelve-Factor App rule: Never bake configuration or credentials into your Docker image. Inject them at runtime.",
+        keyPoints: [
+          { icon: "📄", text: "ConfigMap: Stores non-sensitive config (app.env, JSON configs, feature flags). Injected as env vars or mounted files." },
+          { icon: "🔐", text: "Secret: Stores sensitive data (API keys, DB passwords, SSH keys) base64-encoded. Mounted in tmpfs memory." },
+          { icon: "⚠️", text: "Security Warning: Standard K8s secrets are only Base64 encoded, not encrypted at rest without KMS integration!" }
+        ],
+        quiz: {
+          question: "True or False: By default, Kubernetes Secrets stored in etcd are cryptographically encrypted.",
+          options: [
+            "True (They are encrypted with RSA 4096)",
+            "False (They are only base64-encoded plain text unless EncryptionConfiguration is enabled)"
+          ],
+          answer: 1,
+          explanation: "Correct! Base64 is NOT encryption! In production, you must enable KMS encryption at rest or use tools like HashiCorp Vault / External Secrets Operator."
+        }
+      },
+      {
+        chapter: "Module 5: Storage & Config",
+        title: "Persistent Volumes: Decoupled Storage 💽",
+        lead: "Containers are ephemeral: when a pod restarts, files written to container disk are wiped. Persistent storage requires PV and PVC.",
+        story: "Think of PersistentVolume (PV) as an available hard drive, and PersistentVolumeClaim (PVC) as a voucher from a developer requesting: 'I need a 100GB fast SSD'.",
+        keyPoints: [
+          { icon: "🏗️", text: "StorageClass: Defines storage tiers (e.g. `fast-nvme`, `standard-hdd`) and enables dynamic provisioning." },
+          { icon: "🎫", text: "PVC (Claim): Request made by the developer inside Pod spec." },
+          { icon: "💾", text: "PV (Volume): The actual cloud disk (EBS, GPD, Ceph) dynamically provisioned by the CSI driver." }
+        ]
+      },
+      {
+        chapter: "Module 6: Scaling & Resilience",
+        title: "Autoscaling Magic: HPA & VPA 📈",
+        lead: "Why wake up at 2 AM on Black Friday? Let Kubernetes scale your pods and cluster nodes automatically.",
+        story: "Kubernetes has three layers of autoscaling: pod count, pod size, and server node count.",
+        keyPoints: [
+          { icon: "👥", text: "Horizontal Pod Autoscaler (HPA): Adjusts replica count based on CPU, memory, or custom Prometheus metrics (e.g. queue length)." },
+          { icon: "🏋️", text: "Vertical Pod Autoscaler (VPA): Right-sizes CPU/memory requests for pods automatically over time." },
+          { icon: "🖥️", text: "Cluster Autoscaler / Karpenter: Spawns new cloud VM worker nodes when pods cannot schedule due to insufficient CPU." }
+        ]
+      },
+      {
+        chapter: "Module 6: Scaling & Resilience",
+        title: "Requests vs. Limits (QoS) ⚖️",
+        lead: "The most common source of pod evictions (OOMKilled) is misunderstanding Requests vs. Limits.",
+        code: `resources:
+  requests:
+    cpu: "250m"      # Guaranteed minimum (0.25 core)
+    memory: "512Mi"  # Guaranteed minimum RAM
+  limits:
+    cpu: "1000m"     # Throttle ceiling (1.0 core)
+    memory: "1Gi"    # OOMKilled if exceeded!`,
+        keyPoints: [
+          { icon: "📉", text: "Requests: Used by the Scheduler to find a node with enough room. Guaranteed to the pod." },
+          { icon: "⛔", text: "Limits: The hard ceiling. If CPU exceeds limit, app is throttled (slows down). If RAM exceeds limit, app is KILLED immediately (OOMKill)!" },
+          { icon: "🏅", text: "Quality of Service: Guaranteed (requests == limits), Burstable (requests < limits), BestEffort (no requests set)." }
+        ]
+      },
+      {
+        chapter: "Module 6: Scaling & Resilience",
+        title: "Network Policies (Zero Trust) 🛡️",
+        lead: "By default, Kubernetes networking is completely flat: any pod in any namespace can talk to any other pod.",
+        story: "If a compromised frontend pod can talk directly to your internal database without restrictions, attackers can exfiltrate data. NetworkPolicies create pod-level firewalls.",
+        keyPoints: [
+          { icon: "🧱", text: "Default Deny: Best practice is to block all incoming and outgoing traffic by default." },
+          { icon: "✅", text: "Explicit Ingress Allow: Only allow frontend pods with `role: web` to connect to database port 5432." },
+          { icon: "⚡", text: "CNI Enforcement: NetworkPolicies require a capable CNI plugin like Calico or Cilium to enforce packet filtering." }
+        ]
+      },
+      {
+        chapter: "Module 7: Advanced Cloud-Native",
+        title: "Custom Resources & The Operator Pattern 🤖",
+        lead: "Kubernetes isn't just for containers: it's a programmable platform! You can define your own APIs.",
+        story: "A human DBA knows how to backup PostgreSQL, failover replicas, and upgrade schemas. An Operator is automated software encoding a human engineer's operational domain knowledge.",
+        keyPoints: [
+          { icon: "📜", text: "CRD (Custom Resource Definition): Extends the K8s API with custom types (e.g. `kind: PostgresCluster`)." },
+          { icon: "⚙️", text: "Operator: A custom controller watching your CRD and automating complex stateful operations." },
+          { icon: "🌟", text: "Examples: Prometheus Operator, Strimzi Kafka Operator, CloudNativePG." }
+        ]
+      },
+      {
+        chapter: "Module 7: Advanced Cloud-Native",
+        title: "GitOps: The Modern Standard (ArgoCD) 🐙",
+        lead: "Never use `kubectl apply` directly from your developer laptop in production. GitOps makes Git the Single Source of Truth.",
+        story: "In GitOps, every cluster change is a Git Pull Request. An agent inside the cluster (like ArgoCD or Flux) pulls the Git repository and continuously syncs the cluster state.",
+        keyPoints: [
+          { icon: "📖", text: "Version Controlled: Complete audit trail of every commit, rollout, and author." },
+          { icon: "🔒", text: "Zero Cluster Access Needed: Developers don't need direct cluster credentials, minimizing breach risks." },
+          { icon: "⚡", text: "Automated Drift Reconciliation: If someone manually tampers with a pod via SSH/kubectl, ArgoCD reverts it back to Git spec!" }
+        ]
+      },
+      {
+        chapter: "Module 7: Advanced Cloud-Native",
+        title: "eBPF & The Future of K8s Networking 🐝",
+        lead: "Traditional iptables rules become slow and bog down when clusters grow to thousands of services. The future is eBPF.",
+        story: "eBPF (Extended Berkeley Packet Filter) runs sandboxed bytecode directly inside the Linux kernel, bypassing the networking stack for ultra-low latency.",
+        keyPoints: [
+          { icon: "⚡", text: "Cilium: Modern eBPF-based CNI replacing kube-proxy with 5x higher throughput and native encryption." },
+          { icon: "🔍", text: "Kernel Observability: Traces network packets, security violations, and system calls with near-zero CPU overhead." },
+          { icon: "🚀", text: "Go 1.24 Runtime: NUMA-aware work-stealing queues optimizing K8s pod startup latencies by 42% (from our latest intelligence brief!)." }
+        ]
+      },
+      {
+        chapter: "Module 7: Advanced Cloud-Native",
+        title: "The Ultimate K8s Checklist 📋",
+        lead: "Before you push any workload to production Kubernetes, run through this golden checklist.",
+        keyPoints: [
+          { icon: "1️⃣", text: "Always configure CPU/Memory Requests and Limits (prevent noisy neighbor & OOM cascading)." },
+          { icon: "2️⃣", text: "Define Liveness & Readiness Probes with appropriate initial delays." },
+          { icon: "3️⃣", text: "Set PodAntiAffinity so replicas spread across different physical nodes or availability zones." },
+          { icon: "4️⃣", text: "Use PodDisruptionBudgets (PDB) so cluster upgrades never take down all replicas simultaneously." },
+          { icon: "5️⃣", text: "Enforce ReadOnlyRootFilesystem and non-root security contexts in your PodSpecs." }
+        ]
+      },
+      {
+        chapter: "Graduation",
+        title: "Congratulations, Cloud Architect! 🎓",
+        lead: "You've conquered the full Kubernetes spectrum from bare containers and Pods to Operators, eBPF, and GitOps!",
+        story: "🌟 You now possess the mental models and architectural principles to design, debug, and scale resilient cloud-native systems.",
+        keyPoints: [
+          { icon: "🏆", text: "Mastery Badge Unlocked: Certified KubeQuest Voyager." },
+          { icon: "📱", text: "Bookmark this URL on your phone anytime you need a quick architectural refresher." },
+          { icon: "🚀", text: "Next step: Apply these patterns directly into your microservices and infrastructure!" }
+        ]
+      }
+    ];
+
+    // --- State Management ---
+    let currentSlide = 0;
+    const TOTAL_SLIDES = slides.length;
+    const STORAGE_KEY = "kubequest_slide_idx";
+    const QUIZ_KEY = "kubequest_quiz_state";
+
+    // DOM Elements
+    const container = document.getElementById("slide-container");
+    const indicator = document.getElementById("slide-indicator");
+    const progressBar = document.getElementById("progress-bar");
+    const btnPrev = document.getElementById("btn-prev");
+    const btnNext = document.getElementById("btn-next");
+    const drawer = document.getElementById("drawer");
+    const drawerOverlay = document.getElementById("drawer-overlay");
+    const drawerList = document.getElementById("drawer-list");
+
+    // Load Saved Progress
+    function loadProgress() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved !== null) {
+        const idx = parseInt(saved, 10);
+        if (idx >= 0 && idx < TOTAL_SLIDES) {
+          currentSlide = idx;
+          if (idx > 0) {
+            showToast(`Resumed at slide ${idx + 1}: ${slides[idx].title}`);
+          }
+        }
+      }
+    }
+
+    function saveProgress() {
+      localStorage.setItem(STORAGE_KEY, currentSlide);
+    }
+
+    function showToast(msg) {
+      const slot = document.getElementById("toast-slot");
+      slot.innerHTML = `<div class="resume-toast">📍 ${msg}</div>`;
+      setTimeout(() => { slot.innerHTML = ""; }, 3200);
+    }
+
+    // Render Slide
+    function renderSlide(index) {
+      const s = slides[index];
+      
+      let diagramHtml = "";
+      if (s.diagram) {
+        diagramHtml = `
+          <div class="interactive-diagram">
+            <div style="font-size:12px; font-weight:700; color:#9ca3af; margin-bottom:8px;">${s.diagram.title}</div>
+            <div class="diagram-grid">
+              ${s.diagram.items.map((item, i) => `
+                <div class="diagram-item ${i === 0 ? 'active' : ''}" onclick="selectDiagramItem(${i}, '${encodeURIComponent(item.desc)}')">
+                  <div class="icon">${item.icon}</div>
+                  <div class="label">${item.label}</div>
+                </div>
+              `).join("")}
+            </div>
+            <div class="diagram-detail" id="diagram-desc">${s.diagram.items[0].desc}</div>
+          </div>
+        `;
+      }
+
+      let codeHtml = "";
+      if (s.code) {
+        codeHtml = `<pre class="code-card"><code>${escapeHtml(s.code)}</code></pre>`;
+      }
+
+      let quizHtml = "";
+      if (s.quiz) {
+        const savedAns = getSavedQuiz(index);
+        quizHtml = `
+          <div class="quiz-card">
+            <div class="quiz-title"><span>⚡ Quick Checkpoint</span></div>
+            <div style="font-size: 13px; font-weight: 600; margin-bottom: 10px; color: #fff;">${s.quiz.question}</div>
+            <div class="quiz-options">
+              ${s.quiz.options.map((opt, i) => {
+                let cls = "";
+                if (savedAns !== null) {
+                  if (i === s.quiz.answer) cls = "correct";
+                  else if (i === savedAns) cls = "wrong";
+                }
+                return `<button class="quiz-opt ${cls}" onclick="handleQuiz(${index}, ${i})">${opt}</button>`;
+              }).join("")}
+            </div>
+            <div class="quiz-feedback" id="quiz-fb-${index}" style="${savedAns !== null ? 'display:block; color:#93c5fd;' : ''}">
+              ${savedAns !== null ? (savedAns === s.quiz.answer ? '✅ ' : '❌ ') + s.quiz.explanation : ''}
+            </div>
+          </div>
+        `;
+      }
+
+      const html = `
+        <div class="slide-card">
+          <div class="badge-chapter">${s.chapter}</div>
+          <h1 class="slide-title">${s.title}</h1>
+          <p class="lead">${s.lead}</p>
+          ${s.story ? `<div class="story-box">${s.story}</div>` : ""}
+          ${diagramHtml}
+          ${codeHtml}
+          ${s.keyPoints ? `
+            <ul class="key-points">
+              ${s.keyPoints.map(kp => `
+                <li>
+                  <span class="icon">${kp.icon}</span>
+                  <div>${kp.text}</div>
+                </li>
+              `).join("")}
+            </ul>
+          ` : ""}
+          ${quizHtml}
+        </div>
+      `;
+
+      container.innerHTML = html;
+      document.getElementById("slide-viewport").scrollTop = 0;
+
+      // Update Nav state
+      indicator.textContent = `${index + 1} / ${TOTAL_SLIDES}`;
+      const progressPct = ((index + 1) / TOTAL_SLIDES) * 100;
+      progressBar.style.width = `${progressPct}%`;
+      btnPrev.disabled = index === 0;
+      btnNext.textContent = index === TOTAL_SLIDES - 1 ? "Finish 🎓" : "Next ▶";
+
+      saveProgress();
+      updateDrawerActive();
+    }
+
+    function escapeHtml(text) {
+      return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    // Interactive Diagram item click
+    window.selectDiagramItem = function(index, encodedDesc) {
+      const items = document.querySelectorAll(".diagram-item");
+      items.forEach((el, i) => {
+        el.classList.toggle("active", i === index);
+      });
+      document.getElementById("diagram-desc").textContent = decodeURIComponent(encodedDesc);
+    };
+
+    // Quiz evaluation
+    function getSavedQuiz(slideIdx) {
+      const data = JSON.parse(localStorage.getItem(QUIZ_KEY) || "{}");
+      return data[slideIdx] !== undefined ? data[slideIdx] : null;
+    }
+
+    window.handleQuiz = function(slideIdx, chosenIdx) {
+      const q = slides[slideIdx].quiz;
+      if (!q) return;
+
+      const data = JSON.parse(localStorage.getItem(QUIZ_KEY) || "{}");
+      data[slideIdx] = chosenIdx;
+      localStorage.setItem(QUIZ_KEY, JSON.stringify(data));
+
+      renderSlide(slideIdx);
+    };
+
+    // Navigation Controls
+    function nextSlide() {
+      if (currentSlide < TOTAL_SLIDES - 1) {
+        currentSlide++;
+        renderSlide(currentSlide);
+      } else {
+        showToast("Odyssey Complete! 🎉 Great job!");
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        renderSlide(currentSlide);
+      }
+    }
+
+    btnNext.addEventListener("click", nextSlide);
+    btnPrev.addEventListener("click", prevSlide);
+
+    // Keyboard support
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+        e.preventDefault();
+        prevSlide();
+      }
+    });
+
+    // Touch Swipe Gestures for Mobile Phones
+    let touchStartX = 0;
+    let touchEndX = 0;
+    const viewport = document.getElementById("slide-viewport");
+
+    viewport.addEventListener("touchstart", (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    viewport.addEventListener("touchend", (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    }, { passive: true });
+
+    function handleSwipe() {
+      const diff = touchEndX - touchStartX;
+      if (Math.abs(diff) > 50) {
+        if (diff < 0) {
+          nextSlide(); // Swiped left -> next
+        } else {
+          prevSlide(); // Swiped right -> prev
+        }
+      }
+    }
+
+    // Drawer Table of Contents
+    function buildDrawer() {
+      drawerList.innerHTML = slides.map((s, idx) => `
+        <div class="drawer-item ${idx === currentSlide ? 'active' : ''}" onclick="jumpToSlide(${idx})">
+          <div class="num">${idx + 1}</div>
+          <div style="flex:1;">
+            <div style="font-size:11px; color:#6b7280;">${s.chapter.split(':')[0]}</div>
+            <div>${s.title}</div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function updateDrawerActive() {
+      document.querySelectorAll(".drawer-item").forEach((el, idx) => {
+        el.classList.toggle("active", idx === currentSlide);
+      });
+    }
+
+    window.jumpToSlide = function(idx) {
+      currentSlide = idx;
+      renderSlide(idx);
+      closeDrawer();
+    };
+
+    function openDrawer() {
+      drawer.classList.add("open");
+      drawerOverlay.classList.add("open");
+    }
+
+    function closeDrawer() {
+      drawer.classList.remove("open");
+      drawerOverlay.classList.remove("open");
+    }
+
+    document.getElementById("btn-toc").addEventListener("click", openDrawer);
+    document.getElementById("btn-close-drawer").addEventListener("click", closeDrawer);
+    drawerOverlay.addEventListener("click", closeDrawer);
+
+    // Reset Progress Button
+    document.getElementById("btn-restart").addEventListener("click", () => {
+      if (confirm("Reset learning progress and restart from Slide 1?")) {
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(QUIZ_KEY);
+        currentSlide = 0;
+        renderSlide(0);
+        showToast("Progress reset to Slide 1.");
+      }
+    });
+
+    // Initialize App
+    loadProgress();
+    buildDrawer();
+    renderSlide(currentSlide);
+  </script>
+</body>
+</html>

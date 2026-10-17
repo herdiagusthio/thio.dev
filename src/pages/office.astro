@@ -1,42 +1,23 @@
 ---
 import '../styles/global.css';
 import '../styles/office.css';
+import SeoHead from '../components/SeoHead.astro';
+import Topbar from '../components/Topbar.astro';
 
 const year = 2026;
-const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`;
 ---
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Autonomous Multi-Agent Office & Telemetry — thio.dev</title>
-    <meta
-      name="description"
-      content="Real-time interactive command bridge and 2D/3D spatial telemetry for Herdi Agusthio's autonomous multi-agent engineering division."
-    />
-    <link rel="icon" href={faviconHref} />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap"
-      rel="stylesheet"
+    <SeoHead
+      title="Autonomous 7-Agent Office & Spatial Telemetry — thio.dev"
+      description="Real-time interactive command bridge and 2D/3D spatial telemetry for Herdi Agusthio's 7-agent autonomous engineering organization."
+      canonicalPath="/office"
+      schemaType="WebSite"
     />
   </head>
   <body>
-    <!-- Topbar Navigation -->
-    <header class="topbar">
-      <div class="wrap topbar-inner">
-        <span class="brand"><a href="/" class="nav-brand" style="text-decoration:none; color:inherit;">thio.dev</a></span>
-        <nav class="nav-links">
-          <a href="/showcase">Showcase</a>
-          <a href="/office" class="active-nav">Office</a>
-          <a href="/blog">Blog</a>
-          <a href="/about">About</a>
-          <a href="/contact">Contact</a>
-        </nav>
-      </div>
-    </header>
+    <Topbar active="office" wide={true} />
 
     <main class="wrap main-container">
       <!-- Telemetry Header -->
@@ -44,12 +25,12 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
         <div class="meta-status">
           <span class="status-indicator"></span>
           <span class="mono-label">[SWARM_TELEMETRY: OPERATIONAL]</span>
-          <span class="mono-label">[AGENTS: 8 ACTIVE]</span>
+          <span class="mono-label">[AGENTS: 7 ACTIVE]</span>
           <span class="mono-label">[MEM_INVARIANT: &gt;=500MB HEADROOM OK]</span>
         </div>
         <h1 class="page-title">Autonomous Multi-Agent Command Bridge</h1>
         <p class="hero-desc">
-          Live spatial telemetry and mission control for Thio's specialist engineering workforce.
+          Live spatial telemetry and mission control for Thio's 7-agent specialist engineering workforce.
           Featuring dual <strong>2D Pixel-Art</strong> and <strong>3D Three.js</strong> environments with interactive agent dossiers.
         </p>
       </section>
@@ -240,7 +221,7 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
                   <div class="tv-screen">
                     <div class="tv-code-line line-1"><code>const fleet = new AutonomousOrg();</code></div>
                     <div class="tv-code-line line-2"><code>await fleet.sync(&#123; memorySafe: true &#125;);</code></div>
-                    <div class="tv-code-line line-3"><code>console.log("Memory Headroom: >= 500MB OK");</code></div>
+                    <div class="tv-code-line line-3"><code>fleet.verify(&#123; ramHeadroomMB: "&gt;=500" &#125;);</code></div>
                     <div class="tv-scanlines"></div>
                   </div>
                   <div class="tv-mount"></div>
@@ -313,9 +294,9 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
           <div class="office-sidebar-card">
             <div class="sidebar-card-header">
               <div class="sidebar-card-title">
-                <span>🤖 Fleet Roster (8)</span>
+                <span>🤖 Fleet Roster (7)</span>
               </div>
-              <span class="badge active" style="font-size: 10px;">8 Online</span>
+              <span class="badge active" style="font-size: 10px;">7 Online</span>
             </div>
             <div class="agent-chip-list" id="agentRosterChips">
               <!-- Dynamically populated -->
@@ -549,14 +530,13 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
       ];
 
       const STATIC_LIVE_ACTIVITIES = [
-        { icon: '⚡', agent: 'Prime', role: 'Principal Engineer', action: 'Approved architecture review for Go AI harness', timeAgo: '2m ago' },
-        { icon: '🛠️', agent: 'Goder', role: 'Senior Go Engineer', action: 'Passed table-driven tests (go test -race ./...)', timeAgo: '5m ago' },
-        { icon: '🛡️', agent: 'Sysca', role: 'Infraguard / DevOps', action: 'VPS memory headroom verified (>= 500MB)', timeAgo: '11m ago' },
-        { icon: '👑', agent: 'LEADYA', role: 'Chief Orchestrator', action: 'Synchronized sprint backlog and task dispatch queue', timeAgo: '18m ago' },
-        { icon: '🎨', agent: 'Pixel', role: 'Frontend & UI/UX', action: 'Audited WCAG AA color tokens for dark mode console', timeAgo: '24m ago' },
-        { icon: '✍️', agent: 'Lexa', role: 'Content Specialist', action: 'Synced architecture case study to thio.dev/showcase', timeAgo: '35m ago' },
-        { icon: '🌙', agent: 'Luna', role: 'Product Owner', action: 'Finalized 4-week Go learning syllabus specifications', timeAgo: '48m ago' },
-        { icon: '💼', agent: 'Caren', role: 'Executive Assistant', action: 'Scheduled deep-work blocks in developer calendar', timeAgo: '1h ago' }
+        { icon: '📐', agent: 'Prime', role: 'Principal Engineer', action: 'Approved ADR-014 & ADR-015 architecture review gates', timeAgo: '2m ago' },
+        { icon: '⚡', agent: 'Antigravity', role: 'Lead Agentic Engineer', action: 'Shipped full-stack Cockpit & thio.dev overhaul (52/52 tests)', timeAgo: '5m ago' },
+        { icon: '🛡️', agent: 'Sysca', role: 'Infraguard / DevOps', action: 'Verified TCP BBR, systemd slices & >= 500MB RAM headroom', timeAgo: '11m ago' },
+        { icon: '👑', agent: 'LEADYA', role: 'Chief Orchestrator', action: 'Synchronized 7-agent sprint backlog and Second-Brain SSOT', timeAgo: '18m ago' },
+        { icon: '✍️', agent: 'Lexa', role: 'Content Specialist', action: 'Published bilingual deep-dives & JSON-LD schema on thio.dev', timeAgo: '24m ago' },
+        { icon: '🎯', agent: 'Luna', role: 'Product Owner', action: 'Finalized Cockpit & Showcase UX information architecture', timeAgo: '38m ago' },
+        { icon: '💼', agent: 'Caren', role: 'Executive Assistant', action: 'Synced Sharia portfolio brief & Google Workspace Sheet', timeAgo: '1h ago' }
       ];
 
       const STATIC_CHANNELS = [

@@ -1,0 +1,112 @@
+---
+export interface Props {
+  title: string;
+  description: string;
+  canonicalPath?: string;
+  ogType?: 'website' | 'article';
+  publishedDate?: string;
+  tags?: string[];
+  readingTimeMinutes?: number;
+  schemaType?: 'WebSite' | 'BlogPosting' | 'TechArticle' | 'ProfilePage';
+}
+
+const {
+  title,
+  description,
+  canonicalPath = Astro.url.pathname,
+  ogType = 'website',
+  publishedDate,
+  tags = [],
+  readingTimeMinutes,
+  schemaType = 'WebSite',
+} = Astro.props;
+
+const siteOrigin = 'https://thio.103.217.144.64.nip.io';
+const canonicalUrl = `${siteOrigin}${canonicalPath.startsWith('/') ? canonicalPath : `/${canonicalPath}`}`;
+const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`;
+
+const personEntity = {
+  '@type': 'Person',
+  name: 'Herdi Agusthio',
+  alternateName: 'Thio',
+  jobTitle: 'Software Engineer & Systems Architect',
+  worksFor: {
+    '@type': 'Organization',
+    name: 'Flip',
+  },
+  url: siteOrigin,
+  sameAs: [
+    'https://github.com/herdiagusthio',
+    'https://www.linkedin.com/in/herdiagusthio/',
+  ],
+};
+
+let jsonLd: Record<string, any> = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'thio.dev — Herdi Agusthio Engineering Console',
+  url: siteOrigin,
+  description,
+  author: personEntity,
+};
+
+if (schemaType === 'ProfilePage') {
+  jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ProfilePage',
+    url: canonicalUrl,
+    name: title,
+    description,
+    mainEntity: personEntity,
+  };
+} else if (schemaType === 'BlogPosting' || schemaType === 'TechArticle') {
+  jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': schemaType,
+    headline: title,
+    description,
+    url: canonicalUrl,
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': canonicalUrl,
+    },
+    ...(publishedDate ? { datePublished: publishedDate, dateModified: publishedDate } : {}),
+    ...(tags.length > 0 ? { keywords: tags.join(', ') } : {}),
+    ...(readingTimeMinutes ? { timeRequired: `PT${readingTimeMinutes}M` } : {}),
+    author: personEntity,
+    publisher: personEntity,
+  };
+}
+---
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>{title}</title>
+<meta name="description" content={description} />
+<meta name="author" content="Herdi Agusthio" />
+<link rel="canonical" href={canonicalUrl} />
+<link rel="icon" href={faviconHref} />
+
+<!-- OpenGraph / AI Search Metadata -->
+<meta property="og:site_name" content="thio.dev — Herdi Agusthio" />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:type" content={ogType} />
+<meta property="og:url" content={canonicalUrl} />
+{publishedDate && <meta property="article:published_time" content={publishedDate} />}
+{tags.map((tag) => <meta property="article:tag" content={tag} />)}
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap"
+  rel="stylesheet"
+/>
+
+<!-- JSON-LD Structured Schema (AI SEO) -->
+<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />

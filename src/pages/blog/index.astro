@@ -1,88 +1,77 @@
 ---
-import fs from 'node:fs';
-import path from 'node:path';
-import matter from 'gray-matter';
 import '../../styles/global.css';
+import SeoHead from '../../components/SeoHead.astro';
+import Topbar from '../../components/Topbar.astro';
+import { getBlogPosts } from '../../lib/feed';
 
-interface BlogItem {
-  slug: string;
-  title: string;
-  date: string;
-  summary: string;
-  tags: string[];
-}
-
-const blogDir = path.resolve(process.cwd(), 'content/blog');
-const files = fs.existsSync(blogDir) ? fs.readdirSync(blogDir).filter(f => f.endsWith('.md')) : [];
-
-const items: BlogItem[] = files.map(file => {
-  const slug = file.replace('.md', '');
-  const content = fs.readFileSync(path.join(blogDir, file), 'utf8');
-  const { data } = matter(content);
-  return {
-    slug,
-    title: data.title || slug,
-    date: data.date ? (data.date instanceof Date ? data.date.toISOString().split('T')[0] : String(data.date).split('T')[0]) : '2025-06-01',
-    summary: data.summary || 'Technical essay and engineering reflection.',
-    tags: data.tags || ['engineering', 'career'],
-  };
-}).sort((a, b) => (a.date < b.date ? 1 : -1));
-
-const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`;
+const items = getBlogPosts();
+const allTags = Array.from(new Set(items.flatMap((i) => i.tags))).slice(0, 12);
 ---
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Engineering Blog & Reflections — thio.dev</title>
-    <meta name="description" content="Essays, perspectives, and reflections on software engineering craftsmanship, distributed systems, and the AI era by Herdi Agusthio." />
-    <link rel="icon" href={faviconHref} />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+    <SeoHead
+      title="Engineering Blog & Reflections — Herdi Agusthio (thio.dev)"
+      description="Long-form essays, production post-mortems, and reflections on software engineering craftsmanship, distributed Go systems, and autonomous AI agent organizations."
+      canonicalPath="/blog"
+      schemaType="WebSite"
+    />
   </head>
   <body>
-    <header class="topbar">
-      <div class="wrap topbar-inner">
-        <span class="brand"><a href="/" class="nav-brand" style="text-decoration:none; color:inherit;">thio.dev</a></span>
-        <nav class="nav-links">
-          <a href="/showcase">Showcase</a>
-          <a href="/office">Office</a>
-          <a href="/blog" class="active-nav">Blog</a>
-          <a href="/about">About</a>
-          <a href="/contact">Contact</a>
-        </nav>
-      </div>
-    </header>
+    <Topbar active="blog" />
 
     <main class="wrap main-container">
       <section class="blog-hero">
         <div class="meta-status">
           <span class="status-indicator"></span>
           <span class="mono-label">[SYS_BLOG: ESSAYS &amp; PERSPECTIVES]</span>
-          <span class="mono-label">[COUNT:{items.length}]</span>
+          <span class="mono-label" id="blogCountLabel">[COUNT:{items.length}]</span>
         </div>
         <h1 class="page-title">Engineering Blog &amp; Reflections</h1>
         <p class="hero-desc">
-          Long-form essays, career reflections, and mental models on software craftsmanship, distributed systems, and building in the AI era.
+          Long-form essays, career reflections, and hands-on system deep-dives on software craftsmanship, distributed architectures, and building in the autonomous AI era.
         </p>
+
+        <!-- Search & Tag Filter Bar -->
+        <div class="filter-bar">
+          <input
+            type="search"
+            id="blogSearchInput"
+            class="search-input"
+            placeholder="Search essays by title, summary, or #tag..."
+            aria-label="Search blog essays"
+          />
+          <div class="tag-chips" id="blogTagChips">
+            <button type="button" class="chip-btn active" data-tag="all">All ({items.length})</button>
+            {allTags.map((tag) => (
+              <button type="button" class="chip-btn" data-tag={tag}>#{tag}</button>
+            ))}
+          </div>
+        </div>
       </section>
 
-      <div class="blog-grid">
-        {items.map(item => (
-          <article class="blog-card">
-            <div class="card-header">
-              <span class="card-date">[{item.date}]</span>
-              <span class="card-badge">[ESSAY]</span>
+      <div class="blog-grid" id="blogGrid">
+        {items.map((item) => (
+          <article
+            class="blog-card"
+            data-title={item.title.toLowerCase()}
+            data-summary={item.summaryText.toLowerCase()}
+            data-tags={item.tags.join(',').toLowerCase()}
+          >
+            <div>
+              <div class="card-header">
+                <span class="card-date">[{item.date}]</span>
+                <span class="card-reading">⏱ {item.readingTimeMinutes} min read</span>
+                <span class="card-badge">[ESSAY]</span>
+              </div>
+              <h2 class="card-title">
+                <a href={`/blog/${item.slug}`} class="title-link">{item.title}</a>
+              </h2>
+              <p class="card-summary">{item.summaryText}</p>
             </div>
-            <h2 class="card-title">
-              <a href={`/blog/${item.slug}`} class="title-link">{item.title}</a>
-            </h2>
-            <p class="card-summary">{item.summary}</p>
             <div class="card-footer">
               <div class="card-tags">
-                {item.tags.map(tag => (
+                {item.tags.map((tag) => (
                   <span class="tag-item">#{tag}</span>
                 ))}
               </div>
@@ -97,148 +86,209 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
       <span>© 2026 Herdi Agusthio · Software Engineer</span>
       <a href="/" class="back-link">[ ← RETURN TO CONSOLE ]</a>
     </footer>
+
+    <script is:inline>
+      document.addEventListener('DOMContentLoaded', () => {
+        const searchInput = document.getElementById('blogSearchInput');
+        const cards = Array.from(document.querySelectorAll('#blogGrid .blog-card'));
+        const countLabel = document.getElementById('blogCountLabel');
+        const chipBtns = Array.from(document.querySelectorAll('#blogTagChips .chip-btn'));
+        let activeTag = 'all';
+
+        function applyFilters() {
+          const q = (searchInput?.value || '').trim().toLowerCase();
+          let visible = 0;
+          cards.forEach((card) => {
+            const title = card.getAttribute('data-title') || '';
+            const summary = card.getAttribute('data-summary') || '';
+            const tags = (card.getAttribute('data-tags') || '').split(',');
+            const matchesTag = activeTag === 'all' || tags.includes(activeTag.toLowerCase());
+            const matchesQuery = !q || title.includes(q) || summary.includes(q) || tags.some((t) => t.includes(q));
+            const show = matchesTag && matchesQuery;
+            card.style.display = show ? 'flex' : 'none';
+            if (show) visible++;
+          });
+          if (countLabel) countLabel.textContent = `[COUNT:${visible}]`;
+        }
+
+        searchInput?.addEventListener('input', applyFilters);
+        chipBtns.forEach((btn) => {
+          btn.addEventListener('click', () => {
+            chipBtns.forEach((b) => b.classList.remove('active'));
+            btn.classList.add('active');
+            activeTag = btn.getAttribute('data-tag') || 'all';
+            applyFilters();
+          });
+        });
+      });
+    </script>
+
+    <style>
+      .main-container {
+        padding-top: 2rem;
+        padding-bottom: 4rem;
+      }
+      .blog-hero {
+        border-bottom: 1px solid var(--gray-20);
+        padding-bottom: 2rem;
+        margin-bottom: 2.5rem;
+      }
+      .meta-status {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        color: var(--gray-60);
+        margin-bottom: 1rem;
+      }
+      .status-indicator {
+        width: 8px;
+        height: 8px;
+        background: #10b981;
+        box-shadow: 0 0 8px #10b981;
+        border-radius: 50%;
+      }
+      .page-title {
+        font-family: var(--font-sans);
+        font-size: clamp(2.2rem, 5vw, 3rem);
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        color: var(--gray-100);
+        line-height: 1.2;
+        margin-bottom: 1rem;
+      }
+      .hero-desc {
+        font-family: var(--font-sans);
+        font-size: 1.12rem;
+        line-height: 1.6;
+        color: var(--gray-70);
+        max-width: 48rem;
+        margin-bottom: 1.5rem;
+      }
+      .filter-bar {
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
+      }
+      .search-input {
+        width: 100%;
+        background: var(--gray-10);
+        border: 1px solid var(--gray-20);
+        color: var(--gray-100);
+        font-family: var(--font-mono);
+        font-size: 0.85rem;
+        padding: 0.65rem 0.9rem;
+      }
+      .search-input:focus {
+        outline: none;
+        border-color: #38bdf8;
+      }
+      .tag-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+      }
+      .chip-btn {
+        background: var(--gray-0);
+        border: 1px solid var(--gray-20);
+        color: var(--gray-60);
+        font-family: var(--font-mono);
+        font-size: 0.74rem;
+        padding: 0.3rem 0.65rem;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .chip-btn:hover, .chip-btn.active {
+        color: var(--gray-100);
+        border-color: var(--gray-80);
+        background: var(--gray-10);
+      }
+      .blog-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
+        gap: 1.75rem;
+      }
+      .blog-card {
+        background: var(--gray-0);
+        border: 1px solid var(--gray-20);
+        padding: 1.75rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: border-color 0.2s, background 0.2s;
+      }
+      .blog-card:hover {
+        border-color: var(--gray-60);
+        background: var(--gray-10);
+      }
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-family: var(--font-mono);
+        font-size: 0.74rem;
+        color: var(--gray-50);
+        margin-bottom: 0.9rem;
+        gap: 0.5rem;
+      }
+      .card-reading {
+        color: #38bdf8;
+      }
+      .card-title {
+        font-family: var(--font-sans);
+        font-size: 1.25rem;
+        font-weight: 700;
+        line-height: 1.35;
+        margin-bottom: 0.75rem;
+      }
+      .title-link {
+        color: var(--gray-100);
+        text-decoration: none;
+      }
+      .title-link:hover {
+        text-decoration: underline;
+      }
+      .card-summary {
+        font-family: var(--font-sans);
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: var(--gray-70);
+        margin-bottom: 1.5rem;
+      }
+      .card-footer {
+        display: flex;
+        flex-direction: column;
+        gap: 0.9rem;
+        border-top: 1px dashed var(--gray-20);
+        padding-top: 1rem;
+      }
+      .card-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        font-family: var(--font-mono);
+        font-size: 0.74rem;
+        color: var(--gray-60);
+      }
+      .exec-link {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        color: var(--gray-100);
+        text-decoration: none;
+        font-weight: 600;
+        align-self: flex-start;
+      }
+      .exec-link:hover {
+        text-decoration: underline;
+      }
+      .back-link {
+        text-decoration: none;
+        color: var(--gray-80);
+      }
+      .back-link:hover {
+        color: var(--gray-100);
+      }
+    </style>
   </body>
 </html>
-
-<style>
-  .topbar-inner {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .topbar-tag {
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    color: var(--gray-50);
-  }
-  .sep {
-    color: var(--gray-40);
-  }
-  .active-nav {
-    font-family: var(--font-mono);
-    font-size: 0.9rem;
-    color: var(--gray-100);
-    font-weight: 600;
-  }
-  .main-container {
-    padding-top: 2rem;
-    padding-bottom: 4rem;
-  }
-  .blog-hero {
-    border-bottom: 1px solid var(--gray-20);
-    padding-bottom: 2rem;
-    margin-bottom: 3rem;
-  }
-  .meta-status {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    color: var(--gray-60);
-    margin-bottom: 1rem;
-  }
-  .status-indicator {
-    width: 8px;
-    height: 8px;
-    background: var(--gray-100);
-    border-radius: 50%;
-  }
-  .page-title {
-    font-family: var(--font-sans);
-    font-size: clamp(2.2rem, 5vw, 3rem);
-    font-weight: 800;
-    letter-spacing: -0.04em;
-    color: var(--gray-100);
-    line-height: 1.2;
-    margin-bottom: 1rem;
-  }
-  .hero-desc {
-    font-family: var(--font-sans);
-    font-size: 1.15rem;
-    line-height: 1.6;
-    color: var(--gray-70);
-    max-width: 48rem;
-  }
-  .blog-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
-    gap: 2rem;
-  }
-  .blog-card {
-    background: var(--gray-0);
-    border: 1px solid var(--gray-20);
-    padding: 1.75rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    transition: border-color 0.2s, background 0.2s;
-  }
-  .blog-card:hover {
-    border-color: var(--gray-60);
-    background: var(--gray-10);
-  }
-  .card-header {
-    display: flex;
-    justify-content: space-between;
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    color: var(--gray-50);
-    margin-bottom: 1rem;
-  }
-  .card-title {
-    font-family: var(--font-mono);
-    font-size: 1.2rem;
-    font-weight: 700;
-    line-height: 1.4;
-    margin-bottom: 0.75rem;
-  }
-  .title-link {
-    color: var(--gray-100);
-    text-decoration: none;
-  }
-  .title-link:hover {
-    text-decoration: underline;
-  }
-  .card-summary {
-    font-family: var(--font-sans);
-    font-size: 0.95rem;
-    line-height: 1.6;
-    color: var(--gray-70);
-    margin-bottom: 1.5rem;
-    flex-grow: 1;
-  }
-  .card-footer {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    border-top: 1px dashed var(--gray-20);
-    padding-top: 1rem;
-  }
-  .card-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    color: var(--gray-60);
-  }
-  .exec-link {
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    color: var(--gray-100);
-    text-decoration: none;
-    font-weight: 600;
-    align-self: flex-start;
-  }
-  .exec-link:hover {
-    text-decoration: underline;
-  }
-  .back-link {
-    text-decoration: none;
-    color: var(--gray-80);
-  }
-  .back-link:hover {
-    color: var(--gray-100);
-  }
-</style>

@@ -10,9 +10,10 @@ const pulse = getPulseData();
       <span class="pulse-indicator"></span>
       <span class="signal-text">{pulse.signal}</span>
       <span class="host-pill">[{pulse.host}]</span>
+      <span class="host-pill">[7-AGENT FLEET]</span>
     </div>
     <div class="sys-status-meta">
-      <span class="auth-level">[AUTH_LEVEL:{pulse.auth_level}]</span>
+      <span class="auth-level">[{pulse.memoryGuard}]</span>
       <span class="ts-label">[TS:{pulse.timestamp}]</span>
     </div>
   </div>
@@ -21,18 +22,19 @@ const pulse = getPulseData();
   <div class="sys-operator">
     <div class="operator-dossier">
       <h1 class="operator-name">Herdi Agusthio</h1>
-      <p class="operator-role">&gt; Software Engineer</p>
+      <p class="operator-role">&gt; Software Engineer &amp; Systems Architect</p>
       <p class="operator-bio">
-        Software Engineer at Flip with a decade of experience scaling high-concurrency backend systems across ByteDance, Tokopedia, and GoTo. Focused on architectural purity, distributed services, and durable engineering design.
+        Software Engineer at <strong>Flip</strong> with nearly a decade of experience scaling high-concurrency backend systems across ByteDance, Tokopedia, and GoTo. Focused on architectural purity, distributed Go services, and orchestrating autonomous multi-agent engineering organizations.
       </p>
     </div>
   </div>
 
   <!-- Action Commands -->
   <div class="sys-actions">
-    <a href="/showcase" class="cmd-btn primary">[ EXEC: SHOWCASE ]</a>
-    <a href="/office" class="cmd-btn highlight">[ LAUNCH: AGENT OFFICE ]</a>
+    <a href="/showcase" class="cmd-btn primary">[ EXEC: SHOWCASE &amp; ADRs ]</a>
+    <a href="/office" class="cmd-btn highlight">[ LAUNCH: 2D/3D AGENT OFFICE ]</a>
     <a href="/blog" class="cmd-btn secondary">[ EXEC: BLOG ]</a>
+    <a href="/k8s/" class="cmd-btn secondary">[ PLAY: KUBEQUEST ☸️ ]</a>
   </div>
 </section>
 
@@ -50,7 +52,7 @@ const pulse = getPulseData();
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.82rem;
+    font-size: 0.78rem;
     color: var(--gray-50);
     border-bottom: 1px dashed var(--gray-20);
     padding-bottom: 1rem;
@@ -60,20 +62,22 @@ const pulse = getPulseData();
   .sys-pulse {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 0.6rem;
   }
   
   .pulse-indicator {
     width: 8px;
     height: 8px;
-    background: var(--gray-100);
+    background: #10b981;
+    box-shadow: 0 0 8px #10b981;
     border-radius: 50%;
     animation: blink 2s steps(2, start) infinite;
   }
   
   @keyframes blink {
     0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
+    50% { opacity: 0.35; }
   }
 
   .host-pill {
@@ -82,7 +86,7 @@ const pulse = getPulseData();
 
   .sys-status-meta {
     display: flex;
-    gap: 1rem;
+    gap: 0.85rem;
   }
   
   .sys-operator {
@@ -102,7 +106,7 @@ const pulse = getPulseData();
   .operator-role {
     font-family: var(--font-mono);
     font-size: 0.92rem;
-    color: var(--gray-60);
+    color: #38bdf8;
     margin-bottom: 1.25rem;
     font-weight: 600;
   }
@@ -114,18 +118,21 @@ const pulse = getPulseData();
     line-height: 1.65;
     max-width: 48rem;
   }
+  .operator-bio strong {
+    color: var(--gray-100);
+  }
   
   .sys-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: 0.85rem;
   }
   
   .cmd-btn {
     font-family: var(--font-mono);
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     text-decoration: none;
-    padding: 0.6rem 1.2rem;
+    padding: 0.6rem 1.1rem;
     transition: all 0.2s;
     font-weight: 600;
   }

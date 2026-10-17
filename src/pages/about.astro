@@ -1,33 +1,23 @@
 ---
 import '../styles/global.css';
+import SeoHead from '../components/SeoHead.astro';
+import Topbar from '../components/Topbar.astro';
+import { getAgentFleet } from '../lib/telemetry';
 
-const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`;
+const fleet = getAgentFleet();
 ---
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>About Operator — thio.dev</title>
-    <meta name="description" content="Software Engineer specializing in high-concurrency Go systems and distributed architecture." />
-    <link rel="icon" href={faviconHref} />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+    <SeoHead
+      title="About Herdi Agusthio — Software Engineer & Systems Architect (thio.dev)"
+      description="Software Engineer at Flip with nearly a decade of experience across ByteDance, Tokopedia, and GoTo specializing in high-concurrency Go systems and autonomous multi-agent engineering organizations."
+      canonicalPath="/about"
+      schemaType="ProfilePage"
+    />
   </head>
   <body>
-    <header class="topbar">
-      <div class="wrap topbar-inner">
-        <span class="brand"><a href="/" class="nav-brand" style="text-decoration:none; color:inherit;">thio.dev</a></span>
-        <nav class="nav-links">
-          <a href="/showcase">Showcase</a>
-          <a href="/office">Office</a>
-          <a href="/blog">Blog</a>
-          <a href="/about" class="active-nav">About</a>
-          <a href="/contact">Contact</a>
-        </nav>
-      </div>
-    </header>
+    <Topbar active="about" />
 
     <main class="wrap main-container">
       <section class="page-hero">
@@ -41,10 +31,10 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
             I am a Software Engineer based in West Java, Indonesia, currently building high-performance systems at <strong>Flip</strong>.
           </p>
           <p>
-            With nearly a decade of experience across leading tech companies (ByteDance, Tokopedia, GoTo), my core focus is on architectural purity, distributed systems, and orchestrating complex backend services.
+            With nearly a decade of experience across leading tech companies (<strong>ByteDance</strong>, <strong>Tokopedia</strong>, <strong>GoTo</strong>), my core focus is on architectural purity, high-concurrency Go services, distributed systems, and orchestrating autonomous AI engineering organizations.
           </p>
           <p>
-            This site serves as my system console—a durable knowledge base and architecture lab where I document production blueprints and engineering reflections.
+            This site serves as my system console—a durable knowledge base and architecture lab where I document production blueprints, Architectural Decision Records (ADRs), and engineering reflections.
           </p>
         </div>
       </section>
@@ -55,21 +45,37 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
           <h2 class="section-head">Core Protocols (Skills)</h2>
           <div class="skills-grid">
             <div class="skill-block">
-              <h3 class="skill-title">[ LANGUAGES / FRAMEWORKS ]</h3>
-              <p class="skill-list">Go, Java (gRPC), Ruby on Rails</p>
+              <h3 class="skill-title">[ LANGUAGES &amp; RUNTIMES ]</h3>
+              <p class="skill-list">Go (Golang), TypeScript / Bun, Java (gRPC), Ruby on Rails, Python</p>
             </div>
             <div class="skill-block">
-              <h3 class="skill-title">[ DATABASES ]</h3>
-              <p class="skill-list">PostgreSQL, Redis</p>
+              <h3 class="skill-title">[ DATA &amp; MESSAGING ]</h3>
+              <p class="skill-list">PostgreSQL, Redis, SQLite (WAL), NSQ, Kafka</p>
             </div>
             <div class="skill-block">
-              <h3 class="skill-title">[ MESSAGE BROKERS ]</h3>
-              <p class="skill-list">NSQ</p>
+              <h3 class="skill-title">[ INFRASTRUCTURE &amp; AI ORG ]</h3>
+              <p class="skill-list">Linux Kernel Tuning (BBR / Cgroups), Caddy, Kubernetes, Multi-Agent SDLC</p>
             </div>
             <div class="skill-block">
               <h3 class="skill-title">[ EDUCATION ]</h3>
-              <p class="skill-list">B.S. Computer Science — IPB</p>
+              <p class="skill-list">B.S. Computer Science — IPB University</p>
             </div>
+          </div>
+        </section>
+
+        <!-- Autonomous Agent Organization -->
+        <section class="content-section">
+          <h2 class="section-head">Autonomous 7-Agent Workforce</h2>
+          <div class="fleet-list">
+            {fleet.map((agent) => (
+              <div class="fleet-row">
+                <div class="fleet-main">
+                  <strong class="fleet-name">{agent.name}</strong>
+                  <span class="fleet-role">{agent.role}</span>
+                </div>
+                <span class="fleet-focus">{agent.focus}</span>
+              </div>
+            ))}
           </div>
         </section>
 
@@ -86,7 +92,7 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
               <div class="timeline-content">
                 <h3 class="timeline-role">Software Engineer</h3>
                 <p class="timeline-company">Flip</p>
-                <p class="timeline-desc">Part of the Lifestyle Team.</p>
+                <p class="timeline-desc">Part of the Lifestyle Team building reliable, high-throughput financial and consumer services.</p>
               </div>
             </div>
 
@@ -97,7 +103,7 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
               </div>
               <div class="timeline-content">
                 <h3 class="timeline-role">Software Engineer</h3>
-                <p class="timeline-company">ByteDance & GoTo Logistics</p>
+                <p class="timeline-company">ByteDance &amp; GoTo Logistics</p>
                 <p class="timeline-desc">Global E-Commerce – Supply Chain and Logistics (Dilayani Tokopedia).</p>
               </div>
             </div>
@@ -109,7 +115,7 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
               </div>
               <div class="timeline-content">
                 <h3 class="timeline-role">Software Engineer</h3>
-                <p class="timeline-company">Tokopedia & GoTo Financial</p>
+                <p class="timeline-company">Tokopedia &amp; GoTo Financial</p>
                 <p class="timeline-desc">Core Payment team and GoPay Merchant Gateway.</p>
               </div>
             </div>
@@ -138,21 +144,9 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
 </html>
 
 <style>
-  .topbar-inner {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .active-nav {
-    color: var(--gray-100);
-    text-decoration: underline;
-    text-underline-offset: 4px;
-    font-weight: 600;
-  }
   .main-container {
     padding-top: 2rem;
     padding-bottom: 4rem;
-    max-width: 800px;
   }
   .page-hero {
     border-bottom: 1px dashed var(--gray-30);
@@ -171,7 +165,8 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
   .status-indicator {
     width: 8px;
     height: 8px;
-    background: var(--gray-100);
+    background: #10b981;
+    box-shadow: 0 0 8px #10b981;
     border-radius: 50%;
   }
   .page-title {
@@ -183,23 +178,10 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
     line-height: 1.2;
     margin-bottom: 1.5rem;
   }
-  .prose {
-    font-family: var(--font-sans);
-    font-size: 1.1rem;
-    line-height: 1.6;
-    color: var(--gray-80);
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-  .prose strong {
-    color: var(--gray-100);
-  }
-  
   .content-grid {
     display: flex;
     flex-direction: column;
-    gap: 4rem;
+    gap: 3.5rem;
   }
   .section-head {
     font-family: var(--font-sans);
@@ -210,11 +192,10 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
     border-bottom: 2px solid var(--gray-20);
     padding-bottom: 0.5rem;
   }
-
   .skills-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 2rem;
+    gap: 1.75rem;
   }
   @media (max-width: 600px) {
     .skills-grid {
@@ -223,21 +204,57 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
   }
   .skill-title {
     font-family: var(--font-mono);
-    font-size: 0.85rem;
-    color: var(--gray-60);
-    margin-bottom: 0.5rem;
+    font-size: 0.82rem;
+    color: #38bdf8;
+    margin-bottom: 0.45rem;
     font-weight: 600;
   }
   .skill-list {
     font-family: var(--font-sans);
-    font-size: 1.05rem;
+    font-size: 1.02rem;
     color: var(--gray-90);
+    line-height: 1.5;
   }
-
+  .fleet-list {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--gray-20);
+  }
+  .fleet-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.85rem 1.15rem;
+    border-bottom: 1px solid var(--gray-20);
+    flex-wrap: wrap;
+  }
+  .fleet-row:last-child {
+    border-bottom: none;
+  }
+  .fleet-main {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+  }
+  .fleet-name {
+    font-family: var(--font-mono);
+    color: var(--gray-100);
+    font-size: 0.95rem;
+  }
+  .fleet-role {
+    font-family: var(--font-mono);
+    color: #38bdf8;
+    font-size: 0.78rem;
+  }
+  .fleet-focus {
+    font-size: 0.88rem;
+    color: var(--gray-60);
+  }
   .timeline {
     display: flex;
     flex-direction: column;
-    gap: 2.5rem;
+    gap: 2.25rem;
   }
   .timeline-item {
     display: grid;
@@ -250,15 +267,14 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
       gap: 0.5rem;
     }
   }
-  .timeline-meta {
+  .timeline-date {
     font-family: var(--font-mono);
     font-size: 0.85rem;
     color: var(--gray-50);
-    padding-top: 0.2rem;
   }
   .timeline-role {
     font-family: var(--font-sans);
-    font-size: 1.25rem;
+    font-size: 1.2rem;
     font-weight: 700;
     color: var(--gray-100);
     margin-bottom: 0.25rem;
@@ -266,16 +282,15 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
   .timeline-company {
     font-family: var(--font-mono);
     font-size: 0.9rem;
-    color: var(--gray-60);
-    margin-bottom: 1rem;
+    color: var(--gray-70);
+    margin-bottom: 0.6rem;
   }
   .timeline-desc {
     font-family: var(--font-sans);
-    font-size: 1rem;
-    line-height: 1.6;
-    color: var(--gray-70);
+    font-size: 0.98rem;
+    color: var(--gray-60);
+    line-height: 1.5;
   }
-  
   .back-link {
     text-decoration: none;
     color: var(--gray-80);

@@ -1,54 +1,44 @@
-# thio.dev
+# `thio.dev` — Personal Engineering Console, Blog, Showcase & Live Agent Office
 
-Personal website of **Herdi Agusthio (Thio)** — a *System Changelog & Telemetry Console*.
+Static engineering platform, architecture lab, and live 2D/3D Agent Command Bridge for **Herdi Agusthio**, built with **Astro 7 SSG** and served directly by **Caddy** from `/var/www/thio.dev` (`0 MB` runtime daemon memory).
 
-Instead of a static resume, the site is a live changelog of engineering
-decisions and work sessions, generated at build time from markdown in the
-`second-brain` repo. See [ADR 002](https://github.com/) for the concept.
+---
 
-## Stack
+## 🌐 Live Public Routes
 
-- [Astro](https://astro.build) — static site generator (ships ~zero JS)
-- Plain CSS (dark "console" theme, cyan accent)
-- Deployed free on GitHub Pages via GitHub Actions
+- **System Console (Home)**: [`https://thio.103.217.144.64.nip.io/`](https://thio.103.217.144.64.nip.io/)
+- **Engineering Blog & Reflections**: [`https://thio.103.217.144.64.nip.io/blog`](https://thio.103.217.144.64.nip.io/blog)
+- **Architecture Showcase, Labs & ADRs (`001`–`015`)**: [`https://thio.103.217.144.64.nip.io/showcase`](https://thio.103.217.144.64.nip.io/showcase)
+- **Autonomous 7-Agent Command Bridge (2D/3D Live Office)**: [`https://thio.103.217.144.64.nip.io/office`](https://thio.103.217.144.64.nip.io/office)
+- **KubeQuest Interactive Kubernetes Odyssey**: [`https://thio.103.217.144.64.nip.io/k8s/`](https://thio.103.217.144.64.nip.io/k8s/)
+- **Sanitized Public Telemetry Bridge API**: [`https://api.thio.103.217.144.64.nip.io/office`](https://api.thio.103.217.144.64.nip.io/office)
 
-## How it works
+---
 
-```
-second-brain/journal/*.md      ─┐
-second-brain/decisions/*.md    ─┤  npm run sync   →  content/
-                                └─────────────────────┘
-                                          │  astro build
-                                          ▼
-                                  src/lib/feed.ts  →  chronological feed  →  dist/
-```
+## 🚀 How-To-Use & Verification Commands
 
-- `scripts/sync-content.mjs` copies public markdown from `../second-brain`
-  into `content/`. It's non-fatal if the source is missing (CI uses the
-  committed `content/`). Override the source with `SECOND_BRAIN_DIR`.
-- `src/lib/feed.ts` parses journal days and ADRs into a sorted feed at build time.
-
-## Develop
-
+### 1. Sync Second-Brain Content, Build & Deploy to `/var/www/thio.dev`
 ```bash
-npm install
-npm run dev        # sync + astro dev at http://localhost:4321
-npm run build      # sync + astro build → dist/
-npm run preview    # serve the built dist/
+cd ~/code-storage/thio.dev
+./ship.sh
+```
+*(Automatically runs `scripts/sync-content.mjs` from `~/code-storage/second-brain`, compiles static routes + JSON-LD schemas into `dist/`, verifies `dist/index.html` and `dist/k8s/index.html`, and syncs to `/var/www/thio.dev/`.)*
+
+### 2. Verify Live Routes & JSON-LD Schema via `curl`
+```bash
+# Verify Homepage, Blog, Showcase, Office, and KubeQuest HTTP 200
+for path in "/" "/blog/" "/showcase/" "/office/" "/k8s/"; do
+  printf "%-15s -> HTTP %s\n" "$path" "$(curl -s -o /dev/null -w '%{http_code}' https://thio.103.217.144.64.nip.io$path)"
+done
+
+# Inspect JSON-LD Structured Schema on latest Blog Post
+curl -s https://thio.103.217.144.64.nip.io/blog/refactoring-ai-agent-cockpit-zero-dependency-bun-dan-ui-ux-overhaul/ | grep -o '<script type="application/ld+json">.*</script>'
+
+# Verify Live 7-Agent Office Telemetry API
+curl -s https://api.thio.103.217.144.64.nip.io/office | jq .summary
 ```
 
-## Deploy
-
-Pushing to `main` triggers `.github/workflows/deploy.yml`, which builds and
-publishes to GitHub Pages. Enable **Settings → Pages → Source: GitHub Actions**.
-
-- **Custom domain** (`thio.dev`): leave `BASE_PATH` unset (base `/`) and add a
-  `CNAME` file / configure the domain in repo settings.
-- **Project page** (`<user>.github.io/thio.dev`): set `BASE_PATH: /thio.dev` in
-  the workflow's build step.
-
-## Roadmap
-
-- **v1 (done):** center-column changelog feed
-- **v2:** Architecture Blueprint column (ADR layer visualization)
-- **v3:** static Telemetry panel + accent-color theme switcher
+### 3. Run Security & Quality Gate
+```bash
+/home/thiohermes/.hermes/scripts/sdlc-scanner.sh ~/code-storage/thio.dev
+```

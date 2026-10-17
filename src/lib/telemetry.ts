@@ -14,8 +14,8 @@ export function getPulseData() {
     auth_level: 'SYS_ADMIN',
     timestamp: new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
     host: 'VPS-MAIN',
-    proxy: 'Caddy v2',
-    runtime: 'Go 1.23 / Bun 1.4 / Astro SSG',
+    proxy: 'Caddy v2 (TCP BBR)',
+    runtime: 'Go 1.23 / Bun 1.4 / Astro 7 SSG',
     memoryGuard: 'RAM <= 1.9GB (Headroom >= 500MB)',
   };
 }
@@ -29,12 +29,12 @@ export function resolveMetadata(component: string) {
 
 export function getAgentFleet(): AgentInfo[] {
   return [
-    { id: 'leadya', name: 'LEADYA', role: 'Chief Orchestrator / CEO', focus: 'Autonomous Org Execution & Alignment', status: 'ACTIVE', modelTier: 'Fast/Standard' },
-    { id: 'prime', name: 'Prime', role: 'Principal Technical Architect', focus: 'System Architecture & Review Gate', status: 'ONLINE', modelTier: 'Standard' },
-    { id: 'goder', name: 'Goder', role: 'Senior Go Backend Engineer', focus: 'High Concurrency & Scatter-Gather APIs', status: 'ONLINE', modelTier: 'Standard' },
-    { id: 'sysca', name: 'Sysca', role: 'Infraguard / DevOps & Reliability', focus: 'Linux VPS, Caddy & Memory Guard', status: 'ONLINE', modelTier: 'Standard' },
-    { id: 'pixel', name: 'Pixel', role: 'Frontend & UI/UX Architect', focus: 'Astro SSG & System Console Tokens', status: 'ONLINE', modelTier: 'Standard' },
-    { id: 'lexa', name: 'Lexa', role: 'Technical Narrative & Case Studies', focus: 'Architecture Documentation & RFCs', status: 'ONLINE', modelTier: 'Standard' },
-    { id: 'luna', name: 'Luna', role: 'Product Strategist & PRD Architect', focus: 'Product Requirements & User Flows', status: 'ONLINE', modelTier: 'Standard' },
+    { id: 'root', name: 'LEADYA', role: 'CEO & Chief Orchestrator', focus: 'Autonomous Org Execution & Alignment', status: 'ACTIVE', modelTier: 'Frontier Reasoning' },
+    { id: 'prime', name: 'Prime', role: 'Principal Engineer & Head of Eng', focus: 'System Architecture, ADRs & Review Gate', status: 'ONLINE', modelTier: 'Fast Standard' },
+    { id: 'agy', name: 'Antigravity', role: 'Lead Agentic Engineer (Full-Stack)', focus: 'Go, TypeScript/Bun, Astro & TDD Verification', status: 'ACTIVE', modelTier: 'AGY Engine' },
+    { id: 'infraguard', name: 'Sysca', role: 'Infraguard / DevOps & Reliability', focus: 'Linux VPS, Caddy, Systemd Slices & RAM Guard', status: 'ONLINE', modelTier: 'Fast Standard' },
+    { id: 'luna', name: 'Luna', role: 'Product Owner & Manager', focus: 'PRDs, Feature ROI & UX Information Architecture', status: 'ONLINE', modelTier: 'Fast Standard' },
+    { id: 'lexa', name: 'Lexa', role: 'Content & Narrative Specialist', focus: 'Technical Blogging, AI SEO & JSON-LD Schema', status: 'ONLINE', modelTier: 'Fast Standard' },
+    { id: 'caren', name: 'Caren', role: 'Personal Executive Assistant', focus: 'Financial Intelligence, Schedule & Workspace Ops', status: 'ONLINE', modelTier: 'Balanced Standard' },
   ];
 }
