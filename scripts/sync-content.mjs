@@ -58,9 +58,11 @@ function main() {
   const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
   const source = process.env.SECOND_BRAIN_DIR || path.resolve(siteRoot, '..', 'second-brain');
 
-  if (!fs.existsSync(source)) {
-    // Fail rather than build stale content/: on the VPS that would deploy the wrong site.
-    console.error(`✗ second-brain source not found: ${source}`);
+  // Fail on a missing or partial source rather than build stale content/: on the VPS that would
+  // deploy the wrong site.
+  const missing = TARGETS.map(([src]) => src).filter((src) => !fs.existsSync(path.join(source, src)));
+  if (missing.length) {
+    console.error(`✗ second-brain source incomplete: ${missing.join(', ')} missing in ${source}`);
     console.error('  Clone it next to this repo, or set SECOND_BRAIN_DIR (fixtures/second-brain for sample content).');
     process.exitCode = 1;
     return;
