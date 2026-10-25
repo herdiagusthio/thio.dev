@@ -1,23 +1,4 @@
----
-import { getPulseData } from "../lib/telemetry";
-
-const pulse = getPulseData();
----
 <section class="hero-console">
-  <!-- System Status Bar -->
-  <div class="sys-header">
-    <div class="sys-pulse">
-      <span class="pulse-indicator"></span>
-      <span class="signal-text">{pulse.signal}</span>
-      <span class="host-pill">[{pulse.host}]</span>
-      <span class="host-pill">[7-AGENT FLEET]</span>
-    </div>
-    <div class="sys-status-meta">
-      <span class="auth-level">[{pulse.memoryGuard}]</span>
-      <span class="ts-label">[TS:{pulse.timestamp}]</span>
-    </div>
-  </div>
-  
   <!-- Operator Profile -->
   <div class="sys-operator">
     <div class="operator-dossier">
@@ -31,10 +12,10 @@ const pulse = getPulseData();
 
   <!-- Action Commands -->
   <div class="sys-actions">
-    <a href="/showcase" class="cmd-btn primary">[ EXEC: SHOWCASE &amp; ADRs ]</a>
-    <a href="/office" class="cmd-btn highlight">[ LAUNCH: 2D/3D AGENT OFFICE ]</a>
-    <a href="/blog" class="cmd-btn secondary">[ EXEC: BLOG ]</a>
-    <a href="/k8s/" class="cmd-btn secondary">[ PLAY: KUBEQUEST ☸️ ]</a>
+    <a href="/showcase" class="cmd-btn primary">[ CASE STUDIES ]</a>
+    <a href="/office" class="cmd-btn highlight">[ LIVE OFFICE ]</a>
+    <a href="/blog" class="cmd-btn secondary">[ WRITING ]</a>
+    <a href="/contact" class="cmd-btn secondary">[ CONTACT ]</a>
   </div>
 </section>
 
@@ -47,48 +28,7 @@ const pulse = getPulseData();
     padding: 2rem;
     margin: 2rem 0;
   }
-  
-  .sys-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.78rem;
-    color: var(--gray-50);
-    border-bottom: 1px dashed var(--gray-20);
-    padding-bottom: 1rem;
-    margin-bottom: 1.75rem;
-  }
-  
-  .sys-pulse {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.6rem;
-  }
-  
-  .pulse-indicator {
-    width: 8px;
-    height: 8px;
-    background: #10b981;
-    box-shadow: 0 0 8px #10b981;
-    border-radius: 50%;
-    animation: blink 2s steps(2, start) infinite;
-  }
-  
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.35; }
-  }
 
-  .host-pill {
-    color: var(--gray-60);
-  }
-
-  .sys-status-meta {
-    display: flex;
-    gap: 0.85rem;
-  }
-  
   .sys-operator {
     margin-bottom: 2rem;
   }
@@ -102,7 +42,7 @@ const pulse = getPulseData();
     color: var(--gray-100);
     line-height: 1.1;
   }
-  
+
   .operator-role {
     font-family: var(--font-mono);
     font-size: 0.92rem;
@@ -110,7 +50,7 @@ const pulse = getPulseData();
     margin-bottom: 1.25rem;
     font-weight: 600;
   }
-  
+
   .operator-bio {
     font-family: var(--font-sans);
     font-size: 1.05rem;
@@ -121,13 +61,13 @@ const pulse = getPulseData();
   .operator-bio strong {
     color: var(--gray-100);
   }
-  
+
   .sys-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 0.85rem;
   }
-  
+
   .cmd-btn {
     font-family: var(--font-mono);
     font-size: 0.82rem;
@@ -136,24 +76,24 @@ const pulse = getPulseData();
     transition: color 0.2s, background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
     font-weight: 600;
   }
-  
+
   .cmd-btn.primary {
     background: var(--gray-100);
     color: var(--gray-0);
     border: 1px solid var(--gray-100);
   }
-  
+
   .cmd-btn.primary:hover {
     background: var(--gray-80);
     border-color: var(--gray-80);
   }
-  
+
   .cmd-btn.secondary {
     color: var(--gray-90);
     border: 1px solid var(--gray-30);
     background: var(--gray-0);
   }
-  
+
   .cmd-btn.secondary:hover {
     color: var(--gray-100);
     border-color: var(--gray-60);
@@ -173,18 +113,13 @@ const pulse = getPulseData();
     box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
   }
 
-  @media (max-width: 900px) {
-    .sys-header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.75rem;
+  /* Phones: no box around the hero, so the bio gets the full width */
+  @media (max-width: 640px) {
+    .hero-console {
+      border: none;
+      padding: 0;
+      margin: 1.5rem 0 2rem;
     }
-    .sys-status-meta {
-      flex-wrap: wrap;
-    }
-  }
-
-  @media (max-width: 600px) {
     .operator-name {
       font-size: 2rem;
     }
