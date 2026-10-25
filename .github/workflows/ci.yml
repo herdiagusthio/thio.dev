@@ -1,5 +1,6 @@
-# Verify only. Deploys go through ./ship.sh on the VPS, which syncs fresh content from
-# second-brain; CI builds from the committed content/ and must not overwrite that.
+# Verify only. Deploys go through ./ship.sh on the VPS, which syncs the real content from
+# second-brain. content/ is git-ignored, so CI generates it from the sample second-brain, which
+# also exercises the sync allowlist end to end.
 name: CI
 
 on:
@@ -10,6 +11,8 @@ on:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    env:
+      SECOND_BRAIN_DIR: fixtures/second-brain
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -20,3 +23,10 @@ jobs:
       - run: npm run check
       - run: npm test
       - run: npm run build
+      - name: Public samples built, private samples kept out of dist/
+        run: |
+          ls dist/decisions/001-sample-static-site/index.html dist/blog/sample-post/index.html dist/showcase/sample-case-study/index.html
+          if grep -rl PRIVATE-FIXTURE dist; then
+            echo "::error::private sample content reached dist/ — the sync allowlist is broken"
+            exit 1
+          fi

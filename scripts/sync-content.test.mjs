@@ -1,8 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { copyDir, isPublic } from './sync-content.mjs';
 
 const PUBLISHED = ['published'];
@@ -54,5 +56,28 @@ test('copyDir: copies public files and prunes everything else from the destinati
     assert.deepEqual(fs.readdirSync(dest).sort(), ['keep.txt', 'public.md'], 'missing source leaves dest untouched');
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
+test('main: a missing or incomplete source fails instead of building whatever content/ holds', () => {
+  const script = fileURLToPath(new URL('./sync-content.mjs', import.meta.url));
+  const sync = (dir) =>
+    spawnSync(process.execPath, [script], { env: { ...process.env, SECOND_BRAIN_DIR: dir }, encoding: 'utf8' });
+
+  const missing = sync(path.join(os.tmpdir(), 'no-such-second-brain'));
+  assert.equal(missing.status, 1);
+  assert.match(missing.stderr, /second-brain source incomplete: .*decisions/);
+
+  // A partial clone: two of the three source folders. It must fail before touching content/.
+  const partial = fs.mkdtempSync(path.join(os.tmpdir(), 'sync-partial-'));
+  try {
+    fs.mkdirSync(path.join(partial, 'decisions'));
+    fs.mkdirSync(path.join(partial, 'knowledge', 'engineering'), { recursive: true });
+    const run = sync(partial);
+    assert.equal(run.status, 1);
+    assert.match(run.stderr, /second-brain source incomplete: .*knowledge\/blog/);
+    assert.doesNotMatch(run.stderr, /decisions/);
+  } finally {
+    fs.rmSync(partial, { recursive: true, force: true });
   }
 });
