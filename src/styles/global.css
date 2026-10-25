@@ -164,6 +164,10 @@ a:hover {
   border-color: var(--gray-80);
   background: var(--gray-10);
 }
+/* [ID] on cards of Indonesian posts */
+.lang-badge abbr {
+  text-decoration: none;
+}
 .filter-empty {
   font-family: var(--font-mono);
   font-size: 0.85rem;

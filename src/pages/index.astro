@@ -31,15 +31,16 @@ const decisionItems = decisions.slice(0, 4);
                 <article class="feature-card">
                   <div class="card-meta">
                     <span class="mono-bracket">[{item.date}]</span>
+                    {item.lang === 'id' && <span class="mono-bracket lang-badge">[<abbr title="Bahasa Indonesia">ID</abbr>]</span>}
                     <span class="mono-bracket reading-badge"><span aria-hidden="true">⏱</span> {item.readingTimeMinutes} min read</span>
                     {item.tags.slice(0, 3).map(tag => (
                       <span class="mono-bracket tag">#{tag}</span>
                     ))}
                   </div>
-                  <h3 class="card-title">
+                  <h3 class="card-title" lang={item.lang}>
                     <a href={item.url}>{item.title}</a>
                   </h3>
-                  <div class="card-summary">{item.summaryText}</div>
+                  <div class="card-summary" lang={item.lang}>{item.summaryText}</div>
                   <a href={item.url} class="card-link">[ READ ESSAY → ]</a>
                 </article>
               ))}

@@ -12,6 +12,7 @@ export interface Item {
   date: string; // YYYY-MM-DD
   tags: string[];
   status: string;
+  lang: 'en' | 'id';
   summaryText: string;
   readingTimeMinutes: number;
   url: string;
@@ -44,6 +45,7 @@ export async function getEntries(kind: Kind): Promise<Item[]> {
       date: entry.data.date,
       tags: entry.data.tags,
       status: entry.data.status,
+      lang: entry.data.lang,
       summaryText: summarize(kind, entry.data, body),
       readingTimeMinutes: estimateReadingTime(body),
       url: `${URL_PREFIX[kind]}/${entry.id}`,

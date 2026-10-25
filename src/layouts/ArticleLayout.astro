@@ -4,7 +4,7 @@ import ArticleEnhancer, { type NavLink } from '../components/ArticleEnhancer.ast
 import ContactCta from '../components/ContactCta.astro';
 
 export interface Props {
-  item: { title: string; date: string; tags: string[]; readingTimeMinutes: number; summaryText: string };
+  item: { title: string; date: string; tags: string[]; readingTimeMinutes: number; summaryText: string; lang: 'en' | 'id' };
   active: 'blog' | 'showcase';
   seoTitle: string;
   canonicalPath: string;
@@ -28,6 +28,7 @@ const { item, active, seoTitle, canonicalPath, schemaType, eyebrow, statusLabel,
   tags={item.tags}
   readingTimeMinutes={item.readingTimeMinutes}
   schemaType={schemaType}
+  lang={item.lang}
   active={active}
 >
   <main id="main" class="wrap main-container">
@@ -39,8 +40,8 @@ const { item, active, seoTitle, canonicalPath, schemaType, eyebrow, statusLabel,
           <span class="reading-pill"><span aria-hidden="true">⏱</span> {item.readingTimeMinutes} MIN READ</span>
           {statusLabel && <span class="status-pill">[{statusLabel}]</span>}
         </div>
-        <h1>{item.title}</h1>
-        {showSummary && item.summaryText && <p class="summary-lead">{item.summaryText}</p>}
+        <h1 lang={item.lang}>{item.title}</h1>
+        {showSummary && item.summaryText && <p class="summary-lead" lang={item.lang}>{item.summaryText}</p>}
         {item.tags.length > 0 && (
           <div class="tags-row">
             {item.tags.map((t) => <span class="tag-badge">#{t}</span>)}
@@ -48,7 +49,7 @@ const { item, active, seoTitle, canonicalPath, schemaType, eyebrow, statusLabel,
         )}
       </header>
 
-      <div class="prose"><slot /></div>
+      <div class="prose" lang={item.lang}><slot /></div>
     </article>
 
     <ContactCta />
