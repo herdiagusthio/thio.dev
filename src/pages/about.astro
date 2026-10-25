@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import ContactCta from '../components/ContactCta.astro';
 import { AGENTS as fleet } from '../data/agents';
 ---
 <BaseLayout
@@ -31,45 +32,6 @@ import { AGENTS as fleet } from '../data/agents';
       </section>
 
       <div class="content-grid">
-        <!-- Skills -->
-        <section class="content-section">
-          <h2 class="section-head">Core Protocols (Skills)</h2>
-          <div class="skills-grid">
-            <div class="skill-block">
-              <h3 class="skill-title">[ LANGUAGES &amp; RUNTIMES ]</h3>
-              <p class="skill-list">Go (Golang), TypeScript / Bun, Java (gRPC), Ruby on Rails, Python</p>
-            </div>
-            <div class="skill-block">
-              <h3 class="skill-title">[ DATA &amp; MESSAGING ]</h3>
-              <p class="skill-list">PostgreSQL, Redis, SQLite (WAL), NSQ, Kafka</p>
-            </div>
-            <div class="skill-block">
-              <h3 class="skill-title">[ INFRASTRUCTURE &amp; AI ORG ]</h3>
-              <p class="skill-list">Linux Kernel Tuning (BBR / Cgroups), Caddy, Kubernetes, Multi-Agent SDLC</p>
-            </div>
-            <div class="skill-block">
-              <h3 class="skill-title">[ EDUCATION ]</h3>
-              <p class="skill-list">B.S. Computer Science — IPB University</p>
-            </div>
-          </div>
-        </section>
-
-        <!-- Autonomous Agent Organization -->
-        <section class="content-section">
-          <h2 class="section-head">Autonomous 7-Agent Workforce</h2>
-          <div class="fleet-list">
-            {fleet.map((agent) => (
-              <div class="fleet-row">
-                <div class="fleet-main">
-                  <strong class="fleet-name">{agent.name}</strong>
-                  <span class="fleet-role">{agent.role}</span>
-                </div>
-                <span class="fleet-focus">{agent.focus}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-
         <!-- Experience -->
         <section class="content-section">
           <h2 class="section-head">Execution History</h2>
@@ -124,7 +86,48 @@ import { AGENTS as fleet } from '../data/agents';
             </div>
           </div>
         </section>
+
+        <!-- Skills -->
+        <section class="content-section">
+          <h2 class="section-head">Core Protocols (Skills)</h2>
+          <div class="skills-grid">
+            <div class="skill-block">
+              <h3 class="skill-title">[ LANGUAGES &amp; RUNTIMES ]</h3>
+              <p class="skill-list">Go (Golang), TypeScript / Bun, Java (gRPC), Ruby on Rails, Python</p>
+            </div>
+            <div class="skill-block">
+              <h3 class="skill-title">[ DATA &amp; MESSAGING ]</h3>
+              <p class="skill-list">PostgreSQL, Redis, SQLite (WAL), NSQ, Kafka</p>
+            </div>
+            <div class="skill-block">
+              <h3 class="skill-title">[ INFRASTRUCTURE &amp; AI ORG ]</h3>
+              <p class="skill-list">Linux Kernel Tuning (BBR / Cgroups), Caddy, Kubernetes, Multi-Agent SDLC</p>
+            </div>
+            <div class="skill-block">
+              <h3 class="skill-title">[ EDUCATION ]</h3>
+              <p class="skill-list">B.S. Computer Science — IPB University</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Autonomous Agent Organization -->
+        <section class="content-section">
+          <h2 class="section-head">Autonomous 7-Agent Workforce</h2>
+          <div class="fleet-list">
+            {fleet.map((agent) => (
+              <div class="fleet-row">
+                <div class="fleet-main">
+                  <strong class="fleet-name">{agent.name}</strong>
+                  <span class="fleet-role">{agent.role}</span>
+                </div>
+                <span class="fleet-focus">{agent.focus}</span>
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
+
+      <ContactCta />
     </main>
     <a slot="footer" href="/" class="back-link">[ ← RETURN TO CONSOLE ]</a>
 </BaseLayout>
