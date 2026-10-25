@@ -113,22 +113,7 @@ const allTags = Array.from(new Set(items.flatMap((i) => i.tags))).slice(0, 10);
       <p class="section-desc">
         Immutable engineering decisions governing single-VPS memory ceilings, multi-agent orchestration, model routing, and security invariants.
       </p>
-      <div class="adr-table">
-        {adrs.map((adr) => (
-          <article class="adr-row-card">
-            <div class="adr-row-top">
-              <span class="card-date">[{adr.date}]</span>
-              <span class="card-reading"><span aria-hidden="true">⏱</span> {adr.readingTimeMinutes} min read</span>
-              <span class="adr-accepted-pill">[{adr.status.toUpperCase()}]</span>
-            </div>
-            <h3 class="adr-row-title">
-              <a href={adr.url}>{adr.title}</a>
-            </h3>
-            <p class="adr-row-summary">{adr.summaryText}</p>
-            <a href={adr.url} class="exec-link">[ READ DECISION RECORD → ]</a>
-          </article>
-        ))}
-      </div>
+      <a href="/decisions" class="exec-link">[ BROWSE ALL {adrs.length} DECISION RECORDS → ]</a>
     </section>
   </main>
   <a slot="footer" href="/" class="back-link">[ ← RETURN TO CONSOLE ]</a>
@@ -312,50 +297,5 @@ const allTags = Array.from(new Set(items.flatMap((i) => i.tags))).slice(0, 10);
     color: var(--gray-70);
     font-size: 0.98rem;
     margin-bottom: 1.5rem;
-  }
-  .adr-table {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-  .adr-row-card {
-    border: 1px solid var(--gray-20);
-    padding: 1.35rem 1.5rem;
-    background: var(--gray-0);
-    transition: border-color 0.2s, background 0.2s;
-  }
-  .adr-row-card:hover {
-    border-color: var(--gray-60);
-    background: var(--gray-10);
-  }
-  .adr-row-top {
-    display: flex;
-    gap: 0.85rem;
-    align-items: center;
-    font-family: var(--font-mono);
-    font-size: 0.74rem;
-    color: var(--gray-50);
-    margin-bottom: 0.5rem;
-  }
-  .adr-accepted-pill {
-    color: #10b981;
-    font-weight: 600;
-  }
-  .adr-row-title {
-    font-size: 1.15rem;
-    margin-bottom: 0.5rem;
-  }
-  .adr-row-title a {
-    color: var(--gray-100);
-    text-decoration: none;
-  }
-  .adr-row-title a:hover {
-    text-decoration: underline;
-  }
-  .adr-row-summary {
-    color: var(--gray-70);
-    font-size: 0.94rem;
-    line-height: 1.55;
-    margin-bottom: 0.85rem;
   }
 </style>

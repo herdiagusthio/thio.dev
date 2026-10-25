@@ -1,0 +1,48 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getEntries } from '../../lib/content';
+
+const adrs = await getEntries('decisions');
+---
+<BaseLayout
+  title="Architecture Decision Records (ADRs) — thio.dev"
+  description="Architecture Decision Records by Herdi Agusthio: single-VPS memory ceilings, multi-agent orchestration, model routing and security invariants, newest first."
+  canonicalPath="/decisions"
+  schemaType="WebSite"
+  active="showcase"
+>
+  <main id="main" class="wrap main-container">
+    <div class="meta-status">
+      <span class="status-indicator"></span>
+      <span class="mono-label">[ADRs:{adrs.length}]</span>
+    </div>
+    <h1 class="page-title">Architecture Decision Records</h1>
+    <p class="page-desc">
+      The engineering decisions behind this site, the VPS and the agent organization: what was decided, why, and what it replaced. Newest first.
+    </p>
+
+    <div class="adr-compact-list">
+      {adrs.map((adr) => (
+        <a href={adr.url} class="adr-compact-row">
+          <div class="adr-left">
+            <span class="adr-date">[{adr.date}]</span>
+            <strong class="adr-title">{adr.title}</strong>
+          </div>
+          <span class:list={['adr-status', adr.status]}>[{adr.status.toUpperCase()} →]</span>
+        </a>
+      ))}
+    </div>
+  </main>
+  <a slot="footer" href="/showcase" class="back-link">[ ← SHOWCASE ]</a>
+</BaseLayout>
+
+<style>
+  .page-desc {
+    font-family: var(--font-sans);
+    font-size: 1.05rem;
+    line-height: 1.65;
+    color: var(--gray-70);
+    max-width: 70ch;
+    margin-bottom: 2rem;
+  }
+</style>
