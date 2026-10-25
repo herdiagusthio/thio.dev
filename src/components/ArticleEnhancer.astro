@@ -16,6 +16,7 @@ const { prev = null, next = null } = Astro.props;
 <div class="reading-progress-track" aria-hidden="true">
   <div id="readingProgressBar" class="reading-progress-bar"></div>
 </div>
+<p id="copyStatus" class="sr-only" role="status"></p>
 
 {(prev || next) && (
   <nav class="article-pager" aria-label="Adjacent Articles">
@@ -49,7 +50,11 @@ const { prev = null, next = null } = Astro.props;
       updateProgress();
     }
 
-    // 2. Copy button on all <pre> blocks inside .prose
+    // 2. Copy button on all <pre> blocks inside .prose; the result is announced via #copyStatus
+    const announce = (msg) => {
+      const status = document.getElementById('copyStatus');
+      if (status) status.textContent = msg;
+    };
     document.querySelectorAll('.prose pre').forEach((pre) => {
       if (pre.querySelector('.code-copy-btn')) return;
       pre.style.position = 'relative';
@@ -57,17 +62,25 @@ const { prev = null, next = null } = Astro.props;
       btn.type = 'button';
       btn.className = 'code-copy-btn';
       btn.textContent = '[ COPY ]';
+      btn.setAttribute('aria-label', 'Copy code');
       btn.addEventListener('click', async () => {
         const code = pre.querySelector('code')?.innerText || pre.innerText;
         try {
           await navigator.clipboard.writeText(code);
           btn.textContent = '[ COPIED ✓ ]';
+          announce('Code copied');
           setTimeout(() => { btn.textContent = '[ COPY ]'; }, 1800);
         } catch {
           btn.textContent = '[ ERROR ]';
+          announce('Copy failed');
         }
       });
       pre.appendChild(btn);
+    });
+
+    // 3. Horizontally scrollable code blocks and tables must be reachable by keyboard
+    document.querySelectorAll('.prose pre, .prose table').forEach((el) => {
+      el.setAttribute('tabindex', '0');
     });
   });
 </script>
