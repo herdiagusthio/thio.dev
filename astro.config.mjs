@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import { satteri } from '@astrojs/markdown-satteri';
+import sitemap from '@astrojs/sitemap';
 
 // Single source of the public origin: canonical URLs, JSON-LD, sitemap and the office API host
 // (api.<site host>) all derive from it. Override with SITE_URL when the domain moves.
@@ -18,6 +19,8 @@ const stripFirstH1 = {
 
 export default defineConfig({
   site,
+  // Canonical URLs have no trailing slash; list the same URLs in the sitemap.
+  integrations: [sitemap({ serialize: (item) => ({ ...item, url: item.url.replace(/(.)\/$/, '$1') }) })],
   markdown: {
     // Match the previous marked output: no curly quotes, no Shiki colors.
     processor: satteri({ mdastPlugins: [stripFirstH1], features: { smartPunctuation: false } }),
