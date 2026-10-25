@@ -164,6 +164,57 @@ a:hover {
   border-color: var(--gray-80);
   background: var(--gray-10);
 }
+/* [ID] on cards of Indonesian posts */
+.lang-badge abbr {
+  text-decoration: none;
+}
+/* Compact ADR rows: homepage 'Recent ADRs' and /decisions */
+.adr-compact-list {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--gray-20);
+}
+.adr-compact-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--gray-20);
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.adr-compact-row:last-child {
+  border-bottom: none;
+}
+.adr-compact-row:hover {
+  background: var(--gray-10);
+}
+/* Date always above the title: wrapping made short and long titles lay out differently */
+.adr-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.adr-date {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--gray-50);
+}
+.adr-title {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  color: var(--gray-100);
+}
+.adr-status {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: #10b981;
+  white-space: nowrap;
+}
+.adr-status.superseded {
+  color: var(--gray-60);
+}
 .filter-empty {
   font-family: var(--font-mono);
   font-size: 0.85rem;

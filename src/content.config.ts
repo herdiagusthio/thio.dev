@@ -15,9 +15,17 @@ const base = {
   tags: z.array(z.string()).min(1),
   summary: z.string().optional(),
   description: z.string().optional(),
+  // Language of the content; the site chrome stays English. Pages put it on the title, lead and body.
+  lang: z.enum(['en', 'id']).default('en'),
 };
 
-const article = z.object({ ...base, status: z.literal('published') });
+// The summary is the card text and the meta description, so articles must carry a real one.
+const article = z.object({
+  ...base,
+  summary: z.string().min(40, 'summary must be at least 40 characters'),
+  status: z.literal('published'),
+  featured: z.boolean().default(false), // shown on the homepage (case studies)
+});
 
 export const collections = {
   blog: defineCollection({ loader: glob({ base: './content/blog', pattern: '*.md' }), schema: article }),

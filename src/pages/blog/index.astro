@@ -54,12 +54,13 @@ const allTags = Array.from(new Set(items.flatMap((i) => i.tags))).slice(0, 12);
           <div>
             <div class="card-header">
               <span class="card-date">[{item.date}]</span>
+              {item.lang === 'id' && <span class="card-reading lang-badge">[<abbr title="Bahasa Indonesia">ID</abbr>]</span>}
               <span class="card-reading"><span aria-hidden="true">⏱</span> {item.readingTimeMinutes} min read</span>
             </div>
-            <h2 class="card-title">
+            <h2 class="card-title" lang={item.lang}>
               <a href={`/blog/${item.slug}`} class="title-link">{item.title}</a>
             </h2>
-            <p class="card-summary">{item.summaryText}</p>
+            <p class="card-summary" lang={item.lang}>{item.summaryText}</p>
           </div>
           <div class="card-footer">
             <div class="card-tags">

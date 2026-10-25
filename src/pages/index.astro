@@ -5,7 +5,9 @@ import { getEntries } from '../lib/content';
 
 const [blog, engineering, decisions] = await Promise.all([getEntries('blog'), getEntries('engineering'), getEntries('decisions')]);
 const blogItems = blog.slice(0, 4);
-const showcaseItems = engineering.slice(0, 3);
+// Case studies flagged featured: true in second-brain, else the newest three.
+const featured = engineering.filter((item) => item.featured);
+const showcaseItems = (featured.length ? featured : engineering).slice(0, 3);
 const decisionItems = decisions.slice(0, 4);
 ---
 <BaseLayout
@@ -31,15 +33,16 @@ const decisionItems = decisions.slice(0, 4);
                 <article class="feature-card">
                   <div class="card-meta">
                     <span class="mono-bracket">[{item.date}]</span>
+                    {item.lang === 'id' && <span class="mono-bracket lang-badge">[<abbr title="Bahasa Indonesia">ID</abbr>]</span>}
                     <span class="mono-bracket reading-badge"><span aria-hidden="true">⏱</span> {item.readingTimeMinutes} min read</span>
                     {item.tags.slice(0, 3).map(tag => (
                       <span class="mono-bracket tag">#{tag}</span>
                     ))}
                   </div>
-                  <h3 class="card-title">
+                  <h3 class="card-title" lang={item.lang}>
                     <a href={item.url}>{item.title}</a>
                   </h3>
-                  <div class="card-summary">{item.summaryText}</div>
+                  <div class="card-summary" lang={item.lang}>{item.summaryText}</div>
                   <a href={item.url} class="card-link">[ READ ESSAY → ]</a>
                 </article>
               ))}
@@ -76,7 +79,7 @@ const decisionItems = decisions.slice(0, 4);
           <section class="content-section" style="margin-top: 3.5rem;">
             <div class="section-head-row">
               <h2 class="section-head">Recent Architecture Decisions (ADRs)</h2>
-              <a href="/showcase#adrs" class="view-all-link">Browse all ADRs ({decisions.length}) →</a>
+              <a href="/decisions" class="view-all-link">Browse all ADRs ({decisions.length}) →</a>
             </div>
             <div class="adr-compact-list">
               {decisionItems.map(adr => (
@@ -184,48 +187,5 @@ const decisionItems = decisions.slice(0, 4);
       .view-all-link:hover {
         color: var(--gray-100);
         text-decoration: underline;
-      }
-      .adr-compact-list {
-        display: flex;
-        flex-direction: column;
-        border: 1px solid var(--gray-20);
-      }
-      .adr-compact-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 1rem;
-        padding: 1rem 1.25rem;
-        border-bottom: 1px solid var(--gray-20);
-        text-decoration: none;
-        transition: background 0.15s;
-      }
-      .adr-compact-row:last-child {
-        border-bottom: none;
-      }
-      .adr-compact-row:hover {
-        background: var(--gray-10);
-      }
-      .adr-left {
-        display: flex;
-        align-items: baseline;
-        gap: 0.85rem;
-        flex-wrap: wrap;
-      }
-      .adr-date {
-        font-family: var(--font-mono);
-        font-size: 0.75rem;
-        color: var(--gray-50);
-      }
-      .adr-title {
-        font-family: var(--font-sans);
-        font-size: 1rem;
-        color: var(--gray-100);
-      }
-      .adr-status {
-        font-family: var(--font-mono);
-        font-size: 0.74rem;
-        color: #10b981;
-        white-space: nowrap;
       }
     </style>
