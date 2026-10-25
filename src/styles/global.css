@@ -12,29 +12,11 @@
   --gray-90: #e5e5e5;
   --gray-100: #ffffff;
 
-  /* A-001: Multi-layer Z-index */
-  --z-negative: -1;
-  --z-base: 1;
   --z-nav: 100;
-  --z-overlay: 200;
-  --z-popover: 300;
-  --z-toast: 400;
-  --z-max: 999;
 
   /* Brand Typography */
   --font-sans: 'Outfit', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
-
-  /* Layout Tokens */
-  --telemetry-width: 240px;
-  --context-width: 320px;
-
-  /* A-002: Grid System */
-  --grid-unit: 40px;
-  --space-1: calc(var(--grid-unit) * 1);
-  --space-2: calc(var(--grid-unit) * 2);
-  --space-3: calc(var(--grid-unit) * 3);
-  --space-4: calc(var(--grid-unit) * 4);
 }
 
 /* Reset / Base */
@@ -109,6 +91,77 @@ a:hover {
   color: var(--gray-50);
   font-family: var(--font-mono);
   font-size: 0.82rem;
+}
+.back-link {
+  font-family: var(--font-mono);
+  text-decoration: none;
+  color: var(--gray-80);
+}
+.back-link:hover {
+  color: var(--gray-100);
+}
+
+/* Shared page chrome — pages override with scoped styles where they differ */
+.meta-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--gray-60);
+  margin-bottom: 1rem;
+}
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+  border-radius: 50%;
+}
+.page-title {
+  font-family: var(--font-sans);
+  font-size: clamp(2.2rem, 5vw, 3rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--gray-100);
+  line-height: 1.2;
+  margin-bottom: 1rem;
+}
+
+/* Search + tag filter (src/scripts/filter.ts) */
+.search-input {
+  width: 100%;
+  background: var(--gray-10);
+  border: 1px solid var(--gray-20);
+  color: var(--gray-100);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  padding: 0.65rem 0.9rem;
+}
+.search-input:focus {
+  outline: none;
+  border-color: #38bdf8;
+}
+.tag-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+.chip-btn {
+  background: var(--gray-0);
+  border: 1px solid var(--gray-20);
+  color: var(--gray-60);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  padding: 0.3rem 0.65rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.chip-btn:hover, .chip-btn.active {
+  color: var(--gray-100);
+  border-color: var(--gray-80);
+  background: var(--gray-10);
 }
 
 /* Shared Prose Styling for Markdown Articles, Case Studies & ADRs */
@@ -249,6 +302,12 @@ a:hover {
     text-align: center;
     align-items: center;
   }
+}
+
+/* After the mobile .wrap rule: its padding shorthand would otherwise zero this vertical padding. */
+.main-container {
+  padding-top: 2rem;
+  padding-bottom: 4rem;
 }
 
 /* D-001: Accessibility Focus States */

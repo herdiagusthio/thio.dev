@@ -1,23 +1,15 @@
 ---
-import '../styles/global.css';
+import BaseLayout from '../layouts/BaseLayout.astro';
 import '../styles/office.css';
-import SeoHead from '../components/SeoHead.astro';
-import Topbar from '../components/Topbar.astro';
-
-const year = 2026;
 ---
-<!doctype html>
-<html lang="en">
-  <head>
-    <SeoHead
-      title="Autonomous 7-Agent Office & Spatial Telemetry — thio.dev"
-      description="Real-time interactive command bridge and 2D/3D spatial telemetry for Herdi Agusthio's 7-agent autonomous engineering organization."
-      canonicalPath="/office"
-      schemaType="WebSite"
-    />
-  </head>
-  <body>
-    <Topbar active="office" wide={true} />
+<BaseLayout
+  title="Autonomous 7-Agent Office & Spatial Telemetry — thio.dev"
+  description="Real-time interactive command bridge and 2D/3D spatial telemetry for Herdi Agusthio's 7-agent autonomous engineering organization."
+  canonicalPath="/office"
+  schemaType="WebSite"
+  active="office"
+  wide={true}
+>
 
     <main class="wrap main-container">
       <!-- Telemetry Header -->
@@ -392,10 +384,7 @@ const year = 2026;
       </div>
     </div>
 
-    <footer class="foot wrap">
-      <span>© {year} Herdi Agusthio · Software Engineer</span>
-      <a href="/showcase/autonomous-agent-office" class="back-link">[ READ ARCHITECTURE CASE STUDY → ]</a>
-    </footer>
+    <a slot="footer" href="/showcase/autonomous-agent-office" class="back-link">[ READ ARCHITECTURE CASE STUDY → ]</a>
 
     <!-- Three.js 3D Virtual Office Bundle -->
     <script is:inline src="/js/office3d.bundle.js"></script>
@@ -1059,6 +1048,7 @@ const year = 2026;
       window.openDossierModal = openDossierModal;
       window.switchOfficeMode = switchOfficeMode;
     </script>
+</BaseLayout>
 
     <style>
       .topbar-inner {
@@ -1105,6 +1095,7 @@ const year = 2026;
         font-size: clamp(2rem, 4vw, 2.75rem);
         font-weight: 800;
         letter-spacing: -0.03em;
+        line-height: 1.5;
         margin-bottom: 0.5rem;
       }
       .hero-desc {
@@ -1305,5 +1296,3 @@ const year = 2026;
         color: var(--gray-100);
       }
     </style>
-  </body>
-</html>

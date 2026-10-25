@@ -1,23 +1,16 @@
 ---
-import '../styles/global.css';
-import SeoHead from '../components/SeoHead.astro';
-import Topbar from '../components/Topbar.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
 import { getAgentFleet } from '../lib/telemetry';
 
 const fleet = getAgentFleet();
 ---
-<!doctype html>
-<html lang="en">
-  <head>
-    <SeoHead
-      title="About Herdi Agusthio — Software Engineer & Systems Architect (thio.dev)"
-      description="Software Engineer at Flip with nearly a decade of experience across ByteDance, Tokopedia, and GoTo specializing in high-concurrency Go systems and autonomous multi-agent engineering organizations."
-      canonicalPath="/about"
-      schemaType="ProfilePage"
-    />
-  </head>
-  <body>
-    <Topbar active="about" />
+<BaseLayout
+  title="About Herdi Agusthio — Software Engineer & Systems Architect (thio.dev)"
+  description="Software Engineer at Flip with nearly a decade of experience across ByteDance, Tokopedia, and GoTo specializing in high-concurrency Go systems and autonomous multi-agent engineering organizations."
+  canonicalPath="/about"
+  schemaType="ProfilePage"
+  active="about"
+>
 
     <main class="wrap main-container">
       <section class="page-hero">
@@ -135,47 +128,16 @@ const fleet = getAgentFleet();
         </section>
       </div>
     </main>
-
-    <footer class="foot wrap">
-      <span>© 2026 Herdi Agusthio</span>
-      <a href="/" class="back-link">[ ← RETURN TO CONSOLE ]</a>
-    </footer>
-  </body>
-</html>
+    <a slot="footer" href="/" class="back-link">[ ← RETURN TO CONSOLE ]</a>
+</BaseLayout>
 
 <style>
-  .main-container {
-    padding-top: 2rem;
-    padding-bottom: 4rem;
-  }
   .page-hero {
     border-bottom: 1px dashed var(--gray-30);
     padding-bottom: 2rem;
     margin-bottom: 3rem;
   }
-  .meta-status {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    color: var(--gray-60);
-    margin-bottom: 1rem;
-  }
-  .status-indicator {
-    width: 8px;
-    height: 8px;
-    background: #10b981;
-    box-shadow: 0 0 8px #10b981;
-    border-radius: 50%;
-  }
   .page-title {
-    font-family: var(--font-sans);
-    font-size: clamp(2.2rem, 5vw, 3rem);
-    font-weight: 800;
-    letter-spacing: -0.04em;
-    color: var(--gray-100);
-    line-height: 1.2;
     margin-bottom: 1.5rem;
   }
   .content-grid {
@@ -290,13 +252,5 @@ const fleet = getAgentFleet();
     font-size: 0.98rem;
     color: var(--gray-60);
     line-height: 1.5;
-  }
-  .back-link {
-    text-decoration: none;
-    color: var(--gray-80);
-    font-family: var(--font-mono);
-  }
-  .back-link:hover {
-    color: var(--gray-100);
   }
 </style>

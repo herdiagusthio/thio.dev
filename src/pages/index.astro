@@ -1,29 +1,19 @@
 ---
-import '../styles/global.css';
-import SeoHead from '../components/SeoHead.astro';
-import Topbar from '../components/Topbar.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import { getBlogPosts, getEngineeringShowcases, getDecisions } from '../lib/feed';
 
 const blogItems = getBlogPosts().slice(0, 4);
 const showcaseItems = getEngineeringShowcases().slice(0, 3);
 const decisionItems = getDecisions().slice(0, 4);
-
-const year = 2026;
 ---
-<!doctype html>
-<html lang="en">
-  <head>
-    <SeoHead
-      title="Herdi Agusthio — Software Engineer & Systems Architect"
-      description="Software Engineer at Flip specializing in high-concurrency Go systems, distributed architecture, and autonomous multi-agent engineering organizations."
-      canonicalPath="/"
-      schemaType="WebSite"
-    />
-  </head>
-  <body>
-    <Topbar active="home" />
-
+<BaseLayout
+  title="Herdi Agusthio — Software Engineer & Systems Architect"
+  description="Software Engineer at Flip specializing in high-concurrency Go systems, distributed architecture, and autonomous multi-agent engineering organizations."
+  canonicalPath="/"
+  schemaType="WebSite"
+  active="home"
+>
     <main class="wrap">
       <Hero />
 
@@ -102,11 +92,8 @@ const year = 2026;
         </div>
       </div>
     </main>
-
-    <footer class="foot wrap">
-      <span>© {year} Herdi Agusthio · Software Engineer</span>
-      <span>Built with Astro 7 · Zero-JS Static Console</span>
-    </footer>
+    <span slot="footer">Built with Astro 7 · Zero-JS Static Console</span>
+</BaseLayout>
 
     <style>
       .layout-main {
@@ -242,5 +229,3 @@ const year = 2026;
         white-space: nowrap;
       }
     </style>
-  </body>
-</html>

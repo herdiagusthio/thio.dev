@@ -1,20 +1,13 @@
 ---
-import '../styles/global.css';
-import SeoHead from '../components/SeoHead.astro';
-import Topbar from '../components/Topbar.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
 ---
-<!doctype html>
-<html lang="en">
-  <head>
-    <SeoHead
-      title="Contact Herdi Agusthio — thio.dev"
-      description="Connect with Herdi Agusthio via Email, LinkedIn, or GitHub for distributed systems and software architecture discussions."
-      canonicalPath="/contact"
-      schemaType="ProfilePage"
-    />
-  </head>
-  <body>
-    <Topbar active="contact" />
+<BaseLayout
+  title="Contact Herdi Agusthio — thio.dev"
+  description="Connect with Herdi Agusthio via Email, LinkedIn, or GitHub for distributed systems and software architecture discussions."
+  canonicalPath="/contact"
+  schemaType="ProfilePage"
+  active="contact"
+>
 
     <main class="wrap main-container">
       <section class="page-hero">
@@ -54,46 +47,12 @@ import Topbar from '../components/Topbar.astro';
         </a>
       </div>
     </main>
-
-    <footer class="foot wrap">
-      <span>© 2026 Herdi Agusthio</span>
-      <a href="/" class="back-link">[ ← RETURN TO CONSOLE ]</a>
-    </footer>
-  </body>
-</html>
+    <a slot="footer" href="/" class="back-link">[ ← RETURN TO CONSOLE ]</a>
+</BaseLayout>
 
 <style>
-  .main-container {
-    padding-top: 2rem;
-    padding-bottom: 4rem;
-  }
   .page-hero {
     margin-bottom: 3rem;
-  }
-  .meta-status {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    color: var(--gray-60);
-    margin-bottom: 1rem;
-  }
-  .status-indicator {
-    width: 8px;
-    height: 8px;
-    background: #10b981;
-    box-shadow: 0 0 8px #10b981;
-    border-radius: 50%;
-  }
-  .page-title {
-    font-family: var(--font-sans);
-    font-size: clamp(2.2rem, 5vw, 3rem);
-    font-weight: 800;
-    letter-spacing: -0.04em;
-    color: var(--gray-100);
-    line-height: 1.2;
-    margin-bottom: 1rem;
   }
   .hero-desc {
     font-family: var(--font-sans);
@@ -150,13 +109,5 @@ import Topbar from '../components/Topbar.astro';
     font-family: var(--font-sans);
     font-size: 1rem;
     color: var(--gray-60);
-  }
-  .back-link {
-    text-decoration: none;
-    color: var(--gray-80);
-    font-family: var(--font-mono);
-  }
-  .back-link:hover {
-    color: var(--gray-100);
   }
 </style>

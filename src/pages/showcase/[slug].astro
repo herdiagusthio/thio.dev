@@ -1,8 +1,5 @@
 ---
-import '../../styles/global.css';
-import SeoHead from '../../components/SeoHead.astro';
-import Topbar from '../../components/Topbar.astro';
-import ArticleEnhancer from '../../components/ArticleEnhancer.astro';
+import ArticleLayout from '../../layouts/ArticleLayout.astro';
 import { getEngineeringShowcases } from '../../lib/feed';
 
 export async function getStaticPaths() {
@@ -19,113 +16,17 @@ export async function getStaticPaths() {
 
 const { item, prev, next } = Astro.props;
 ---
-<!doctype html>
-<html lang="en">
-  <head>
-    <SeoHead
-      title={`${item.title} — Engineering Case Study (thio.dev)`}
-      description={item.summaryText}
-      canonicalPath={`/showcase/${item.slug}`}
-      ogType="article"
-      publishedDate={item.date}
-      tags={item.tags}
-      readingTimeMinutes={item.readingTimeMinutes}
-      schemaType="TechArticle"
-    />
-  </head>
-  <body>
-    <Topbar active="showcase" />
-
-    <main class="wrap main-container">
-      <article class="case-study-content">
-        <header class="article-header">
-          <div class="meta-row">
-            <span class="eyebrow">[CASE STUDY]</span>
-            {item.date && <span class="eyebrow">[{item.date}]</span>}
-            <span class="reading-pill">⏱ {item.readingTimeMinutes} MIN READ</span>
-            <span class="status-pill">[PUBLISHED]</span>
-          </div>
-          <h1>{item.title}</h1>
-          {item.summaryText && (
-            <p class="summary-lead">{item.summaryText}</p>
-          )}
-          {item.tags && item.tags.length > 0 && (
-            <div class="tags-row">
-              {item.tags.map((t: string) => (
-                <span class="tag-badge">#{t}</span>
-              ))}
-            </div>
-          )}
-        </header>
-        
-        <div class="prose" set:html={item.bodyHtml} />
-      </article>
-
-      <ArticleEnhancer
-        prev={prev}
-        next={next}
-        backHref="/showcase"
-        backLabel="[ ← RETURN TO SHOWCASE ]"
-      />
-    </main>
-
-    <style>
-      .main-container {
-        padding-top: 2rem;
-        padding-bottom: 2rem;
-      }
-      .article-header {
-        padding: 1.5rem 0 2rem;
-        border-bottom: 1px solid var(--gray-20);
-        margin-bottom: 2.5rem;
-      }
-      .meta-row {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 0.75rem;
-        margin-bottom: 1rem;
-        font-family: var(--font-mono);
-      }
-      .eyebrow {
-        font-size: 0.78rem;
-        color: var(--gray-60);
-      }
-      .reading-pill {
-        font-size: 0.78rem;
-        color: #38bdf8;
-        font-weight: 600;
-      }
-      .status-pill {
-        font-size: 0.78rem;
-        color: #10b981;
-        font-weight: 600;
-      }
-      h1 {
-        font-family: var(--font-sans);
-        font-size: clamp(2rem, 5vw, 2.75rem);
-        font-weight: 800;
-        letter-spacing: -0.04em;
-        color: var(--gray-100);
-        line-height: 1.2;
-        margin-bottom: 1rem;
-      }
-      .summary-lead {
-        font-family: var(--font-sans);
-        font-size: 1.12rem;
-        line-height: 1.65;
-        color: var(--gray-80);
-        margin-bottom: 1.25rem;
-        max-width: 50rem;
-      }
-      .tags-row {
-        display: flex;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-        font-family: var(--font-mono);
-        font-size: 0.78rem;
-        color: var(--gray-60);
-      }
-    </style>
-  </body>
-</html>
+<ArticleLayout
+  item={item}
+  active="showcase"
+  seoTitle={`${item.title} — Engineering Case Study (thio.dev)`}
+  canonicalPath={`/showcase/${item.slug}`}
+  schemaType="TechArticle"
+  eyebrow="CASE STUDY"
+  statusLabel="PUBLISHED"
+  back={{ href: '/showcase', label: '[ ← RETURN TO SHOWCASE ]' }}
+  prev={prev}
+  next={next}
+>
+  <Fragment set:html={item.bodyHtml} />
+</ArticleLayout>
