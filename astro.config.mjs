@@ -2,11 +2,9 @@
 import { defineConfig } from 'astro/config';
 import { satteri } from '@astrojs/markdown-satteri';
 
-// Base path handling for GitHub Pages:
-//  - Custom domain (thio.dev)         -> BASE_PATH unset, base '/'
-//  - Project page (user.github.io/thio.dev) -> set BASE_PATH=/thio.dev in CI
-const base = process.env.BASE_PATH || '/';
-const site = process.env.SITE_URL || 'https://thio.dev';
+// Single source of the public origin: canonical URLs, JSON-LD, sitemap and the office API host
+// (api.<site host>) all derive from it. Override with SITE_URL when the domain moves.
+const site = process.env.SITE_URL || 'https://thio.103.217.144.64.nip.io';
 
 // The page renders the title from frontmatter, so drop the body's first H1.
 /** @type {import('satteri').MdastPluginDefinition} */
@@ -20,7 +18,6 @@ const stripFirstH1 = {
 
 export default defineConfig({
   site,
-  base,
   markdown: {
     // Match the previous marked output: no curly quotes, no Shiki colors.
     processor: satteri({ mdastPlugins: [stripFirstH1], features: { smartPunctuation: false } }),
