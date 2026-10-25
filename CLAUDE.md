@@ -4,12 +4,12 @@ Astro 7 static site — Herdi Agusthio's personal engineering console (blog, cas
 
 ## Commands
 
-- `npm run build` / `npm run dev` run `scripts/sync-content.mjs` first, which mirrors `../second-brain` (or `$SECOND_BRAIN_DIR`) into `content/` and **deletes** `content/**/*.md` not public in the source. Use `npx astro build` to build without touching `content/`.
-- `npm run check` (astro check) and `npm test` (node:test over `scripts/*.test.mjs`, `src/**/*.test.ts`) must stay green; CI runs both plus the build. CI never deploys — `./ship.sh` on the VPS does, then runs `scripts/smoke-check.sh` (every sitemap page returns 200 live, and the live homepage is byte-identical to `dist/index.html`).
+- `npm run build` / `npm run dev` run `scripts/sync-content.mjs` first, which mirrors `../second-brain` (or `$SECOND_BRAIN_DIR`) into `content/` and **deletes** `content/**/*.md` not public in the source. It fails if the source is missing; without second-brain use `SECOND_BRAIN_DIR=fixtures/second-brain`. `content/` is generated and git-ignored. Use `npx astro build` to build without touching `content/`.
+- `npm run check` (astro check) and `npm test` (node:test over `scripts/*.test.mjs`, `src/**/*.test.ts`) must stay green; CI runs both plus the build from `fixtures/second-brain`, and fails if a `PRIVATE-FIXTURE` sample reaches `dist/`. CI never deploys — `./ship.sh` on the VPS does, then runs `scripts/smoke-check.sh` (every sitemap page returns 200 live, and the live homepage is byte-identical to `dist/index.html`).
 
 ## Content pipeline
 
-- Privacy boundary = the sync allowlist (`isPublic` in `scripts/sync-content.mjs`): frontmatter `status: published` (blog, engineering) or `accepted|superseded` (decisions). `content/` is committed to a public repo, so keep it fail-closed.
+- Privacy boundary = the sync allowlist (`isPublic` in `scripts/sync-content.mjs`): frontmatter `status: published` (blog, engineering) or `accepted|superseded` (decisions). Everything synced is published, so keep it fail-closed; `fixtures/second-brain` holds a private sample of each kind that CI keeps out of `dist/`.
 - Quality gate = `src/content.config.ts` (glob-loader collections, strict schema: `title`, `date` YYYY-MM-DD, `tags` ≥1, `status`). Fix bad frontmatter in second-brain, not in `content/`.
 - `src/lib/content.ts` `getEntries(kind)` is the only content API (view model + per-kind summary fallback); pure helpers live in `src/lib/text.ts` so node:test can import them without `astro:*`.
 - Markdown uses Astro's Satteri processor with an mdast plugin dropping the body's first H1 (`astro.config.mjs`); smart punctuation and syntax highlighting are off on purpose.

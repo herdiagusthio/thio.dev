@@ -1,8 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { copyDir, isPublic } from './sync-content.mjs';
 
 const PUBLISHED = ['published'];
@@ -55,4 +57,14 @@ test('copyDir: copies public files and prunes everything else from the destinati
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }
+});
+
+test('main: a missing source fails instead of building whatever content/ holds', () => {
+  const script = fileURLToPath(new URL('./sync-content.mjs', import.meta.url));
+  const run = spawnSync(process.execPath, [script], {
+    env: { ...process.env, SECOND_BRAIN_DIR: path.join(os.tmpdir(), 'no-such-second-brain') },
+    encoding: 'utf8',
+  });
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /second-brain source not found/);
 });

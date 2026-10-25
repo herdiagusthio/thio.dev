@@ -21,18 +21,19 @@ Static engineering platform, architecture lab, and live 2D/3D Agent Command Brid
 ```bash
 npm run dev      # sync content from ../second-brain, then astro dev
 npm run build    # sync content from ../second-brain, then astro build
-npx astro build  # build from the committed content/ without syncing
+npx astro build  # build from the current content/ without re-syncing
+SECOND_BRAIN_DIR=fixtures/second-brain npm run dev   # no second-brain checkout: sample content
 npm run check    # astro check (type errors)
 npm test         # node:test unit tests (sync allowlist, text helpers, office data)
 ./ship.sh        # VPS deploy: npm ci → test → build → verify → rsync to /var/www/thio.dev → smoke check
 ```
 
-CI (`.github/workflows/ci.yml`) runs `npm ci`, `check`, `test` and `build` on every push and PR. It does not deploy: only `ship.sh` builds from fresh second-brain content.
+CI (`.github/workflows/ci.yml`) runs `npm ci`, `check`, `test` and `build` on every push and PR, building from the sample second-brain in `fixtures/second-brain/`, and fails if any of its `PRIVATE-FIXTURE` files reaches `dist/`. It does not deploy: only `ship.sh` builds the real site from second-brain.
 
 ## 📝 Content Flow
 
 ```
-second-brain (private) ──sync allowlist──▶ content/ (committed) ──content collections──▶ static pages
+second-brain (private) ──sync allowlist──▶ content/ (generated, git-ignored) ──content collections──▶ static pages
 ```
 
 - `scripts/sync-content.mjs` copies a file only when its YAML frontmatter `status` is public: `published` for `knowledge/blog` and `knowledge/engineering`, `accepted` or `superseded` for `decisions`. Everything else stays private and is pruned from `content/`.
