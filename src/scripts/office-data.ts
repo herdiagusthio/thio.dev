@@ -147,15 +147,6 @@ export function normalizeSnapshot(data: unknown, roster: Agent[]): Snapshot | nu
   };
 }
 
-/**
- * Copy for window.Office3D. The bundled public/js/office3d.bundle.js predates the vps-dashboard
- * fix that builds 3D labels with textContent: it interpolates name and currentTask into innerHTML.
- * ponytail: pre-escape for that build; when the bundle is refreshed from ../vps-dashboard, drop
- * this (it would show entities) and add the icon sprite + .btn/.icon CSS the new toolbar uses.
- */
-export const forLegacy3D = (agents: Agent[]): Agent[] =>
-  agents.map((a) => ({ ...a, name: render(a.name), currentTask: render(a.currentTask) }));
-
 // --- Static fallback (also the first paint) ---------------------------------------------------
 
 export const STATIC_ACTIVITIES: Activity[] = [

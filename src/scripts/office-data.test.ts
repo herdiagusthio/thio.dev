@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { forLegacy3D, html, normalizeSnapshot, raw, stateClass } from './office-data.ts';
+import { html, normalizeSnapshot, raw, stateClass } from './office-data.ts';
 import { AGENTS } from '../data/agents.ts';
 
 const XSS = '<img src=x onerror=alert(1)>';
@@ -60,14 +60,6 @@ test('normalizeSnapshot: validates stations and merges the static roster', () =>
   assert.equal(snap.activities, null);
   assert.equal(snap.channels, null);
   assert.equal(snap.summary, null);
-});
-
-test('forLegacy3D: escapes the free text the prebuilt 3D bundle puts into innerHTML', () => {
-  const [a] = forLegacy3D([{ ...AGENTS[0], name: XSS, currentTask: 'a & <b>' }]);
-  assert.equal(a.name, '&lt;img src=x onerror=alert(1)&gt;');
-  assert.equal(a.currentTask, 'a &amp; &lt;b&gt;');
-  assert.equal(a.id, AGENTS[0].id);
-  assert.equal(a.state, AGENTS[0].state, 'state stays raw: the bundle compares it');
 });
 
 test('normalizeSnapshot: activities, channels and summary', () => {
