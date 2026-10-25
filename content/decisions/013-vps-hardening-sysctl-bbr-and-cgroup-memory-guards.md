@@ -1,3 +1,10 @@
+---
+title: "ADR 013: Single-VPS Resource Hardening, TCP BBR & Cgroup Memory Guardrails"
+date: "2026-10-17"
+status: accepted
+tags: ["architecture", "adr", "systems"]
+---
+
 # ADR 013: Single-VPS Resource Hardening, TCP BBR & Cgroup Memory Guardrails
 
 ## Context

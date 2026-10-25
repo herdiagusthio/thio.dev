@@ -1,7 +1,7 @@
 ---
 title: "Use Git + Markdown for Second Brain"
 date: "2026-07-19"
-status: "published"
+status: accepted
 tags: ["git","markdown","knowledge-management","architecture"]
 ---
 
