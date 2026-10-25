@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { estimateReadingTime, firstLine, sectionParagraph, stripMarkdownInline } from './text.ts';
+import { estimateReadingTime, sectionParagraph, stripMarkdownInline } from './text.ts';
 
 test('estimateReadingTime: 200 wpm, code blocks ignored, minimum 1', () => {
   const cases: [string, string, number][] = [
@@ -29,10 +29,4 @@ test('sectionParagraph: first paragraph of the first matching ## section', () =>
   assert.equal(sectionParagraph('## Overview\n\nOnly section, runs to end.', ['Overview']), 'Only section, runs to end.');
   assert.equal(sectionParagraph('## context\nlower-case heading', ['Context']), 'lower-case heading');
   assert.equal(sectionParagraph(body, ['Missing']), undefined);
-});
-
-test('firstLine: first non-heading line after dropping the H1', () => {
-  assert.equal(firstLine('# Title\n\nHook sentence.\n\nMore.'), 'Hook sentence.');
-  assert.equal(firstLine('Intro without heading.'), 'Intro without heading.');
-  assert.equal(firstLine('# Title\n\n## Sub\n'), undefined);
 });

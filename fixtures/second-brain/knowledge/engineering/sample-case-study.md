@@ -3,6 +3,8 @@ title: "Sample Case Study: A Fail-Closed Content Sync"
 date: "2026-03-01"
 status: published
 tags: ["engineering", "sample"]
+summary: "Sample case study for CI builds: copying only allowlisted files from a private repo."
+featured: true
 ---
 
 # Sample Case Study: A Fail-Closed Content Sync

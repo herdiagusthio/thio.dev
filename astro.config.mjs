@@ -19,6 +19,12 @@ const stripFirstH1 = {
 
 export default defineConfig({
   site,
+  // Case studies merged into their fuller versions in second-brain; keep the old URLs working.
+  redirects: {
+    '/showcase/scatter-gather-aggregation': '/showcase/gold-standard-flight-aggregation',
+    '/showcase/primitive-obsession-hexagonal': '/showcase/gold-standard-hexagonal-refactor',
+    '/showcase/atomic-guest-sync': '/showcase/atomic-consistency-sync',
+  },
   // Self-hosted from src/assets/fonts (OFL-1.1, licenses alongside): no request to Google, at build
   // time or in the browser. One variable woff2 per family; the discrete weights match the old Google
   // Fonts link, so text renders as before. Normal styles only (prose italics stay synthesized).

@@ -5,7 +5,9 @@ import { getEntries } from '../lib/content';
 
 const [blog, engineering, decisions] = await Promise.all([getEntries('blog'), getEntries('engineering'), getEntries('decisions')]);
 const blogItems = blog.slice(0, 4);
-const showcaseItems = engineering.slice(0, 3);
+// Case studies flagged featured: true in second-brain, else the newest three.
+const featured = engineering.filter((item) => item.featured);
+const showcaseItems = (featured.length ? featured : engineering).slice(0, 3);
 const decisionItems = decisions.slice(0, 4);
 ---
 <BaseLayout
