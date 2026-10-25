@@ -108,6 +108,8 @@
 
 .office-stage-header {
   display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   justify-content: space-between;
   align-items: center;
   background: #090e17;
@@ -256,6 +258,7 @@
 
 .stage-status-pills {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   font-family: var(--font-mono);
@@ -1735,6 +1738,22 @@
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+/* Phones: seat the 12 desks 3 per row, so the office fits the screen */
+@media (max-width: 640px) {
+  .office-stage-header {
+    border-radius: 16px;
+  }
+
+  .desks-row {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* 150px would be clipped by the room's edge in the outer columns */
+  .desk-speech-bubble {
+    max-width: 130px;
+  }
 }
 
 
