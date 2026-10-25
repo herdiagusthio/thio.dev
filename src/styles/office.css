@@ -51,7 +51,8 @@
   border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
-.badge.standby {
+.badge.standby,
+.badge.inactive {
   background: rgba(148, 163, 184, 0.15);
   color: #94a3b8;
   border: 1px solid rgba(148, 163, 184, 0.3);
@@ -1606,6 +1607,9 @@
   padding: 5px 11px;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .office-3d-tools button:hover {
@@ -1613,7 +1617,8 @@
   border-color: rgba(255, 255, 255, 0.4);
 }
 
-.office-3d-tools button.active {
+.office-3d-tools button.active,
+.office-3d-tools button[aria-pressed="true"] {
   background: #ef4444;
   border-color: #ffffff;
   color: #ffffff;
@@ -1692,6 +1697,44 @@
   border-color: rgba(148, 163, 184, 0.35);
   color: #94a3b8;
   font-style: italic;
+}
+
+/* The label's name row comes first in the DOM (its accessible name); show the speech bubble on top. */
+.agent-tag-3d .speech-3d {
+  order: -1;
+}
+
+/* Shown by the 3D bundle when WebGL is unavailable. */
+.office-3d-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+/* Lucide sprite icons used by the 3D toolbar. */
+.icon-sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.icon {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+  vertical-align: -0.125em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 

@@ -19,7 +19,7 @@ Astro 7 static site — Herdi Agusthio's personal engineering console (blog, cas
 
 - `src/scripts/office.ts` (bundled module) renders the 2D office; data comes from `src/data/agents.ts` (single roster, also used by /about) and the live API `https://api.<site host>/office`, validated by `normalizeSnapshot` in `src/scripts/office-data.ts`.
 - All HTML built from data must go through the `html` tag in `office-data.ts` (escapes every interpolation); colors are hex-validated because they land in `style`; `id`/`state` must be identifiers. Clicks use `data-agent-id` delegation — no inline handlers.
-- The committed 3D bundle interpolates `name`/`currentTask` into `innerHTML`, so it receives `forLegacy3D(agents)`; remove that when refreshing the bundle from vps-dashboard (newer builds use `textContent`).
+- The 3D bundle writes agent labels with `textContent`; its toolbar icons need the matching `#i-<name>` symbols in the sprite in `office.astro` (copied from vps-dashboard's `public/index.html`).
 - The API only allows the production origin (CORS), so local runs show the static fallback; mock `fetch` to test live mode.
 - `public/js/office3d.bundle.js` is prebuilt from `../vps-dashboard` (`bun run build:3d`); `public/k8s/index.html` is a standalone game.
 
