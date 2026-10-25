@@ -449,17 +449,17 @@ import '../styles/office.css';
         line-height: 1.6;
       }
 
-      /* 2-Column Office Layout */
+      /* 2-Column Office Layout. minmax(0, 1fr): a plain 1fr track never shrinks below its widest child. */
       .virtual-office-layout {
         display: grid;
-        grid-template-columns: 1fr 340px;
+        grid-template-columns: minmax(0, 1fr) 340px;
         gap: 24px;
         align-items: start;
       }
 
       @media (max-width: 1080px) {
         .virtual-office-layout {
-          grid-template-columns: 1fr;
+          grid-template-columns: minmax(0, 1fr);
         }
       }
 
