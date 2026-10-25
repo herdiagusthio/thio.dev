@@ -24,7 +24,7 @@ export function isPublic(text, allowed) {
   return Boolean(status) && allowed.includes(status[1].toLowerCase());
 }
 
-function copyDir(srcDir, destDir, allowed) {
+export function copyDir(srcDir, destDir, allowed) {
   if (!fs.existsSync(srcDir)) {
     console.warn(`  ⚠ source missing, skipped: ${srcDir}`);
     return 0;

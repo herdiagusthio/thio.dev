@@ -1,6 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { isPublic } from './sync-content.mjs';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { copyDir, isPublic } from './sync-content.mjs';
 
 const PUBLISHED = ['published'];
 const ADR = ['accepted', 'superseded'];
@@ -26,5 +29,28 @@ test('isPublic: only frontmatter status on the allowlist passes', () => {
   ];
   for (const [name, text, allowed, want] of cases) {
     assert.equal(isPublic(text, allowed), want, name);
+  }
+});
+
+test('copyDir: copies public files and prunes everything else from the destination', () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'sync-content-'));
+  try {
+    const src = path.join(tmp, 'src');
+    const dest = path.join(tmp, 'dest');
+    fs.mkdirSync(src);
+    fs.mkdirSync(dest);
+    fs.writeFileSync(path.join(src, 'public.md'), '---\nstatus: published\n---\nhi');
+    fs.writeFileSync(path.join(src, 'private.md'), '---\nstatus: internal\n---\nsecret');
+    fs.writeFileSync(path.join(src, 'notes.txt'), 'not markdown');
+    fs.writeFileSync(path.join(dest, 'private.md'), 'synced before it went private');
+    fs.writeFileSync(path.join(dest, 'removed.md'), 'deleted from source');
+    fs.writeFileSync(path.join(dest, 'keep.txt'), 'non-markdown is left alone');
+
+    assert.equal(copyDir(src, dest, ['published']), 1);
+    assert.deepEqual(fs.readdirSync(dest).sort(), ['keep.txt', 'public.md']);
+    assert.equal(copyDir(path.join(tmp, 'missing'), dest, ['published']), 0);
+    assert.deepEqual(fs.readdirSync(dest).sort(), ['keep.txt', 'public.md'], 'missing source leaves dest untouched');
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
   }
 });
