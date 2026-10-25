@@ -267,7 +267,8 @@ function load3D(): Promise<void> {
   office3DLoad ??= new Promise<void>((resolve, reject) => {
     const script = document.createElement('script');
     script.src = '/js/office3d.bundle.js';
-    script.onload = () => resolve();
+    // A bundle that loads but throws while running leaves Office3D undefined: treat it as a failed load.
+    script.onload = () => (window.Office3D ? resolve() : reject(new Error('3D bundle did not define Office3D')));
     script.onerror = () => reject(new Error('3D bundle failed to load'));
     document.head.append(script);
   }).catch((e) => {
