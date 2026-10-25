@@ -1,3 +1,10 @@
+---
+title: "ADR 014: VPS Dashboard Modular Architecture, Host-Aware Sentinel & UI/UX Overhaul"
+date: "2026-10-17"
+status: accepted
+tags: ["architecture", "adr", "systems"]
+---
+
 # ADR 014: VPS Dashboard Modular Architecture, Host-Aware Sentinel & UI/UX Overhaul
 
 - **Date:** 2026-10-17

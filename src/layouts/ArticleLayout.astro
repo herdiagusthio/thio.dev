@@ -1,0 +1,114 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import ArticleEnhancer, { type NavLink } from '../components/ArticleEnhancer.astro';
+
+export interface Props {
+  item: { title: string; date: string; tags: string[]; readingTimeMinutes: number; summaryText: string };
+  active: 'blog' | 'showcase';
+  seoTitle: string;
+  canonicalPath: string;
+  schemaType: 'BlogPosting' | 'TechArticle';
+  eyebrow: string;
+  statusLabel: string;
+  showSummary?: boolean;
+  back: { href: string; label: string };
+  prev: NavLink | null;
+  next: NavLink | null;
+}
+
+const { item, active, seoTitle, canonicalPath, schemaType, eyebrow, statusLabel, showSummary = true, back, prev, next } = Astro.props;
+---
+<BaseLayout
+  title={seoTitle}
+  description={item.summaryText}
+  canonicalPath={canonicalPath}
+  ogType="article"
+  publishedDate={item.date}
+  tags={item.tags}
+  readingTimeMinutes={item.readingTimeMinutes}
+  schemaType={schemaType}
+  active={active}
+>
+  <main class="wrap main-container">
+    <article>
+      <header class="article-header">
+        <div class="meta-row">
+          <span class="eyebrow">[{eyebrow}]</span>
+          {item.date && <span class="eyebrow">[{item.date}]</span>}
+          <span class="reading-pill">⏱ {item.readingTimeMinutes} MIN READ</span>
+          <span class="status-pill">[{statusLabel}]</span>
+        </div>
+        <h1>{item.title}</h1>
+        {showSummary && item.summaryText && <p class="summary-lead">{item.summaryText}</p>}
+        {item.tags.length > 0 && (
+          <div class="tags-row">
+            {item.tags.map((t) => <span class="tag-badge">#{t}</span>)}
+          </div>
+        )}
+      </header>
+
+      <div class="prose"><slot /></div>
+    </article>
+
+    <ArticleEnhancer prev={prev} next={next} />
+  </main>
+  <a slot="footer" href={back.href} class="back-link">{back.label}</a>
+</BaseLayout>
+
+<style>
+  .main-container {
+    padding-bottom: 2rem;
+  }
+  .article-header {
+    padding: 1.5rem 0 2rem;
+    border-bottom: 1px solid var(--gray-20);
+    margin-bottom: 2.5rem;
+  }
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    font-family: var(--font-mono);
+  }
+  .eyebrow {
+    font-size: 0.78rem;
+    color: var(--gray-60);
+  }
+  .reading-pill {
+    font-size: 0.78rem;
+    color: #38bdf8;
+    font-weight: 600;
+  }
+  .status-pill {
+    font-size: 0.78rem;
+    color: #10b981;
+    font-weight: 600;
+  }
+  h1 {
+    font-family: var(--font-sans);
+    font-size: clamp(2rem, 5vw, 2.75rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: var(--gray-100);
+    line-height: 1.2;
+    margin-bottom: 1rem;
+  }
+  .summary-lead {
+    font-family: var(--font-sans);
+    font-size: 1.12rem;
+    line-height: 1.65;
+    color: var(--gray-80);
+    margin-bottom: 1.25rem;
+    max-width: 50rem;
+  }
+  .tags-row {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--gray-60);
+  }
+</style>

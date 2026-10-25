@@ -1,29 +1,20 @@
 ---
-import '../styles/global.css';
-import SeoHead from '../components/SeoHead.astro';
-import Topbar from '../components/Topbar.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
-import { getBlogPosts, getEngineeringShowcases, getDecisions } from '../lib/feed';
+import { getEntries } from '../lib/content';
 
-const blogItems = getBlogPosts().slice(0, 4);
-const showcaseItems = getEngineeringShowcases().slice(0, 3);
-const decisionItems = getDecisions().slice(0, 4);
-
-const year = 2026;
+const [blog, engineering, decisions] = await Promise.all([getEntries('blog'), getEntries('engineering'), getEntries('decisions')]);
+const blogItems = blog.slice(0, 4);
+const showcaseItems = engineering.slice(0, 3);
+const decisionItems = decisions.slice(0, 4);
 ---
-<!doctype html>
-<html lang="en">
-  <head>
-    <SeoHead
-      title="Herdi Agusthio — Software Engineer & Systems Architect"
-      description="Software Engineer at Flip specializing in high-concurrency Go systems, distributed architecture, and autonomous multi-agent engineering organizations."
-      canonicalPath="/"
-      schemaType="WebSite"
-    />
-  </head>
-  <body>
-    <Topbar active="home" />
-
+<BaseLayout
+  title="Herdi Agusthio — Software Engineer & Systems Architect"
+  description="Software Engineer at Flip specializing in high-concurrency Go systems, distributed architecture, and autonomous multi-agent engineering organizations."
+  canonicalPath="/"
+  schemaType="WebSite"
+  active="home"
+>
     <main class="wrap">
       <Hero />
 
@@ -33,7 +24,7 @@ const year = 2026;
           <section class="content-section">
             <div class="section-head-row">
               <h2 class="section-head">Latest Engineering Reflections</h2>
-              <a href="/blog" class="view-all-link">View all essays ({getBlogPosts().length}) →</a>
+              <a href="/blog" class="view-all-link">View all essays ({blog.length}) →</a>
             </div>
             <div class="card-list">
               {blogItems.map(item => (
@@ -48,7 +39,7 @@ const year = 2026;
                   <h3 class="card-title">
                     <a href={item.url}>{item.title}</a>
                   </h3>
-                  <div class="card-summary" set:html={item.summaryHtml} />
+                  <div class="card-summary">{item.summaryText}</div>
                   <a href={item.url} class="card-link">[ READ ESSAY → ]</a>
                 </article>
               ))}
@@ -59,7 +50,7 @@ const year = 2026;
           <section class="content-section" style="margin-top: 3.5rem;">
             <div class="section-head-row">
               <h2 class="section-head">Featured Production Case Studies</h2>
-              <a href="/showcase" class="view-all-link">View all case studies ({getEngineeringShowcases().length}) →</a>
+              <a href="/showcase" class="view-all-link">View all case studies ({engineering.length}) →</a>
             </div>
             <div class="card-list">
               {showcaseItems.map(item => (
@@ -74,7 +65,7 @@ const year = 2026;
                   <h3 class="card-title">
                     <a href={item.url}>{item.title}</a>
                   </h3>
-                  <div class="card-summary" set:html={item.summaryHtml} />
+                  <div class="card-summary">{item.summaryText}</div>
                   <a href={item.url} class="card-link">[ READ CASE FILE → ]</a>
                 </article>
               ))}
@@ -85,7 +76,7 @@ const year = 2026;
           <section class="content-section" style="margin-top: 3.5rem;">
             <div class="section-head-row">
               <h2 class="section-head">Recent Architecture Decisions (ADRs)</h2>
-              <a href="/showcase#adrs" class="view-all-link">Browse all ADRs ({getDecisions().length}) →</a>
+              <a href="/showcase#adrs" class="view-all-link">Browse all ADRs ({decisions.length}) →</a>
             </div>
             <div class="adr-compact-list">
               {decisionItems.map(adr => (
@@ -94,7 +85,7 @@ const year = 2026;
                     <span class="adr-date">[{adr.date}]</span>
                     <strong class="adr-title">{adr.title}</strong>
                   </div>
-                  <span class="adr-status">[ACCEPTED →]</span>
+                  <span class="adr-status">[{adr.status.toUpperCase()} →]</span>
                 </a>
               ))}
             </div>
@@ -102,11 +93,8 @@ const year = 2026;
         </div>
       </div>
     </main>
-
-    <footer class="foot wrap">
-      <span>© {year} Herdi Agusthio · Software Engineer</span>
-      <span>Built with Astro 7 · Zero-JS Static Console</span>
-    </footer>
+    <span slot="footer">Built with Astro 7 · Zero-JS Static Console</span>
+</BaseLayout>
 
     <style>
       .layout-main {
@@ -242,5 +230,3 @@ const year = 2026;
         white-space: nowrap;
       }
     </style>
-  </body>
-</html>

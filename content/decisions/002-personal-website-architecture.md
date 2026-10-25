@@ -1,7 +1,7 @@
 ---
 title: "Personal Website Concept & System Console Architecture"
 date: "2026-07-25"
-status: "published"
+status: accepted
 tags: ["architecture","astro","system-console","performance"]
 ---
 

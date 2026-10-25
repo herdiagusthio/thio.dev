@@ -1,3 +1,10 @@
+---
+title: "ADR 009: Hermes Automated Context Compression & Anti-Thrash Breaker Management"
+date: "2026-09-29"
+status: accepted
+tags: ["architecture", "adr", "systems"]
+---
+
 # ADR 009: Hermes Automated Context Compression & Anti-Thrash Breaker Management
 
 ## Status

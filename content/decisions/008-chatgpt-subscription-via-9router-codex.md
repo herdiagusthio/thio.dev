@@ -1,3 +1,10 @@
+---
+title: "ADR 008: ChatGPT Subscription Routing via 9Router Codex OAuth"
+date: "2026-09-29"
+status: accepted
+tags: ["architecture", "adr", "systems"]
+---
+
 # ADR 008: ChatGPT Subscription Routing via 9Router Codex OAuth
 
 ## Status

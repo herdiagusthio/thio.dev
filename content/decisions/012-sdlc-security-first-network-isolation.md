@@ -1,3 +1,10 @@
+---
+title: "ADR 012: SDLC Security-First Network Isolation & Localhost Invariant"
+date: "2026-10-17"
+status: accepted
+tags: ["architecture", "adr", "systems"]
+---
+
 # ADR 012: SDLC Security-First Network Isolation & Localhost Invariant
 
 ## Context

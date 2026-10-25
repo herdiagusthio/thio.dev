@@ -1,3 +1,10 @@
+---
+title: "ADR 015: thio.dev Content Sync Resilience, AI SEO (JSON-LD) & Reader UX Overhaul"
+date: "2026-10-17"
+status: accepted
+tags: ["architecture", "adr", "systems"]
+---
+
 # ADR 015: `thio.dev` Content Sync Resilience, AI SEO (JSON-LD) & Reader UX Overhaul
 
 - **Date:** 2026-10-17

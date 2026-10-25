@@ -8,11 +8,9 @@ export interface NavLink {
 export interface Props {
   prev?: NavLink | null;
   next?: NavLink | null;
-  backHref: string;
-  backLabel: string;
 }
 
-const { prev = null, next = null, backHref, backLabel } = Astro.props;
+const { prev = null, next = null } = Astro.props;
 ---
 <!-- Top Reading Progress Bar -->
 <div class="reading-progress-track" aria-hidden="true">
@@ -35,11 +33,6 @@ const { prev = null, next = null, backHref, backLabel } = Astro.props;
     ) : <div />}
   </nav>
 )}
-
-<footer class="foot wrap">
-  <span>© 2026 Herdi Agusthio · Software Engineer</span>
-  <a href={backHref} class="back-link">{backLabel}</a>
-</footer>
 
 <script is:inline>
   document.addEventListener('DOMContentLoaded', () => {
@@ -135,13 +128,5 @@ const { prev = null, next = null, backHref, backLabel } = Astro.props;
     font-size: 1rem;
     color: var(--gray-100);
     line-height: 1.35;
-  }
-  .back-link {
-    font-family: var(--font-mono);
-    text-decoration: none;
-    color: var(--gray-80);
-  }
-  .back-link:hover {
-    color: var(--gray-100);
   }
 </style>

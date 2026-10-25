@@ -1,3 +1,10 @@
+---
+title: "ADR: Verification Harness Architecture"
+date: "2026-10-10"
+status: accepted
+tags: ["architecture", "adr", "systems"]
+---
+
 # ADR: Verification Harness Architecture
 - **Date:** 2026-10-10
 - **Status:** Accepted

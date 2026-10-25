@@ -1,3 +1,10 @@
+---
+title: "ADR 006: Mandatory Self-Verification Protocol"
+date: "2026-09-20"
+status: accepted
+tags: ["architecture", "adr", "systems"]
+---
+
 # ADR 006: Mandatory Self-Verification Protocol
 
 ## Status

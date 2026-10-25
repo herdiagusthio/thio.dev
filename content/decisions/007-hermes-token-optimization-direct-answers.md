@@ -1,3 +1,10 @@
+---
+title: "ADR 007: Hermes Agent Token Optimization & Channel Direct Answer Protocol"
+date: "2026-09-23"
+status: accepted
+tags: ["architecture", "adr", "systems"]
+---
+
 # ADR 007: Hermes Agent Token Optimization & Channel Direct Answer Protocol
 
 ## Status

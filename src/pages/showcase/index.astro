@@ -1,470 +1,360 @@
 ---
-import '../../styles/global.css';
-import SeoHead from '../../components/SeoHead.astro';
-import Topbar from '../../components/Topbar.astro';
-import { getEngineeringShowcases, getDecisions } from '../../lib/feed';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getEntries } from '../../lib/content';
 
-const items = getEngineeringShowcases();
-const adrs = getDecisions();
+const [items, adrs] = await Promise.all([getEntries('engineering'), getEntries('decisions')]);
 const allTags = Array.from(new Set(items.flatMap((i) => i.tags))).slice(0, 10);
 ---
-<!doctype html>
-<html lang="en">
-  <head>
-    <SeoHead
-      title="Engineering Showcase, Interactive Labs & ADRs — thio.dev"
-      description="Production architectural blueprints, high-concurrency Go patterns, interactive system labs (Agent Office, KubeQuest), and Architectural Decision Records (ADRs) by Herdi Agusthio."
-      canonicalPath="/showcase"
-      schemaType="WebSite"
-    />
-  </head>
-  <body>
-    <Topbar active="showcase" />
+<BaseLayout
+  title="Engineering Showcase, Interactive Labs & ADRs — thio.dev"
+  description="Production architectural blueprints, high-concurrency Go patterns, interactive system labs (Agent Office, KubeQuest), and Architectural Decision Records (ADRs) by Herdi Agusthio."
+  canonicalPath="/showcase"
+  schemaType="WebSite"
+  active="showcase"
+>
+  <main class="wrap main-container">
+    <section class="showcase-hero">
+      <div class="meta-status">
+        <span class="status-indicator"></span>
+        <span class="mono-label">[SYS_LAB: PRODUCTION BLUEPRINTS &amp; ADRs]</span>
+        <span class="mono-label">[CASE STUDIES:{items.length} · ADRs:{adrs.length}]</span>
+      </div>
+      <h1 class="page-title">Engineering Showcase &amp; Architecture Lab</h1>
+      <p class="hero-desc">
+        High-fidelity architectural blueprints, concurrency patterns, interactive system simulations, and Architecture Decision Records (ADRs).
+      </p>
+    </section>
 
-    <main class="wrap main-container">
-      <section class="showcase-hero">
-        <div class="meta-status">
-          <span class="status-indicator"></span>
-          <span class="mono-label">[SYS_LAB: PRODUCTION BLUEPRINTS &amp; ADRs]</span>
-          <span class="mono-label" id="showcaseCountLabel">[CASE STUDIES:{items.length} · ADRs:{adrs.length}]</span>
-        </div>
-        <h1 class="page-title">Engineering Showcase &amp; Architecture Lab</h1>
-        <p class="hero-desc">
-          High-fidelity architectural blueprints, concurrency patterns, interactive system simulations, and Architecture Decision Records (ADRs).
-        </p>
-      </section>
-
-      <!-- Interactive Live Labs Spotlight -->
-      <section class="labs-section">
-        <h2 class="section-subhead">[ INTERACTIVE LIVE LABS &amp; SIMULATIONS ]</h2>
-        <div class="labs-grid">
-          <a href="/office" class="lab-card highlight-cyan">
-            <div class="lab-badge-row">
-              <span class="lab-pill live">● LIVE TELEMETRY</span>
-              <span class="lab-tech">2D Pixel-Art + 3D Three.js</span>
-            </div>
-            <h3>Autonomous 7-Agent Command Bridge</h3>
-            <p>Interactive spatial telemetry and live status stream for LEADYA, Prime, Antigravity, Sysca, Luna, Lexa, and Caren.</p>
-            <span class="lab-cta">[ LAUNCH AGENT OFFICE → ]</span>
-          </a>
-
-          <a href="/k8s/" class="lab-card highlight-blue">
-            <div class="lab-badge-row">
-              <span class="lab-pill interactive">☸️ INTERACTIVE ODYSSEY</span>
-              <span class="lab-tech">Kubernetes Simulator</span>
-            </div>
-            <h3>KubeQuest — Interactive Kubernetes Odyssey</h3>
-            <p>Hands-on, gamified Kubernetes cluster troubleshooting, pod scheduling, and architecture learning lab.</p>
-            <span class="lab-cta">[ LAUNCH KUBEQUEST → ]</span>
-          </a>
-        </div>
-      </section>
-
-      <!-- Production Case Studies -->
-      <section class="cases-section">
-        <div class="section-header-flex">
-          <h2 class="section-subhead">[ PRODUCTION ARCHITECTURE CASE STUDIES ({items.length}) ]</h2>
-        </div>
-
-        <div class="filter-bar">
-          <input
-            type="search"
-            id="showcaseSearchInput"
-            class="search-input"
-            placeholder="Filter case studies by title, pattern, or #tag..."
-            aria-label="Filter case studies"
-          />
-          <div class="tag-chips" id="showcaseTagChips">
-            <button type="button" class="chip-btn active" data-tag="all">All ({items.length})</button>
-            {allTags.map((tag) => (
-              <button type="button" class="chip-btn" data-tag={tag}>#{tag}</button>
-            ))}
+    <!-- Interactive Live Labs Spotlight -->
+    <section class="labs-section">
+      <h2 class="section-subhead">[ INTERACTIVE LIVE LABS &amp; SIMULATIONS ]</h2>
+      <div class="labs-grid">
+        <a href="/office" class="lab-card highlight-cyan">
+          <div class="lab-badge-row">
+            <span class="lab-pill live">● LIVE TELEMETRY</span>
+            <span class="lab-tech">2D Pixel-Art + 3D Three.js</span>
           </div>
-        </div>
+          <h3>Autonomous 7-Agent Command Bridge</h3>
+          <p>Interactive spatial telemetry and live status stream for LEADYA, Prime, Antigravity, Sysca, Luna, Lexa, and Caren.</p>
+          <span class="lab-cta">[ LAUNCH AGENT OFFICE → ]</span>
+        </a>
 
-        <div class="showcase-grid" id="showcaseGrid">
-          {items.map((item) => (
-            <article
-              class="showcase-card"
-              data-title={item.title.toLowerCase()}
-              data-summary={item.summaryText.toLowerCase()}
-              data-tags={item.tags.join(',').toLowerCase()}
-            >
-              <div>
-                <div class="card-header">
-                  <span class="card-date">[{item.date}]</span>
-                  <span class="card-reading">⏱ {item.readingTimeMinutes} min read</span>
-                  <span class="card-badge">[CASE STUDY]</span>
-                </div>
-                <h3 class="card-title">
-                  <a href={`/showcase/${item.slug}`} class="title-link">{item.title}</a>
-                </h3>
-                <p class="card-summary">{item.summaryText}</p>
-              </div>
-              <div class="card-footer">
-                <div class="card-tags">
-                  {item.tags.map((tag) => (
-                    <span class="tag-item">#{tag}</span>
-                  ))}
-                </div>
-                <a href={`/showcase/${item.slug}`} class="exec-link">[ READ CASE STUDY → ]</a>
-              </div>
-            </article>
+        <a href="/k8s/" class="lab-card highlight-blue">
+          <div class="lab-badge-row">
+            <span class="lab-pill interactive">☸️ INTERACTIVE ODYSSEY</span>
+            <span class="lab-tech">Kubernetes Simulator</span>
+          </div>
+          <h3>KubeQuest — Interactive Kubernetes Odyssey</h3>
+          <p>Hands-on, gamified Kubernetes cluster troubleshooting, pod scheduling, and architecture learning lab.</p>
+          <span class="lab-cta">[ LAUNCH KUBEQUEST → ]</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- Production Case Studies -->
+    <section class="cases-section" data-filter-root>
+      <div class="section-header-flex">
+        <h2 class="section-subhead">[ PRODUCTION ARCHITECTURE CASE STUDIES ({items.length}) ]</h2>
+      </div>
+
+      <div class="filter-bar">
+        <input
+          type="search"
+          class="search-input"
+          placeholder="Filter case studies by title, pattern, or #tag..."
+          aria-label="Filter case studies"
+          data-filter-input
+        />
+        <div class="tag-chips">
+          <button type="button" class="chip-btn active" data-filter-chip="all">All ({items.length})</button>
+          {allTags.map((tag) => (
+            <button type="button" class="chip-btn" data-filter-chip={tag}>#{tag}</button>
           ))}
         </div>
-      </section>
+      </div>
 
-      <!-- Architectural Decision Records (ADRs) -->
-      <section id="adrs" class="adrs-section">
-        <h2 class="section-subhead">[ ARCHITECTURAL DECISION RECORDS · ADRs ({adrs.length}) ]</h2>
-        <p class="section-desc">
-          Immutable engineering decisions governing single-VPS memory ceilings, multi-agent orchestration, model routing, and security invariants.
-        </p>
-        <div class="adr-table">
-          {adrs.map((adr) => (
-            <article class="adr-row-card">
-              <div class="adr-row-top">
-                <span class="card-date">[{adr.date}]</span>
-                <span class="card-reading">⏱ {adr.readingTimeMinutes} min read</span>
-                <span class="adr-accepted-pill">[ACCEPTED]</span>
+      <div class="showcase-grid">
+        {items.map((item) => (
+          <article
+            class="showcase-card"
+            data-filter-card
+            data-title={item.title.toLowerCase()}
+            data-summary={item.summaryText.toLowerCase()}
+            data-tags={item.tags.join(',').toLowerCase()}
+          >
+            <div>
+              <div class="card-header">
+                <span class="card-date">[{item.date}]</span>
+                <span class="card-reading">⏱ {item.readingTimeMinutes} min read</span>
+                <span class="card-badge">[CASE STUDY]</span>
               </div>
-              <h3 class="adr-row-title">
-                <a href={adr.url}>{adr.title}</a>
+              <h3 class="card-title">
+                <a href={`/showcase/${item.slug}`} class="title-link">{item.title}</a>
               </h3>
-              <p class="adr-row-summary">{adr.summaryText}</p>
-              <a href={adr.url} class="exec-link">[ READ DECISION RECORD → ]</a>
-            </article>
-          ))}
-        </div>
-      </section>
-    </main>
+              <p class="card-summary">{item.summaryText}</p>
+            </div>
+            <div class="card-footer">
+              <div class="card-tags">
+                {item.tags.map((tag) => (
+                  <span class="tag-item">#{tag}</span>
+                ))}
+              </div>
+              <a href={`/showcase/${item.slug}`} class="exec-link">[ READ CASE STUDY → ]</a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
 
-    <footer class="foot wrap">
-      <span>© 2026 Herdi Agusthio · Software Engineer</span>
-      <a href="/" class="back-link">[ ← RETURN TO CONSOLE ]</a>
-    </footer>
+    <!-- Architectural Decision Records (ADRs) -->
+    <section id="adrs" class="adrs-section">
+      <h2 class="section-subhead">[ ARCHITECTURAL DECISION RECORDS · ADRs ({adrs.length}) ]</h2>
+      <p class="section-desc">
+        Immutable engineering decisions governing single-VPS memory ceilings, multi-agent orchestration, model routing, and security invariants.
+      </p>
+      <div class="adr-table">
+        {adrs.map((adr) => (
+          <article class="adr-row-card">
+            <div class="adr-row-top">
+              <span class="card-date">[{adr.date}]</span>
+              <span class="card-reading">⏱ {adr.readingTimeMinutes} min read</span>
+              <span class="adr-accepted-pill">[{adr.status.toUpperCase()}]</span>
+            </div>
+            <h3 class="adr-row-title">
+              <a href={adr.url}>{adr.title}</a>
+            </h3>
+            <p class="adr-row-summary">{adr.summaryText}</p>
+            <a href={adr.url} class="exec-link">[ READ DECISION RECORD → ]</a>
+          </article>
+        ))}
+      </div>
+    </section>
+  </main>
+  <a slot="footer" href="/" class="back-link">[ ← RETURN TO CONSOLE ]</a>
+</BaseLayout>
 
-    <script is:inline>
-      document.addEventListener('DOMContentLoaded', () => {
-        const searchInput = document.getElementById('showcaseSearchInput');
-        const cards = Array.from(document.querySelectorAll('#showcaseGrid .showcase-card'));
-        const chipBtns = Array.from(document.querySelectorAll('#showcaseTagChips .chip-btn'));
-        let activeTag = 'all';
+<script>
+  import '../../scripts/filter';
+</script>
 
-        function applyFilters() {
-          const q = (searchInput?.value || '').trim().toLowerCase();
-          cards.forEach((card) => {
-            const title = card.getAttribute('data-title') || '';
-            const summary = card.getAttribute('data-summary') || '';
-            const tags = (card.getAttribute('data-tags') || '').split(',');
-            const matchesTag = activeTag === 'all' || tags.includes(activeTag.toLowerCase());
-            const matchesQuery = !q || title.includes(q) || summary.includes(q) || tags.some((t) => t.includes(q));
-            card.style.display = matchesTag && matchesQuery ? 'flex' : 'none';
-          });
-        }
-
-        searchInput?.addEventListener('input', applyFilters);
-        chipBtns.forEach((btn) => {
-          btn.addEventListener('click', () => {
-            chipBtns.forEach((b) => b.classList.remove('active'));
-            btn.classList.add('active');
-            activeTag = btn.getAttribute('data-tag') || 'all';
-            applyFilters();
-          });
-        });
-      });
-    </script>
-
-    <style>
-      .main-container {
-        padding-top: 2rem;
-        padding-bottom: 4rem;
-      }
-      .showcase-hero {
-        border-bottom: 1px solid var(--gray-20);
-        padding-bottom: 2rem;
-        margin-bottom: 2.5rem;
-      }
-      .meta-status {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 0.75rem;
-        font-family: var(--font-mono);
-        font-size: 0.8rem;
-        color: var(--gray-60);
-        margin-bottom: 1rem;
-      }
-      .status-indicator {
-        width: 8px;
-        height: 8px;
-        background: #10b981;
-        box-shadow: 0 0 8px #10b981;
-        border-radius: 50%;
-      }
-      .page-title {
-        font-family: var(--font-sans);
-        font-size: clamp(2.2rem, 5vw, 3rem);
-        font-weight: 800;
-        letter-spacing: -0.04em;
-        color: var(--gray-100);
-        line-height: 1.2;
-        margin-bottom: 1rem;
-      }
-      .hero-desc {
-        font-family: var(--font-sans);
-        font-size: 1.12rem;
-        line-height: 1.6;
-        color: var(--gray-70);
-        max-width: 48rem;
-      }
-      .section-subhead {
-        font-family: var(--font-mono);
-        font-size: 0.9rem;
-        color: var(--gray-90);
-        letter-spacing: 0.02em;
-        margin-bottom: 1.25rem;
-        border-bottom: 1px dashed var(--gray-20);
-        padding-bottom: 0.6rem;
-      }
-      .labs-section {
-        margin-bottom: 3.5rem;
-      }
-      .labs-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
-        gap: 1.5rem;
-      }
-      .lab-card {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        padding: 1.6rem;
-        background: var(--gray-10);
-        border: 1px solid var(--gray-30);
-        text-decoration: none;
-        transition: all 0.2s;
-      }
-      .lab-card.highlight-cyan {
-        border-color: rgba(56, 189, 248, 0.45);
-        background: rgba(56, 189, 248, 0.04);
-      }
-      .lab-card.highlight-cyan:hover {
-        border-color: #38bdf8;
-        background: rgba(56, 189, 248, 0.1);
-      }
-      .lab-card.highlight-blue {
-        border-color: rgba(96, 165, 250, 0.45);
-        background: rgba(50, 108, 229, 0.06);
-      }
-      .lab-card.highlight-blue:hover {
-        border-color: #60a5fa;
-        background: rgba(50, 108, 229, 0.14);
-      }
-      .lab-badge-row {
-        display: flex;
-        justify-content: space-between;
-        font-family: var(--font-mono);
-        font-size: 0.72rem;
-        margin-bottom: 0.85rem;
-      }
-      .lab-pill.live { color: #10b981; font-weight: 600; }
-      .lab-pill.interactive { color: #60a5fa; font-weight: 600; }
-      .lab-tech { color: var(--gray-60); }
-      .lab-card h3 {
-        font-family: var(--font-sans);
-        font-size: 1.25rem;
-        color: var(--gray-100);
-        margin-bottom: 0.5rem;
-      }
-      .lab-card p {
-        font-size: 0.94rem;
-        color: var(--gray-70);
-        line-height: 1.55;
-        margin-bottom: 1.25rem;
-      }
-      .lab-cta {
-        font-family: var(--font-mono);
-        font-size: 0.78rem;
-        color: var(--gray-100);
-        font-weight: 600;
-      }
-      .filter-bar {
-        display: flex;
-        flex-direction: column;
-        gap: 0.85rem;
-        margin-bottom: 1.75rem;
-      }
-      .search-input {
-        width: 100%;
-        background: var(--gray-10);
-        border: 1px solid var(--gray-20);
-        color: var(--gray-100);
-        font-family: var(--font-mono);
-        font-size: 0.85rem;
-        padding: 0.65rem 0.9rem;
-      }
-      .search-input:focus {
-        outline: none;
-        border-color: #38bdf8;
-      }
-      .tag-chips {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.45rem;
-      }
-      .chip-btn {
-        background: var(--gray-0);
-        border: 1px solid var(--gray-20);
-        color: var(--gray-60);
-        font-family: var(--font-mono);
-        font-size: 0.74rem;
-        padding: 0.3rem 0.65rem;
-        cursor: pointer;
-        transition: all 0.15s;
-      }
-      .chip-btn:hover, .chip-btn.active {
-        color: var(--gray-100);
-        border-color: var(--gray-80);
-        background: var(--gray-10);
-      }
-      .showcase-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
-        gap: 1.75rem;
-      }
-      .showcase-card {
-        background: var(--gray-0);
-        border: 1px solid var(--gray-20);
-        padding: 1.75rem;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        transition: border-color 0.2s, background 0.2s;
-      }
-      .showcase-card:hover {
-        border-color: var(--gray-60);
-        background: var(--gray-10);
-      }
-      .card-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-family: var(--font-mono);
-        font-size: 0.74rem;
-        color: var(--gray-50);
-        margin-bottom: 0.9rem;
-      }
-      .card-reading {
-        color: #38bdf8;
-      }
-      .card-title {
-        font-family: var(--font-sans);
-        font-size: 1.2rem;
-        font-weight: 700;
-        line-height: 1.35;
-        margin-bottom: 0.75rem;
-      }
-      .title-link {
-        color: var(--gray-100);
-        text-decoration: none;
-      }
-      .title-link:hover {
-        text-decoration: underline;
-      }
-      .card-summary {
-        font-family: var(--font-sans);
-        font-size: 0.95rem;
-        line-height: 1.6;
-        color: var(--gray-70);
-        margin-bottom: 1.5rem;
-      }
-      .card-footer {
-        display: flex;
-        flex-direction: column;
-        gap: 0.9rem;
-        border-top: 1px dashed var(--gray-20);
-        padding-top: 1rem;
-      }
-      .card-tags {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        font-family: var(--font-mono);
-        font-size: 0.74rem;
-        color: var(--gray-60);
-      }
-      .exec-link {
-        font-family: var(--font-mono);
-        font-size: 0.78rem;
-        color: var(--gray-100);
-        text-decoration: none;
-        font-weight: 600;
-        align-self: flex-start;
-      }
-      .exec-link:hover {
-        text-decoration: underline;
-      }
-      .adrs-section {
-        margin-top: 4rem;
-      }
-      .section-desc {
-        color: var(--gray-70);
-        font-size: 0.98rem;
-        margin-bottom: 1.5rem;
-      }
-      .adr-table {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-      }
-      .adr-row-card {
-        border: 1px solid var(--gray-20);
-        padding: 1.35rem 1.5rem;
-        background: var(--gray-0);
-        transition: border-color 0.2s, background 0.2s;
-      }
-      .adr-row-card:hover {
-        border-color: var(--gray-60);
-        background: var(--gray-10);
-      }
-      .adr-row-top {
-        display: flex;
-        gap: 0.85rem;
-        align-items: center;
-        font-family: var(--font-mono);
-        font-size: 0.74rem;
-        color: var(--gray-50);
-        margin-bottom: 0.5rem;
-      }
-      .adr-accepted-pill {
-        color: #10b981;
-        font-weight: 600;
-      }
-      .adr-row-title {
-        font-size: 1.15rem;
-        margin-bottom: 0.5rem;
-      }
-      .adr-row-title a {
-        color: var(--gray-100);
-        text-decoration: none;
-      }
-      .adr-row-title a:hover {
-        text-decoration: underline;
-      }
-      .adr-row-summary {
-        color: var(--gray-70);
-        font-size: 0.94rem;
-        line-height: 1.55;
-        margin-bottom: 0.85rem;
-      }
-      .back-link {
-        text-decoration: none;
-        color: var(--gray-80);
-      }
-      .back-link:hover {
-        color: var(--gray-100);
-      }
-    </style>
-  </body>
-</html>
+<style>
+  .showcase-hero {
+    border-bottom: 1px solid var(--gray-20);
+    padding-bottom: 2rem;
+    margin-bottom: 2.5rem;
+  }
+  .hero-desc {
+    font-family: var(--font-sans);
+    font-size: 1.12rem;
+    line-height: 1.6;
+    color: var(--gray-70);
+    max-width: 48rem;
+  }
+  .section-subhead {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    color: var(--gray-90);
+    letter-spacing: 0.02em;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px dashed var(--gray-20);
+    padding-bottom: 0.6rem;
+  }
+  .labs-section {
+    margin-bottom: 3.5rem;
+  }
+  .labs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+    gap: 1.5rem;
+  }
+  .lab-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1.6rem;
+    background: var(--gray-10);
+    border: 1px solid var(--gray-30);
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .lab-card.highlight-cyan {
+    border-color: rgba(56, 189, 248, 0.45);
+    background: rgba(56, 189, 248, 0.04);
+  }
+  .lab-card.highlight-cyan:hover {
+    border-color: #38bdf8;
+    background: rgba(56, 189, 248, 0.1);
+  }
+  .lab-card.highlight-blue {
+    border-color: rgba(96, 165, 250, 0.45);
+    background: rgba(50, 108, 229, 0.06);
+  }
+  .lab-card.highlight-blue:hover {
+    border-color: #60a5fa;
+    background: rgba(50, 108, 229, 0.14);
+  }
+  .lab-badge-row {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    margin-bottom: 0.85rem;
+  }
+  .lab-pill.live { color: #10b981; font-weight: 600; }
+  .lab-pill.interactive { color: #60a5fa; font-weight: 600; }
+  .lab-tech { color: var(--gray-60); }
+  .lab-card h3 {
+    font-family: var(--font-sans);
+    font-size: 1.25rem;
+    color: var(--gray-100);
+    margin-bottom: 0.5rem;
+  }
+  .lab-card p {
+    font-size: 0.94rem;
+    color: var(--gray-70);
+    line-height: 1.55;
+    margin-bottom: 1.25rem;
+  }
+  .lab-cta {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--gray-100);
+    font-weight: 600;
+  }
+  .filter-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    margin-bottom: 1.75rem;
+  }
+  .showcase-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
+    gap: 1.75rem;
+  }
+  .showcase-card {
+    background: var(--gray-0);
+    border: 1px solid var(--gray-20);
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .showcase-card:hover {
+    border-color: var(--gray-60);
+    background: var(--gray-10);
+  }
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    color: var(--gray-50);
+    margin-bottom: 0.9rem;
+  }
+  .card-reading {
+    color: #38bdf8;
+  }
+  .card-title {
+    font-family: var(--font-sans);
+    font-size: 1.2rem;
+    font-weight: 700;
+    line-height: 1.35;
+    margin-bottom: 0.75rem;
+  }
+  .title-link {
+    color: var(--gray-100);
+    text-decoration: none;
+  }
+  .title-link:hover {
+    text-decoration: underline;
+  }
+  .card-summary {
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--gray-70);
+    margin-bottom: 1.5rem;
+  }
+  .card-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    border-top: 1px dashed var(--gray-20);
+    padding-top: 1rem;
+  }
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    color: var(--gray-60);
+  }
+  .exec-link {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--gray-100);
+    text-decoration: none;
+    font-weight: 600;
+    align-self: flex-start;
+  }
+  .exec-link:hover {
+    text-decoration: underline;
+  }
+  .adrs-section {
+    margin-top: 4rem;
+  }
+  .section-desc {
+    color: var(--gray-70);
+    font-size: 0.98rem;
+    margin-bottom: 1.5rem;
+  }
+  .adr-table {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .adr-row-card {
+    border: 1px solid var(--gray-20);
+    padding: 1.35rem 1.5rem;
+    background: var(--gray-0);
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .adr-row-card:hover {
+    border-color: var(--gray-60);
+    background: var(--gray-10);
+  }
+  .adr-row-top {
+    display: flex;
+    gap: 0.85rem;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    color: var(--gray-50);
+    margin-bottom: 0.5rem;
+  }
+  .adr-accepted-pill {
+    color: #10b981;
+    font-weight: 600;
+  }
+  .adr-row-title {
+    font-size: 1.15rem;
+    margin-bottom: 0.5rem;
+  }
+  .adr-row-title a {
+    color: var(--gray-100);
+    text-decoration: none;
+  }
+  .adr-row-title a:hover {
+    text-decoration: underline;
+  }
+  .adr-row-summary {
+    color: var(--gray-70);
+    font-size: 0.94rem;
+    line-height: 1.55;
+    margin-bottom: 0.85rem;
+  }
+</style>

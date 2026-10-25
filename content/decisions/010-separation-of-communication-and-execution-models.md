@@ -1,3 +1,10 @@
+---
+title: "ADR 010: Separation of Communication, Execution, and Background Inference Workloads"
+date: "2026-10-02"
+status: accepted
+tags: ["architecture", "adr", "systems"]
+---
+
 # ADR 010: Separation of Communication, Execution, and Background Inference Workloads
 
 ## Status

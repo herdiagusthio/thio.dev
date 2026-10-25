@@ -1,0 +1,24 @@
+---
+import '../styles/global.css';
+import SeoHead, { type Props as SeoProps } from '../components/SeoHead.astro';
+import Topbar, { type Props as TopbarProps } from '../components/Topbar.astro';
+
+export type Props = SeoProps & TopbarProps;
+
+const { active, wide, ...seo } = Astro.props;
+const year = new Date().getFullYear();
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <SeoHead {...seo} />
+  </head>
+  <body>
+    <Topbar active={active} wide={wide} />
+    <slot />
+    <footer class="foot wrap">
+      <span>© {year} Herdi Agusthio · Software Engineer</span>
+      <slot name="footer" />
+    </footer>
+  </body>
+</html>
