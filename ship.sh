@@ -1,11 +1,11 @@
 #!/bin/bash
 set -euo pipefail
 
-echo "=== [1/3] Installing locked dependencies & running tests ==="
+echo "=== [1/4] Installing locked dependencies & running tests ==="
 npm ci --no-audit --no-fund
 npm test
 
-echo "=== [2/3] Syncing second-brain content & building Astro SSG ==="
+echo "=== [2/4] Syncing second-brain content & building Astro SSG ==="
 npm run build
 
 if [ ! -f "dist/index.html" ] || [ ! -f "dist/k8s/index.html" ]; then
@@ -13,7 +13,10 @@ if [ ! -f "dist/index.html" ] || [ ! -f "dist/k8s/index.html" ]; then
   exit 1
 fi
 
-echo "=== [3/3] Deploying dist/ to /var/www/thio.dev/ ==="
+echo "=== [3/4] Deploying dist/ to /var/www/thio.dev/ ==="
 rsync -avz --delete dist/ /var/www/thio.dev/
+
+echo "=== [4/4] Smoke-checking the live site ==="
+scripts/smoke-check.sh || { echo "ERROR: deployed, but the live site failed the smoke check"; exit 1; }
 
 echo "=== Deployment complete ==="
