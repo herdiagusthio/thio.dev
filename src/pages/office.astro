@@ -43,21 +43,17 @@ import '../styles/office.css';
             <!-- Center: Room Navigator & 2D/3D View Toggle -->
             <div class="stage-room-navigator">
               <div class="room-nav-control" id="roomNavControlWrap">
-                <button type="button" id="officeNavPrev" class="room-nav-arrow" title="Previous Room">‹</button>
+                <button type="button" id="officeNavPrev" class="room-nav-arrow" aria-label="Previous room"><span aria-hidden="true">‹</span></button>
                 <div class="room-nav-title-box">
                   <span id="officeRoomTitle">Workspace</span>
                   <span id="officeRoomCount" class="room-nav-count-badge">5</span>
                 </div>
-                <button type="button" id="officeNavNext" class="room-nav-arrow" title="Next Room">›</button>
-                <span id="officeDayNightPill" class="day-night-chip">☀️ daytime</span>
-              </div>
-              <div class="room-nav-dots" id="roomNavDotsWrap">
-                <span id="dotWorkspace" class="nav-dot active" title="Go to Workspace"></span>
-                <span id="dotLounge" class="nav-dot" title="Go to Lounge"></span>
+                <button type="button" id="officeNavNext" class="room-nav-arrow" aria-label="Next room"><span aria-hidden="true">›</span></button>
+                <span id="officeDayNightPill" class="day-night-chip"><span aria-hidden="true">☀️</span> daytime</span>
               </div>
               <div class="view-toggle" id="officeViewToggle">
-                <button type="button" id="toggleView2D" class="active" title="2D Pixel-Art Office">2D</button>
-                <button type="button" id="toggleView3D" title="Interactive 3D Isometric Office">3D</button>
+                <button type="button" id="toggleView2D" class="active" aria-pressed="true" title="2D Pixel-Art Office">2D</button>
+                <button type="button" id="toggleView3D" aria-pressed="false" title="Interactive 3D Isometric Office">3D</button>
               </div>
             </div>
 
@@ -66,7 +62,8 @@ import '../styles/office.css';
               <span class="status-summary-pill working"><span class="summary-dot green"></span> <b id="officeHeaderWorkingCount">5</b> working</span>
               <span class="status-summary-pill idle"><span class="summary-dot gray"></span> <b id="officeHeaderIdleCount">3</b> standby</span>
               <span class="status-summary-pill offline"><span class="summary-dot dark"></span> <b>0</b> offline</span>
-              <button type="button" id="refreshOfficeBtn" class="office-refresh-btn" title="Refresh Live State">🔄</button>
+              <button type="button" id="refreshOfficeBtn" class="office-refresh-btn" aria-label="Refresh live data"><span aria-hidden="true">🔄</span></button>
+              <span id="officeLiveStatus" class="sr-only" role="status"></span>
             </div>
           </div>
 
@@ -75,7 +72,7 @@ import '../styles/office.css';
             <!-- WORKSPACE ROOM -->
             <div id="officeWorkspaceRoom" class="office-room-stage workspace-stage">
               <!-- Back Wall Decor -->
-              <div class="office-back-wall">
+              <div class="office-back-wall" aria-hidden="true">
                 <!-- Left Window -->
                 <div class="office-window window-left">
                   <div class="window-glass">
@@ -181,14 +178,14 @@ import '../styles/office.css';
 
               <!-- Footer Hint -->
               <div class="stage-footer-bar">
-                <span>💡 Click any workstation or agent character to view architecture dossier & charter</span>
+                <span><span aria-hidden="true">💡</span> Click any workstation or agent character to view architecture dossier & charter</span>
               </div>
             </div>
 
             <!-- LOUNGE ROOM -->
             <div id="officeLoungeRoom" class="office-room-stage lounge-stage" style="display: none;">
               <!-- Lounge Back Wall -->
-              <div class="office-back-wall lounge-wall">
+              <div class="office-back-wall lounge-wall" aria-hidden="true">
                 <!-- Left Window -->
                 <div class="office-window window-left">
                   <div class="window-glass">
@@ -253,7 +250,7 @@ import '../styles/office.css';
                     </div>
 
                     <!-- Coffee Table in Front of Sofa -->
-                    <div class="lounge-coffee-table">
+                    <div class="lounge-coffee-table" aria-hidden="true">
                       <div class="coffee-cup" title="Fresh Toraja Coffee"><span class="steam">~</span>☕</div>
                       <div class="coffee-cup" title="Green Tea"><span class="steam">~</span>🍵</div>
                       <div class="table-magazine">TECH ARCHITECTURE</div>
@@ -295,9 +292,9 @@ import '../styles/office.css';
           <!-- 1. Fleet Roster Quick Nav -->
           <div class="office-sidebar-card">
             <div class="sidebar-card-header">
-              <div class="sidebar-card-title">
-                <span>🤖 Fleet Roster (7)</span>
-              </div>
+              <h2 class="sidebar-card-title">
+                <span><span aria-hidden="true">🤖</span> Fleet Roster (7)</span>
+              </h2>
               <span class="badge active" style="font-size: 10px;">7 Online</span>
             </div>
             <div class="agent-chip-list" id="agentRosterChips">
@@ -308,10 +305,10 @@ import '../styles/office.css';
           <!-- 2. Live Activity Card -->
           <div class="office-sidebar-card">
             <div class="sidebar-card-header">
-              <div class="sidebar-card-title">
-                <span class="sidebar-pulse-icon">∿</span>
+              <h2 class="sidebar-card-title">
+                <span class="sidebar-pulse-icon" aria-hidden="true">∿</span>
                 <span>Live Engineering Activity</span>
-              </div>
+              </h2>
               <span class="badge active" style="font-size: 10px;">Live Stream</span>
             </div>
             <div class="live-activity-list" id="sidebarActivityList">
@@ -322,9 +319,9 @@ import '../styles/office.css';
           <!-- 3. Channels Card -->
           <div class="office-sidebar-card">
             <div class="sidebar-card-header">
-              <div class="sidebar-card-title">
-                <span>💬 Architecture Channels (6)</span>
-              </div>
+              <h2 class="sidebar-card-title">
+                <span><span aria-hidden="true">💬</span> Architecture Channels (6)</span>
+              </h2>
               <span class="badge active" style="font-size: 10px;">Connected</span>
             </div>
             <div class="sidebar-channels-list" id="sidebarChannelsList">
@@ -336,63 +333,64 @@ import '../styles/office.css';
     </main>
 
     <!-- AGENT DOSSIER INSPECTOR MODAL -->
-    <div id="stationDetailModal" class="modal-backdrop" style="display: none;">
+    <dialog id="stationDetailModal" class="office-dialog" aria-labelledby="modalAgentName">
       <div class="cyber-modal-card">
         <div class="cyber-modal-head">
           <div style="display: flex; align-items: center; gap: 14px;">
-            <div class="holo-avatar-pod" style="width: 44px; height: 44px;">
+            <div class="holo-avatar-pod" style="width: 44px; height: 44px;" aria-hidden="true">
               <div class="holo-avatar-ring"></div>
               <div id="modalAvatar" class="holo-avatar-core" style="width: 36px; height: 36px; font-size: 18px;">👑</div>
             </div>
             <div>
-              <h3 id="modalAgentName" style="font-size: 18px; margin-bottom: 2px; font-weight: 700; color: #f8fafc;">LEADYA</h3>
+              <!-- autofocus: focus lands on the title, so the Space keyup that opened the dialog can't press Close -->
+              <h2 id="modalAgentName" tabindex="-1" autofocus style="font-size: 18px; margin-bottom: 2px; font-weight: 700; color: #f8fafc;">LEADYA</h2>
               <div id="modalAgentRole" style="font-size: 12px; color: var(--accent);">CEO & Chief Orchestrator</div>
             </div>
           </div>
-          <button type="button" id="closeStationModalBtn" class="btn-secondary">✕ Close</button>
+          <button type="button" id="closeStationModalBtn" class="btn-secondary"><span aria-hidden="true">✕</span> Close</button>
         </div>
         <div class="cyber-modal-body">
           <div class="cyber-meta-grid">
             <div class="cyber-meta-cell">
-              <label>Current Status</label>
+              <span class="meta-label">Current Status</span>
               <strong id="modalStateVal" style="color: #38bdf8;">Working</strong>
             </div>
             <div class="cyber-meta-cell">
-              <label>Location / Zone</label>
+              <span class="meta-label">Location / Zone</span>
               <strong id="modalRoomVal">Command Bridge (Station #1)</strong>
             </div>
             <div class="cyber-meta-cell">
-              <label>Inference Engine & Tier</label>
+              <span class="meta-label">Inference Engine & Tier</span>
               <strong id="modalModelVal">Frontier Reasoning (agenticprojectcombo)</strong>
             </div>
             <div class="cyber-meta-cell">
-              <label>Execution Invariant</label>
+              <span class="meta-label">Execution Invariant</span>
               <strong id="modalProvenanceVal" style="font-size: 11px;">Deterministic Memory & Review Gate</strong>
             </div>
           </div>
 
           <div class="cyber-meta-cell">
-            <label>Current Attributed Task</label>
+            <span class="meta-label">Current Attributed Task</span>
             <div id="modalCurrentTask" style="font-size: 13px; font-weight: 600; color: #38bdf8; font-family: var(--font-mono);">None</div>
           </div>
 
           <div class="cyber-meta-cell">
-            <label>Recent Live Activity Trace</label>
+            <span class="meta-label">Recent Live Activity Trace</span>
             <div id="modalRecentActivity" style="font-size: 12px; color: var(--text-muted); font-family: var(--font-mono);">None</div>
           </div>
 
           <div class="cyber-meta-cell">
-            <label>Public Mission Charter & Philosophy</label>
+            <span class="meta-label">Public Mission Charter & Philosophy</span>
             <div id="modalMission" style="font-size: 12px; line-height: 1.5; color: var(--text-main); max-height: 140px; overflow-y: auto; white-space: pre-wrap; font-family: var(--font-sans);"></div>
           </div>
 
           <div class="cyber-meta-cell">
-            <label>Domain Skills & Operational Protocols</label>
+            <span class="meta-label">Domain Skills & Operational Protocols</span>
             <div id="modalSkills" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;"></div>
           </div>
         </div>
       </div>
-    </div>
+    </dialog>
 
     <a slot="footer" href="/showcase/autonomous-agent-office" class="back-link">[ READ ARCHITECTURE CASE STUDY → ]</a>
 
@@ -517,7 +515,7 @@ import '../styles/office.css';
         border: 1px solid rgba(255, 255, 255, 0.06);
         border-radius: 8px;
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
       }
 
       .agent-chip-item:hover {

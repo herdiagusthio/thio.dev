@@ -28,6 +28,8 @@ let isLive = false;
 let lastUpdatedAt: string | null = null;
 let currentRoom: 'workspace' | 'lounge' = 'workspace';
 let office3DInitialized = false;
+let announcedLive: boolean | null = null;
+let renderPending = false;
 
 const $ = (id: string) => document.getElementById(id);
 
@@ -77,6 +79,12 @@ function updateHudStatus(summary: Summary | null) {
   pill?.classList.toggle('static', !isLive);
   const pillText = $('gatewayStatusText');
   if (pillText) pillText.textContent = isLive ? 'Swarm Fleet — Live Telemetry' : 'Swarm Fleet — Static Fallback';
+  // Announce only when live/fallback flips, never on a routine refresh (the first call sets the baseline).
+  const liveStatus = $('officeLiveStatus');
+  if (liveStatus && announcedLive !== null && announcedLive !== isLive) {
+    liveStatus.textContent = isLive ? 'Live telemetry connected' : 'Live telemetry unavailable, showing static data';
+  }
+  announcedLive = isLive;
 
   const monoLabels = document.querySelectorAll('.mono-label');
   if (monoLabels[0]) monoLabels[0].textContent = isLive ? '[SWARM_TELEMETRY: LIVE]' : '[SWARM_TELEMETRY: STATIC FALLBACK]';
@@ -132,7 +140,7 @@ function deskCell(deskNum: number, workspace: Agent[]) {
         </div>
         <div class="desk-chair ${agent ? 'occupied' : ''}"></div>
       </div>
-      <div class="desk-slot-label">Desk #${deskNum}${agent ? ` · ${agent.name}` : ''}</div>
+      <div class="desk-slot-label">Desk #${deskNum}${agent ? html`<span class="desk-slot-name"> · ${agent.name}</span>` : ''}</div>
     </div>`;
 }
 
@@ -176,7 +184,7 @@ function renderOffice2D() {
     'agentRosterChips',
     html`${agents.map((a) => html`
       <div class="agent-chip-item" ${agentAttrs(a)} title="Inspect ${a.name}">
-        <span class="chip-avatar">${a.avatar}</span>
+        <span class="chip-avatar" aria-hidden="true">${a.avatar}</span>
         <div class="chip-details">
           <strong>${a.name}</strong>
           <small>${a.role}</small>
@@ -190,7 +198,7 @@ function renderOffice2D() {
     html`${activities.map((item) => html`
       <div class="sidebar-activity-item">
         <div class="activity-top">
-          <span class="activity-agent">${item.icon} ${item.agent}</span>
+          <span class="activity-agent"><span aria-hidden="true">${item.icon}</span> ${item.agent}</span>
           <span class="activity-time">${item.timeAgo}</span>
         </div>
         <div class="activity-action">${item.action}</div>
@@ -208,7 +216,7 @@ function renderOffice2D() {
             <small>${c.target}</small>
           </div>
         </div>
-        <span class="badge active" style="font-size: 9px;">CONNECTED</span>
+        <span class="badge active" style="font-size: 10px;">CONNECTED</span>
       </div>`)}`,
   );
 }
@@ -227,7 +235,7 @@ function updateClockAndLighting() {
   const isNight = wib.getHours() < 6 || wib.getHours() >= 18;
   const pill = $('officeDayNightPill');
   if (pill) {
-    pill.textContent = isNight ? '🌙 nighttime' : '☀️ daytime';
+    setHtml('officeDayNightPill', html`<span aria-hidden="true">${isNight ? '🌙' : '☀️'}</span> ${isNight ? 'nighttime' : 'daytime'}`);
     pill.className = `day-night-chip ${isNight ? 'night' : 'day'}`;
   }
   document.querySelectorAll('.office-room-stage').forEach((stage) => stage.classList.toggle('is-night', isNight));
@@ -250,18 +258,17 @@ function switchRoom(room: 'workspace' | 'lounge') {
   if (title) title.textContent = isWorkspace ? 'Workspace' : 'Lounge';
   const count = $('officeRoomCount');
   if (count) count.textContent = String(agents.filter((a) => a.room === (isWorkspace ? 'Workspace' : 'Lounge')).length);
-  $('dotWorkspace')?.classList.toggle('active', isWorkspace);
-  $('dotLounge')?.classList.toggle('active', !isWorkspace);
 }
 
 function switchOfficeMode(mode: '2D' | '3D') {
   const is3D = mode === '3D';
-  $('toggleView2D')?.classList.toggle('active', !is3D);
-  $('toggleView3D')?.classList.toggle('active', is3D);
+  for (const [id, on] of [['toggleView2D', !is3D], ['toggleView3D', is3D]] as const) {
+    $(id)?.classList.toggle('active', on);
+    $(id)?.setAttribute('aria-pressed', String(on));
+  }
   show('virtualOffice2DStage', !is3D);
   show('virtualOffice3DStage', is3D);
   show('roomNavControlWrap', !is3D);
-  show('roomNavDotsWrap', !is3D);
 
   const stage3D = $('virtualOffice3DStage');
   if (is3D) {
@@ -273,9 +280,11 @@ function switchOfficeMode(mode: '2D' | '3D') {
   }
 }
 
+const dossier = () => $('stationDetailModal') as HTMLDialogElement | null;
+
 function openDossierModal(agentId: string) {
   const agent = agents.find((a) => a.id === agentId);
-  const modal = $('stationDetailModal');
+  const modal = dossier();
   if (!agent || !modal) return;
 
   const text: Record<string, string> = {
@@ -298,18 +307,27 @@ function openDossierModal(agentId: string) {
     html`${agent.skills.map((s) => html`
       <span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 11px;">#${s}</span>`)}`,
   );
-  modal.style.display = 'flex';
+  // The 3D labels carry data-agent-id and also call onSelect, so one click can arrive twice.
+  if (!modal.open) modal.showModal();
 }
 
-function closeDossierModal() {
-  const modal = $('stationDetailModal');
-  if (modal) modal.style.display = 'none';
+// Re-render the 2D office and put keyboard focus back on the same agent in the same list.
+function rerender() {
+  const focused = document.activeElement?.closest<HTMLElement>('[data-agent-id]');
+  const agentId = focused?.dataset.agentId;
+  const listId = focused?.parentElement?.closest('[id]')?.id;
+  renderOffice2D();
+  switchRoom(currentRoom);
+  if (agentId && listId) {
+    document.querySelector<HTMLElement>(`#${CSS.escape(listId)} [data-agent-id="${CSS.escape(agentId)}"]`)?.focus();
+  }
 }
 
 async function refreshAndRender() {
   await refreshLiveState();
-  renderOffice2D();
-  switchRoom(currentRoom);
+  // Re-rendering under an open dossier would replace its opener (focus would return to <body>).
+  if (dossier()?.open) renderPending = true;
+  else rerender();
   updateClockAndLighting();
 }
 
@@ -335,18 +353,22 @@ document.addEventListener('keydown', (e) => {
     e.preventDefault();
     openDossierModal(id);
   }
-  if (e.key === 'Escape') closeDossierModal();
 });
 
 const toggleRoom = () => switchRoom(currentRoom === 'workspace' ? 'lounge' : 'workspace');
 $('officeNavPrev')?.addEventListener('click', toggleRoom);
 $('officeNavNext')?.addEventListener('click', toggleRoom);
-$('dotWorkspace')?.addEventListener('click', () => switchRoom('workspace'));
-$('dotLounge')?.addEventListener('click', () => switchRoom('lounge'));
 $('toggleView2D')?.addEventListener('click', () => switchOfficeMode('2D'));
 $('toggleView3D')?.addEventListener('click', () => switchOfficeMode('3D'));
-$('closeStationModalBtn')?.addEventListener('click', closeDossierModal);
-$('stationDetailModal')?.addEventListener('click', (e) => {
-  if ((e.target as HTMLElement).id === 'stationDetailModal') closeDossierModal();
+$('closeStationModalBtn')?.addEventListener('click', () => dossier()?.close());
+// A click on the dialog element itself (not its card) is a click on the backdrop.
+dossier()?.addEventListener('click', (e) => {
+  if (e.target === dossier()) dossier()?.close();
+});
+dossier()?.addEventListener('close', () => {
+  if (renderPending) {
+    renderPending = false;
+    rerender();
+  }
 });
 $('refreshOfficeBtn')?.addEventListener('click', refreshAndRender);
