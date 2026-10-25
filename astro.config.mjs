@@ -1,5 +1,5 @@
 // @ts-check
-import { defineConfig } from 'astro/config';
+import { defineConfig, fontProviders } from 'astro/config';
 import { satteri } from '@astrojs/markdown-satteri';
 import sitemap from '@astrojs/sitemap';
 
@@ -19,6 +19,36 @@ const stripFirstH1 = {
 
 export default defineConfig({
   site,
+  // Self-hosted from src/assets/fonts (OFL-1.1, licenses alongside): no request to Google, at build
+  // time or in the browser. One variable woff2 per family; the discrete weights match the old Google
+  // Fonts link, so text renders as before. Normal styles only (prose italics stay synthesized).
+  fonts: [
+    {
+      provider: fontProviders.local(),
+      name: 'Outfit',
+      cssVariable: '--font-sans',
+      fallbacks: ['sans-serif'],
+      options: {
+        variants: [
+          { src: ['./src/assets/fonts/outfit-latin.woff2'], weight: 400, style: 'normal' },
+          { src: ['./src/assets/fonts/outfit-latin.woff2'], weight: 600, style: 'normal' },
+          { src: ['./src/assets/fonts/outfit-latin.woff2'], weight: 800, style: 'normal' },
+        ],
+      },
+    },
+    {
+      provider: fontProviders.local(),
+      name: 'JetBrains Mono',
+      cssVariable: '--font-mono',
+      fallbacks: ['monospace'],
+      options: {
+        variants: [
+          { src: ['./src/assets/fonts/jetbrains-mono-latin.woff2'], weight: 400, style: 'normal' },
+          { src: ['./src/assets/fonts/jetbrains-mono-latin.woff2'], weight: 600, style: 'normal' },
+        ],
+      },
+    },
+  ],
   // Canonical URLs have no trailing slash; list the same URLs in the sitemap.
   integrations: [sitemap({ serialize: (item) => ({ ...item, url: item.url.replace(/(.)\/$/, '$1') }) })],
   markdown: {

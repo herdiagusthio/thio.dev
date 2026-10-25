@@ -8,7 +8,7 @@ import { html, normalizeSnapshot, stateClass, STATIC_ACTIVITIES, STATIC_CHANNELS
 
 declare global {
   interface Window {
-    // Prebuilt from ../vps-dashboard/src/office3d.ts, loaded as a classic script before this module.
+    // Prebuilt from ../vps-dashboard/src/office3d.ts; load3D() adds it on the first switch to 3D.
     Office3D?: {
       init(container: HTMLElement, onSelect: (station: Agent) => void): unknown;
       update(stations: Agent[], isNight: boolean): void;
@@ -28,6 +28,8 @@ let isLive = false;
 let lastUpdatedAt: string | null = null;
 let currentRoom: 'workspace' | 'lounge' = 'workspace';
 let office3DInitialized = false;
+let office3DLoad: Promise<void> | null = null;
+let viewMode: '2D' | '3D' = '2D';
 let announcedLive: boolean | null = null;
 let renderPending = false;
 
@@ -260,7 +262,24 @@ function switchRoom(room: 'workspace' | 'lounge') {
   if (count) count.textContent = String(agents.filter((a) => a.room === (isWorkspace ? 'Workspace' : 'Lounge')).length);
 }
 
-function switchOfficeMode(mode: '2D' | '3D') {
+// The 3D bundle (~170 KB compressed) is fetched only when someone opens 3D; a failed load can be retried.
+function load3D(): Promise<void> {
+  office3DLoad ??= new Promise<void>((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = '/js/office3d.bundle.js';
+    // A bundle that loads but throws while running leaves Office3D undefined: treat it as a failed load.
+    script.onload = () => (window.Office3D ? resolve() : reject(new Error('3D bundle did not define Office3D')));
+    script.onerror = () => reject(new Error('3D bundle failed to load'));
+    document.head.append(script);
+  }).catch((e) => {
+    office3DLoad = null;
+    throw e;
+  });
+  return office3DLoad;
+}
+
+async function switchOfficeMode(mode: '2D' | '3D') {
+  viewMode = mode;
   const is3D = mode === '3D';
   for (const [id, on] of [['toggleView2D', !is3D], ['toggleView3D', is3D]] as const) {
     $(id)?.classList.toggle('active', on);
@@ -272,7 +291,16 @@ function switchOfficeMode(mode: '2D' | '3D') {
 
   const stage3D = $('virtualOffice3DStage');
   if (is3D) {
-    if (!office3DInitialized && window.Office3D && stage3D) {
+    if (!office3DInitialized && stage3D) {
+      try {
+        await load3D();
+      } catch (e) {
+        console.warn('[Office] 3D view unavailable:', e);
+        if (viewMode === '3D') switchOfficeMode('2D');
+        return;
+      }
+      // Back in 2D before the bundle arrived: init on the next switch, not into a hidden stage.
+      if (viewMode !== '3D' || office3DInitialized || !window.Office3D) return;
       window.Office3D.init(stage3D, (station) => openDossierModal(station.id));
       office3DInitialized = true;
     }
