@@ -1,4 +1,6 @@
 ---
+import { Font } from 'astro:assets';
+
 export interface Props {
   title: string;
   description: string;
@@ -106,13 +108,9 @@ if (schemaType === 'ProfilePage') {
 <meta name="twitter:description" content={description} />
 <meta name="twitter:image" content={ogImageUrl} />
 
-<!-- Google Fonts -->
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link
-  href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap"
-  rel="stylesheet"
-/>
+<!-- Fonts: self-hosted (astro.config.mjs `fonts`); preload only the regular weights -->
+<Font cssVariable="--font-sans" preload={[{ weight: 400 }]} />
+<Font cssVariable="--font-mono" preload={[{ weight: 400 }]} />
 
 <!-- JSON-LD Structured Schema (AI SEO) -->
 <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />

@@ -1,5 +1,5 @@
 // @ts-check
-import { defineConfig } from 'astro/config';
+import { defineConfig, fontProviders } from 'astro/config';
 import { satteri } from '@astrojs/markdown-satteri';
 import sitemap from '@astrojs/sitemap';
 
@@ -19,6 +19,26 @@ const stripFirstH1 = {
 
 export default defineConfig({
   site,
+  // Downloaded at build time and served from this site, so pages make no requests to Google.
+  // Normal styles only, like the old Google Fonts link (prose italics stay synthesized).
+  fonts: [
+    {
+      provider: fontProviders.google(),
+      name: 'Outfit',
+      cssVariable: '--font-sans',
+      weights: [400, 600, 800],
+      styles: ['normal'],
+      fallbacks: ['sans-serif'],
+    },
+    {
+      provider: fontProviders.google(),
+      name: 'JetBrains Mono',
+      cssVariable: '--font-mono',
+      weights: [400, 600],
+      styles: ['normal'],
+      fallbacks: ['monospace'],
+    },
+  ],
   // Canonical URLs have no trailing slash; list the same URLs in the sitemap.
   integrations: [sitemap({ serialize: (item) => ({ ...item, url: item.url.replace(/(.)\/$/, '$1') }) })],
   markdown: {

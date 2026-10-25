@@ -14,9 +14,7 @@
 
   --z-nav: 100;
 
-  /* Brand Typography */
-  --font-sans: 'Outfit', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  /* Brand typography: --font-sans (Outfit) and --font-mono (JetBrains Mono) come from <Font> in SeoHead */
 }
 
 /* Reset / Base */
