@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="KubeQuest: a hands-on, gamified tour of Kubernetes, from clusters and pods to scheduling and troubleshooting, right in your browser.">
   <title>KubeQuest — The Fun Interactive Kubernetes Odyssey</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☸️</text></svg>">
   <style>
@@ -410,7 +411,7 @@
       justify-content: space-between;
     }
 
-    .drawer-header h3 { font-size: 16px; font-weight: 700; color: #fff; }
+    .drawer-header h2 { font-size: 16px; font-weight: 700; color: #fff; }
 
     .drawer-list {
       flex: 1;
@@ -503,8 +504,8 @@
     <div class="drawer-overlay" id="drawer-overlay"></div>
     <aside class="drawer" id="drawer">
       <div class="drawer-header">
-        <h3>🗺️ Flight Plan / Modules</h3>
-        <button class="icon-btn" id="btn-close-drawer">✕</button>
+        <h2><span aria-hidden="true">🗺️</span> Flight Plan / Modules</h2>
+        <button class="icon-btn" id="btn-close-drawer" aria-label="Close modules">✕</button>
       </div>
       <div class="drawer-list" id="drawer-list"></div>
     </aside>
