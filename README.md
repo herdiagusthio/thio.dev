@@ -50,7 +50,7 @@ cd ../vps-dashboard && bun run build:3d   # src/office3d.ts → public/js/office
 cp public/js/office3d.bundle.js ../thio.dev/public/js/
 ```
 
-It exposes `window.Office3D.{init, update, destroy}`; `src/scripts/office.ts` drives it.
+It exposes `window.Office3D.{init, update, destroy}`; `src/scripts/office.ts` drives it. The committed build predates vps-dashboard's `textContent` label fix, so thio.dev pre-escapes its input (`forLegacy3D` in `src/scripts/office-data.ts`). When you swap in a newer build, remove `forLegacy3D` (it would show HTML entities) and add the icon sprite and `.btn`/`.icon` styles its toolbar uses.
 
 ## ✅ Verify Live
 
