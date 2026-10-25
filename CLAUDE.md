@@ -5,7 +5,7 @@ Astro 7 static site — Herdi Agusthio's personal engineering console (blog, cas
 ## Commands
 
 - `npm run build` / `npm run dev` run `scripts/sync-content.mjs` first, which mirrors `../second-brain` (or `$SECOND_BRAIN_DIR`) into `content/` and **deletes** `content/**/*.md` not public in the source. Use `npx astro build` to build without touching `content/`.
-- `npm run check` (astro check) and `npm test` (node:test over `scripts/*.test.mjs`, `src/**/*.test.ts`) must stay green; CI runs both plus the build. CI never deploys — `./ship.sh` on the VPS does.
+- `npm run check` (astro check) and `npm test` (node:test over `scripts/*.test.mjs`, `src/**/*.test.ts`) must stay green; CI runs both plus the build. CI never deploys — `./ship.sh` on the VPS does, then runs `scripts/smoke-check.sh` (every sitemap page returns 200 live, and the live homepage is byte-identical to `dist/index.html`).
 
 ## Content pipeline
 

@@ -24,7 +24,7 @@ npm run build    # sync content from ../second-brain, then astro build
 npx astro build  # build from the committed content/ without syncing
 npm run check    # astro check (type errors)
 npm test         # node:test unit tests (sync allowlist, text helpers, office data)
-./ship.sh        # VPS deploy: npm ci → test → build → verify → rsync to /var/www/thio.dev
+./ship.sh        # VPS deploy: npm ci → test → build → verify → rsync to /var/www/thio.dev → smoke check
 ```
 
 CI (`.github/workflows/ci.yml`) runs `npm ci`, `check`, `test` and `build` on every push and PR. It does not deploy: only `ship.sh` builds from fresh second-brain content.
@@ -54,12 +54,10 @@ It exposes `window.Office3D.{init, update, destroy}`; `src/scripts/office.ts` dr
 
 ## ✅ Verify Live
 
-```bash
-for path in "/" "/blog/" "/showcase/" "/office/" "/k8s/" "/rss.xml" "/sitemap-index.xml" "/robots.txt"; do
-  printf "%-20s -> HTTP %s\n" "$path" "$(curl -s -o /dev/null -w '%{http_code}' https://thio.103.217.144.64.nip.io$path)"
-done
+`ship.sh` ends with `scripts/smoke-check.sh`: every page in `dist/`'s sitemap plus the RSS, robots, sitemap index, `/k8s/`, og image and 3D bundle must return 200 from the live site, and the live homepage must be byte-identical to `dist/index.html` (so Caddy is serving this build). Re-run it on the VPS after a deploy, or pass a base URL that serves `dist/` as-is (e.g. `python3 -m http.server 8000 -d dist`, then `scripts/smoke-check.sh http://localhost:8000`; `astro dev`/`preview` inject scripts, so the homepage check fails there).
 
-curl -s https://api.thio.103.217.144.64.nip.io/office | jq .summary
+```bash
+curl -s https://api.thio.103.217.144.64.nip.io/office | jq .summary   # live office API
 ```
 
 Security & quality gate: `/home/thiohermes/.hermes/scripts/sdlc-scanner.sh ~/code-storage/thio.dev`
