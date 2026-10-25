@@ -12,7 +12,9 @@ test('isPublic: only frontmatter status on the allowlist passes', () => {
   const cases = [
     ['unquoted published', '---\ntitle: A\nstatus: published\n---\nbody', PUBLISHED, true],
     ['double-quoted', '---\nstatus: "published"\n---\n', PUBLISHED, true],
-    ['single-quoted, mixed case', "---\nstatus: 'Accepted'\n---\n", ADR, true],
+    ['single-quoted', "---\nstatus: 'accepted'\n---\n", ADR, true],
+    // Case-sensitive like the content schema: syncing "Accepted" would fail the build after content/ changed.
+    ['mixed case stays private', '---\nstatus: Accepted\n---\n', ADR, false],
     ['superseded ADR', '---\nstatus: superseded\n---\n', ADR, true],
     ['CRLF line endings', '---\r\ntitle: A\r\nstatus: published\r\n---\r\nbody', PUBLISHED, true],
     ['BOM before frontmatter', '﻿---\nstatus: published\n---\n', PUBLISHED, true],

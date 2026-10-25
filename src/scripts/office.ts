@@ -1,9 +1,9 @@
 // Live Office client — /office. Paints the static roster immediately, then refreshes from the
 // sanitized public API every 30s; any network or shape failure keeps the static fallback.
-// Every API value goes through `html` (escaped) and normalizeSnapshot (validated) first.
+// Every API value is validated by normalizeSnapshot, then escaped by `html` (2D) or forLegacy3D (3D).
 
 import { AGENTS as ROSTER, type Agent } from '../data/agents';
-import { html, normalizeSnapshot, stateClass, STATIC_ACTIVITIES, STATIC_CHANNELS, type Activity, type Channel, type Summary } from './office-data';
+import { forLegacy3D, html, normalizeSnapshot, stateClass, STATIC_ACTIVITIES, STATIC_CHANNELS, type Activity, type Channel, type Summary } from './office-data';
 
 declare global {
   interface Window {
@@ -231,7 +231,7 @@ function updateClockAndLighting() {
   }
   document.querySelectorAll('.office-room-stage').forEach((stage) => stage.classList.toggle('is-night', isNight));
 
-  if (office3DInitialized) window.Office3D?.update(agents, isNight);
+  if (office3DInitialized) window.Office3D?.update(forLegacy3D(agents), isNight);
 }
 
 // Showing clears the inline display so the stylesheet's value (e.g. flex) applies.

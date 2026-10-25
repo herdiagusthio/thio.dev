@@ -62,6 +62,9 @@ export interface Snapshot {
 
 const DEFAULT_COLORS: AgentColors = { hair: '#18181b', skin: '#fed7aa', shirt: '#3b82f6', pants: '#1e3a8a' };
 const HEX = /^#[0-9a-f]{3,8}$/i;
+// id and state are identifiers (map keys, class names, 3D animation switches), never free text.
+const ID = /^[\w-]+$/;
+const STATES = ['Working', 'Reviewing', 'Collaborating', 'Idle', 'Offline'];
 
 const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
 const str = (v: unknown) => (typeof v === 'string' ? v : undefined);
@@ -82,7 +85,7 @@ function toAgent(raw: unknown, roster: Agent[]): Agent | null {
   const state = str(raw.state);
   const room = str(raw.room);
   const seat = Number.isInteger(raw.seat) ? (raw.seat as number) : undefined;
-  if (!id || !name || !state || !room || seat === undefined) return null;
+  if (!id || !ID.test(id) || !name || !state || !STATES.includes(state) || !room || seat === undefined) return null;
 
   const known = roster.find((a) => a.id === id);
   return {
@@ -143,6 +146,15 @@ export function normalizeSnapshot(data: unknown, roster: Agent[]): Snapshot | nu
     updatedAt: str(data.updatedAt) ?? str(data.fetchedAt) ?? null,
   };
 }
+
+/**
+ * Copy for window.Office3D. The bundled public/js/office3d.bundle.js predates the vps-dashboard
+ * fix that builds 3D labels with textContent: it interpolates name and currentTask into innerHTML.
+ * ponytail: pre-escape for that build; when the bundle is refreshed from ../vps-dashboard, drop
+ * this (it would show entities) and add the icon sprite + .btn/.icon CSS the new toolbar uses.
+ */
+export const forLegacy3D = (agents: Agent[]): Agent[] =>
+  agents.map((a) => ({ ...a, name: render(a.name), currentTask: render(a.currentTask) }));
 
 // --- Static fallback (also the first paint) ---------------------------------------------------
 

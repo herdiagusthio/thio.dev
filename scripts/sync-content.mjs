@@ -21,7 +21,8 @@ export function isPublic(text, allowed) {
   const frontmatter = text.match(/^﻿?---\r?\n([\s\S]*?)\r?\n---/);
   if (!frontmatter) return false;
   const status = frontmatter[1].match(/^status:\s*["']?([\w-]+)["']?\s*(?:#.*)?$/m);
-  return Boolean(status) && allowed.includes(status[1].toLowerCase());
+  // Case-sensitive, like the content schema: "Accepted" stays private instead of failing the build.
+  return Boolean(status) && allowed.includes(status[1]);
 }
 
 export function copyDir(srcDir, destDir, allowed) {

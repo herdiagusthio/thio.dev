@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { html, normalizeSnapshot, raw, stateClass } from './office-data.ts';
+import { forLegacy3D, html, normalizeSnapshot, raw, stateClass } from './office-data.ts';
 import { AGENTS } from '../data/agents.ts';
 
 const XSS = '<img src=x onerror=alert(1)>';
@@ -37,6 +37,9 @@ test('normalizeSnapshot: validates stations and merges the static roster', () =>
         station({ id: 'lexa', name: 'Lexa', seat: 6, colors: { hair: 'red; background:url(//evil)', skin: '#fff', shirt: '#fff', pants: '#fff' } }),
         station({ id: 'ghost', name: 'Ghost', seat: 9 }),
         station({ id: 'nosat', seat: '2' }),
+        station({ id: `x" onclick="alert(1)` }),
+        station({ id: 'odd', state: 'Working" onmouseover="alert(1)' }),
+        station({ id: 'new-state', state: 'Sleeping' }),
         { name: 'missing id' },
       ],
       updatedAt: '2026-10-25T00:00:00Z',
@@ -57,6 +60,14 @@ test('normalizeSnapshot: validates stations and merges the static roster', () =>
   assert.equal(snap.activities, null);
   assert.equal(snap.channels, null);
   assert.equal(snap.summary, null);
+});
+
+test('forLegacy3D: escapes the free text the prebuilt 3D bundle puts into innerHTML', () => {
+  const [a] = forLegacy3D([{ ...AGENTS[0], name: XSS, currentTask: 'a & <b>' }]);
+  assert.equal(a.name, '&lt;img src=x onerror=alert(1)&gt;');
+  assert.equal(a.currentTask, 'a &amp; &lt;b&gt;');
+  assert.equal(a.id, AGENTS[0].id);
+  assert.equal(a.state, AGENTS[0].state, 'state stays raw: the bundle compares it');
 });
 
 test('normalizeSnapshot: activities, channels and summary', () => {
