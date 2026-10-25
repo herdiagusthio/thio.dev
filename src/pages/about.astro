@@ -1,8 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { getAgentFleet } from '../lib/telemetry';
-
-const fleet = getAgentFleet();
+import { AGENTS as fleet } from '../data/agents';
 ---
 <BaseLayout
   title="About Herdi Agusthio — Software Engineer & Systems Architect (thio.dev)"
