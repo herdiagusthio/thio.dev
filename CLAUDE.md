@@ -9,7 +9,7 @@ Astro 7 static site — Herdi Agusthio's personal engineering console (blog, cas
 
 ## Content pipeline
 
-- Privacy boundary = the sync allowlist (`isPublic` in `scripts/sync-content.mjs`): frontmatter `status: published` (blog, engineering) or `accepted|superseded` (decisions). Everything synced is published, so keep it fail-closed; `fixtures/second-brain` holds a private sample of each kind that CI keeps out of `dist/`.
+- Privacy boundary = the sync allowlist (`isPublic` in `scripts/sync-content.mjs`): frontmatter `status: published` (blog, engineering) or `accepted|superseded` (decisions), and decisions must be numbered ADRs (`NNN-*.md`) — the agent pipeline's `sdlc-*`/`goai-*` tickets in `decisions/` never sync, whatever status they carry. Everything synced is published, so keep it fail-closed; `fixtures/second-brain` holds a private sample of each kind that CI keeps out of `dist/`.
 - Quality gate = `src/content.config.ts` (glob-loader collections, strict schema: `title`, `date` YYYY-MM-DD, `tags` ≥1, `status`; blog and engineering also need `summary` ≥40 chars, ADRs fall back to their Context paragraph). Optional: `lang` (`en`|`id`, put on an article's title/lead/body — the site chrome stays English) and `featured` (homepage case studies). Fix bad frontmatter in second-brain, not in `content/`.
 - `src/lib/content.ts` `getEntries(kind)` is the only content API (view model + per-kind summary fallback); pure helpers live in `src/lib/text.ts` so node:test can import them without `astro:*`.
 - Markdown uses Astro's Satteri processor with an mdast plugin dropping the body's first H1 (`astro.config.mjs`); smart punctuation and syntax highlighting are off on purpose.

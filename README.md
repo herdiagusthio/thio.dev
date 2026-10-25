@@ -36,7 +36,7 @@ CI (`.github/workflows/ci.yml`) runs `npm ci`, `check`, `test` and `build` on ev
 second-brain (private) ──sync allowlist──▶ content/ (generated, git-ignored) ──content collections──▶ static pages
 ```
 
-- `scripts/sync-content.mjs` copies a file only when its YAML frontmatter `status` is public: `published` for `knowledge/blog` and `knowledge/engineering`, `accepted` or `superseded` for `decisions`. Everything else stays private and is pruned from `content/`.
+- `scripts/sync-content.mjs` copies a file only when its YAML frontmatter `status` is public: `published` for `knowledge/blog` and `knowledge/engineering`, `accepted` or `superseded` for `decisions`, which must also be numbered ADRs (`NNN-*.md`; pipeline tickets like `sdlc-*` never sync). Everything else stays private and is pruned from `content/`.
 - `src/content.config.ts` enforces the frontmatter: `title`, `date` (`YYYY-MM-DD`), `tags` (at least one), `status`, and for blog posts and case studies a `summary` of at least 40 characters. Optional: `lang: id` for Indonesian posts, `featured: true` for homepage case studies. Bad frontmatter fails the build.
 - Write content in second-brain, never directly in `content/` — the sync deletes anything that is not in the source.
 

@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { copyDir, isPublic } from './sync-content.mjs';
+import { copyDir, isPublic, NUMBERED_ADR } from './sync-content.mjs';
 
 const PUBLISHED = ['published'];
 const ADR = ['accepted', 'superseded'];
@@ -54,6 +54,25 @@ test('copyDir: copies public files and prunes everything else from the destinati
     assert.deepEqual(fs.readdirSync(dest).sort(), ['keep.txt', 'public.md']);
     assert.equal(copyDir(path.join(tmp, 'missing'), dest, ['published']), 0);
     assert.deepEqual(fs.readdirSync(dest).sort(), ['keep.txt', 'public.md'], 'missing source leaves dest untouched');
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
+test('copyDir: decisions publish only numbered ADRs, whatever a generated file claims as status', () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'sync-content-'));
+  try {
+    const src = path.join(tmp, 'src');
+    const dest = path.join(tmp, 'dest');
+    fs.mkdirSync(src);
+    fs.writeFileSync(path.join(src, '016-real-decision.md'), '---\nstatus: accepted\n---\nADR');
+    // Pipeline tickets (sdlc-*, goai-*) can carry status: accepted but are internal working notes.
+    fs.writeFileSync(path.join(src, 'sdlc-1025-dfc7-adr.md'), '---\nstatus: accepted\n---\n/home/user/code-storage/project');
+    fs.writeFileSync(path.join(src, 'goai-spec.md'), '---\nstatus: accepted\n---\nspec');
+    fs.writeFileSync(path.join(src, '000-template.md'), '---\nstatus: proposed\n---\ntemplate');
+
+    assert.equal(copyDir(src, dest, ADR, NUMBERED_ADR), 1);
+    assert.deepEqual(fs.readdirSync(dest), ['016-real-decision.md']);
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }
