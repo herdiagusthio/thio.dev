@@ -13,6 +13,7 @@ test('isPublic: only frontmatter status on the allowlist passes', () => {
     ['superseded ADR', '---\nstatus: superseded\n---\n', ADR, true],
     ['CRLF line endings', '---\r\ntitle: A\r\nstatus: published\r\n---\r\nbody', PUBLISHED, true],
     ['BOM before frontmatter', '﻿---\nstatus: published\n---\n', PUBLISHED, true],
+    ['trailing YAML comment', '---\nstatus: accepted # was proposed\n---\n', ADR, true],
     ['internal', '---\nstatus: internal\n---\n', PUBLISHED, false],
     ['proposed ADR', '---\nstatus: proposed\n---\n', ADR, false],
     ['published is not an ADR status', '---\nstatus: published\n---\n', ADR, false],

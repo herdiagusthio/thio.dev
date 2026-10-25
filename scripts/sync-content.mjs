@@ -20,7 +20,7 @@ const TARGETS = [
 export function isPublic(text, allowed) {
   const frontmatter = text.match(/^﻿?---\r?\n([\s\S]*?)\r?\n---/);
   if (!frontmatter) return false;
-  const status = frontmatter[1].match(/^status:\s*["']?([\w-]+)["']?\s*$/m);
+  const status = frontmatter[1].match(/^status:\s*["']?([\w-]+)["']?\s*(?:#.*)?$/m);
   return Boolean(status) && allowed.includes(status[1].toLowerCase());
 }
 
