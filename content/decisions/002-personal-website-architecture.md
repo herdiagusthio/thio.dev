@@ -1,13 +1,13 @@
 ---
 title: "Personal Website Concept & System Console Architecture"
 date: "2026-07-25"
-status: accepted
+status: superseded
 tags: ["architecture","astro","system-console","performance"]
 ---
 
 # ADR: 002: Personal Website Concept & Architecture
 - **Date:** 2026-07-25
-- **Status:** Proposed
+- **Status:** Superseded by ADR 015 (thio.dev content sync, AI SEO & live office). The static, markdown-built console shipped, but the site is served by Caddy from the VPS instead of GitHub Pages, content syncs from second-brain through a frontmatter allowlist instead of a separate public path, and `/office` shows live sanitized telemetry instead of a static illustration.
 
 ## Context
 Thio (Herdi Agusthio) wants to design and build a personal website that is highly unique, personal, and represents his background as a backend engineer operating in the fintech/AI sector. The site should be cost-effective ($0 hosting on platforms like Vercel or GitHub Pages) and act as a professional developer profile that avoids generic resume templates. Family details are excluded from the public scope for privacy.
