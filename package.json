@@ -10,13 +10,12 @@
     "build": "npm run sync && astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "test": "node --test 'scripts/*.test.mjs'",
+    "test": "node --test 'scripts/*.test.mjs' 'src/**/*.test.ts'",
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^7.4.2",
-    "gray-matter": "^4.0.3",
-    "marked": "^18.0.7"
+    "@astrojs/markdown-satteri": "^0.4.5",
+    "astro": "^7.4.2"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.12",

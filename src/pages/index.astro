@@ -1,11 +1,12 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
-import { getBlogPosts, getEngineeringShowcases, getDecisions } from '../lib/feed';
+import { getEntries } from '../lib/content';
 
-const blogItems = getBlogPosts().slice(0, 4);
-const showcaseItems = getEngineeringShowcases().slice(0, 3);
-const decisionItems = getDecisions().slice(0, 4);
+const [blog, engineering, decisions] = await Promise.all([getEntries('blog'), getEntries('engineering'), getEntries('decisions')]);
+const blogItems = blog.slice(0, 4);
+const showcaseItems = engineering.slice(0, 3);
+const decisionItems = decisions.slice(0, 4);
 ---
 <BaseLayout
   title="Herdi Agusthio — Software Engineer & Systems Architect"
@@ -23,7 +24,7 @@ const decisionItems = getDecisions().slice(0, 4);
           <section class="content-section">
             <div class="section-head-row">
               <h2 class="section-head">Latest Engineering Reflections</h2>
-              <a href="/blog" class="view-all-link">View all essays ({getBlogPosts().length}) →</a>
+              <a href="/blog" class="view-all-link">View all essays ({blog.length}) →</a>
             </div>
             <div class="card-list">
               {blogItems.map(item => (
@@ -38,7 +39,7 @@ const decisionItems = getDecisions().slice(0, 4);
                   <h3 class="card-title">
                     <a href={item.url}>{item.title}</a>
                   </h3>
-                  <div class="card-summary" set:html={item.summaryHtml} />
+                  <div class="card-summary">{item.summaryText}</div>
                   <a href={item.url} class="card-link">[ READ ESSAY → ]</a>
                 </article>
               ))}
@@ -49,7 +50,7 @@ const decisionItems = getDecisions().slice(0, 4);
           <section class="content-section" style="margin-top: 3.5rem;">
             <div class="section-head-row">
               <h2 class="section-head">Featured Production Case Studies</h2>
-              <a href="/showcase" class="view-all-link">View all case studies ({getEngineeringShowcases().length}) →</a>
+              <a href="/showcase" class="view-all-link">View all case studies ({engineering.length}) →</a>
             </div>
             <div class="card-list">
               {showcaseItems.map(item => (
@@ -64,7 +65,7 @@ const decisionItems = getDecisions().slice(0, 4);
                   <h3 class="card-title">
                     <a href={item.url}>{item.title}</a>
                   </h3>
-                  <div class="card-summary" set:html={item.summaryHtml} />
+                  <div class="card-summary">{item.summaryText}</div>
                   <a href={item.url} class="card-link">[ READ CASE FILE → ]</a>
                 </article>
               ))}
@@ -75,7 +76,7 @@ const decisionItems = getDecisions().slice(0, 4);
           <section class="content-section" style="margin-top: 3.5rem;">
             <div class="section-head-row">
               <h2 class="section-head">Recent Architecture Decisions (ADRs)</h2>
-              <a href="/showcase#adrs" class="view-all-link">Browse all ADRs ({getDecisions().length}) →</a>
+              <a href="/showcase#adrs" class="view-all-link">Browse all ADRs ({decisions.length}) →</a>
             </div>
             <div class="adr-compact-list">
               {decisionItems.map(adr => (
@@ -84,7 +85,7 @@ const decisionItems = getDecisions().slice(0, 4);
                     <span class="adr-date">[{adr.date}]</span>
                     <strong class="adr-title">{adr.title}</strong>
                   </div>
-                  <span class="adr-status">[ACCEPTED →]</span>
+                  <span class="adr-status">[{adr.status.toUpperCase()} →]</span>
                 </a>
               ))}
             </div>

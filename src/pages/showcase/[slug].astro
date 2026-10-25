@@ -1,9 +1,10 @@
 ---
+import { render } from 'astro:content';
 import ArticleLayout from '../../layouts/ArticleLayout.astro';
-import { getEngineeringShowcases } from '../../lib/feed';
+import { getEntries } from '../../lib/content';
 
 export async function getStaticPaths() {
-  const items = getEngineeringShowcases();
+  const items = await getEntries('engineering');
   return items.map((item, idx) => ({
     params: { slug: item.slug },
     props: {
@@ -15,6 +16,7 @@ export async function getStaticPaths() {
 }
 
 const { item, prev, next } = Astro.props;
+const { Content } = await render(item.entry);
 ---
 <ArticleLayout
   item={item}
@@ -28,5 +30,5 @@ const { item, prev, next } = Astro.props;
   prev={prev}
   next={next}
 >
-  <Fragment set:html={item.bodyHtml} />
+  <Content />
 </ArticleLayout>

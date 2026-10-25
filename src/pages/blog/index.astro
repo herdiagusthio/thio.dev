@@ -1,8 +1,8 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getBlogPosts } from '../../lib/feed';
+import { getEntries } from '../../lib/content';
 
-const items = getBlogPosts();
+const items = await getEntries('blog');
 const allTags = Array.from(new Set(items.flatMap((i) => i.tags))).slice(0, 12);
 ---
 <BaseLayout

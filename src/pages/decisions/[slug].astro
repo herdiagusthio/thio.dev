@@ -1,9 +1,10 @@
 ---
+import { render } from 'astro:content';
 import ArticleLayout from '../../layouts/ArticleLayout.astro';
-import { getDecisions } from '../../lib/feed';
+import { getEntries } from '../../lib/content';
 
 export async function getStaticPaths() {
-  const adrs = getDecisions();
+  const adrs = await getEntries('decisions');
   return adrs.map((adr, idx) => ({
     params: { slug: adr.slug },
     props: {
@@ -15,6 +16,7 @@ export async function getStaticPaths() {
 }
 
 const { adr, prev, next } = Astro.props;
+const { Content } = await render(adr.entry);
 ---
 <ArticleLayout
   item={adr}
@@ -23,11 +25,11 @@ const { adr, prev, next } = Astro.props;
   canonicalPath={`/decisions/${adr.slug}`}
   schemaType="TechArticle"
   eyebrow="DECISION RECORD"
-  statusLabel="ACCEPTED"
+  statusLabel={adr.status.toUpperCase()}
   showSummary={false}
   back={{ href: '/showcase#adrs', label: '[ ← RETURN TO ADR CATALOG ]' }}
   prev={prev}
   next={next}
 >
-  <Fragment set:html={adr.bodyHtml} />
+  <Content />
 </ArticleLayout>
