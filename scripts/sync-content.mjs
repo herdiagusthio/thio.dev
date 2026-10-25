@@ -11,9 +11,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-// [sourceSubdir, destSubdir, allowed frontmatter statuses]
+// ADRs are numbered (001-...). Pipeline tickets (sdlc-*, goai-*) live in decisions/ too and may say
+// status: accepted, but they are internal working notes with server paths: never publish them.
+export const NUMBERED_ADR = /^\d{3}-/;
+
+// [sourceSubdir, destSubdir, allowed frontmatter statuses, required file name pattern]
 const TARGETS = [
-  ['decisions', 'decisions', ['accepted', 'superseded']],
+  ['decisions', 'decisions', ['accepted', 'superseded'], NUMBERED_ADR],
   ['knowledge/engineering', 'engineering', ['published']],
   ['knowledge/blog', 'blog', ['published']],
 ];
@@ -26,7 +30,7 @@ export function isPublic(text, allowed) {
   return Boolean(status) && allowed.includes(status[1]);
 }
 
-export function copyDir(srcDir, destDir, allowed) {
+export function copyDir(srcDir, destDir, allowed, namePattern = /^/) {
   if (!fs.existsSync(srcDir)) {
     console.warn(`  ⚠ source missing, skipped: ${srcDir}`);
     return 0;
@@ -37,7 +41,7 @@ export function copyDir(srcDir, destDir, allowed) {
   for (const name of fs.readdirSync(srcDir)) {
     if (!name.endsWith('.md')) continue;
     const fullPath = path.join(srcDir, name);
-    if (!isPublic(fs.readFileSync(fullPath, 'utf8'), allowed)) {
+    if (!namePattern.test(name) || !isPublic(fs.readFileSync(fullPath, 'utf8'), allowed)) {
       skipped.push(name);
       continue;
     }
@@ -70,8 +74,8 @@ function main() {
 
   console.log(`Syncing content from ${source}`);
   let total = 0;
-  for (const [src, dest, allowed] of TARGETS) {
-    const n = copyDir(path.join(source, src), path.join(siteRoot, 'content', dest), allowed);
+  for (const [src, dest, allowed, namePattern] of TARGETS) {
+    const n = copyDir(path.join(source, src), path.join(siteRoot, 'content', dest), allowed, namePattern);
     console.log(`  ${dest}/  ${n} file(s)`);
     total += n;
   }

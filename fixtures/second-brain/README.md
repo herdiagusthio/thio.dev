@@ -6,4 +6,4 @@ A tiny stand-in for the private `second-brain` repo, used by CI and by anyone wi
 SECOND_BRAIN_DIR=fixtures/second-brain npm run dev
 ```
 
-Public files (one per kind, plus a superseded ADR and an Indonesian `lang: id` post) must build; every file containing `PRIVATE-FIXTURE` must never reach `dist/` — CI fails if it does. Only `decisions/` and `knowledge/{blog,engineering}/` are synced.
+Public files (one per kind, plus a superseded ADR and an Indonesian `lang: id` post) must build; every file containing `PRIVATE-FIXTURE` must never reach `dist/` — CI fails if it does (including `decisions/sdlc-sample-ticket.md`: `status: accepted` but not a numbered ADR). Only `decisions/` and `knowledge/{blog,engineering}/` are synced.
