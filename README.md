@@ -37,10 +37,10 @@ second-brain (private) ──sync allowlist──▶ content/ (generated, git-ig
 ```
 
 - `scripts/sync-content.mjs` copies a file only when its YAML frontmatter `status` is public: `published` for `knowledge/blog` and `knowledge/engineering`, `accepted` or `superseded` for `decisions`. Everything else stays private and is pruned from `content/`.
-- `src/content.config.ts` enforces the frontmatter: `title`, `date` (`YYYY-MM-DD`), `tags` (at least one), `status`; `summary` is optional. Bad frontmatter fails the build.
+- `src/content.config.ts` enforces the frontmatter: `title`, `date` (`YYYY-MM-DD`), `tags` (at least one), `status`, and for blog posts and case studies a `summary` of at least 40 characters. Optional: `lang: id` for Indonesian posts, `featured: true` for homepage case studies. Bad frontmatter fails the build.
 - Write content in second-brain, never directly in `content/` — the sync deletes anything that is not in the source.
 
-**Release order:** when a change needs second-brain frontmatter (e.g. a new required field), merge and pull second-brain on the VPS before shipping thio.dev, otherwise the affected entries are skipped.
+**Release order:** when a change needs second-brain frontmatter (e.g. a new required field), merge and pull second-brain on the VPS before shipping thio.dev, otherwise the build fails on the affected entries.
 
 ## 🧊 3D Office Bundle
 
@@ -51,7 +51,7 @@ cd ../vps-dashboard && bun run build:3d   # src/office3d.ts → public/js/office
 cp public/js/office3d.bundle.js ../thio.dev/public/js/
 ```
 
-It exposes `window.Office3D.{init, update, destroy}`; `src/scripts/office.ts` drives it with validated agents (labels are written with `textContent`). The toolbar's icons come from the `#i-*` sprite in `src/pages/office.astro`: if a new build uses another `spriteIcon('<name>')`, copy that `<symbol>` from vps-dashboard's `public/index.html`.
+It exposes `window.Office3D.{init, update, destroy}`; `src/scripts/office.ts` loads it on the first switch to 3D and drives it with validated agents (labels are written with `textContent`). The toolbar's icons come from the `#i-*` sprite in `src/pages/office.astro`: if a new build uses another `spriteIcon('<name>')`, copy that `<symbol>` from vps-dashboard's `public/index.html`.
 
 ## ✅ Verify Live
 
