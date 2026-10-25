@@ -155,7 +155,7 @@ a:hover {
   font-size: 0.74rem;
   padding: 0.3rem 0.65rem;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: color 0.15s, border-color 0.15s, background-color 0.15s;
 }
 .chip-btn:hover, .chip-btn.active {
   color: var(--gray-100);
@@ -281,7 +281,7 @@ a:hover {
   font-size: 0.7rem;
   padding: 0.2rem 0.5rem;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: color 0.15s, border-color 0.15s;
 }
 .code-copy-btn:hover {
   color: var(--gray-100);

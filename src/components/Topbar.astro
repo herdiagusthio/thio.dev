@@ -17,7 +17,6 @@ const { active = 'home', wide = false } = Astro.props;
       <a href="/showcase" aria-current={active === 'showcase' ? 'page' : undefined}>Showcase</a>
       <a href="/office" aria-current={active === 'office' ? 'page' : undefined}>Office</a>
       <a href="/blog" aria-current={active === 'blog' ? 'page' : undefined}>Blog</a>
-      <a href="/k8s/" class="nav-lab-pill" title="KubeQuest Interactive Kubernetes Odyssey">KubeQuest ☸️</a>
       <a href="/about" aria-current={active === 'about' ? 'page' : undefined}>About</a>
       <a href="/contact" aria-current={active === 'contact' ? 'page' : undefined}>Contact</a>
     </nav>
@@ -57,19 +56,5 @@ const { active = 'home', wide = false } = Astro.props;
     font-weight: 600;
     border-bottom: 2px solid var(--gray-100);
     padding-bottom: 2px;
-  }
-  .nav-lab-pill {
-    font-size: 0.78rem;
-    padding: 0.2rem 0.55rem;
-    border: 1px solid rgba(56, 189, 248, 0.4);
-    background: rgba(56, 189, 248, 0.08);
-    color: #38bdf8 !important;
-    border-radius: 4px;
-    transition: all 0.2s;
-  }
-  .nav-lab-pill:hover {
-    background: rgba(56, 189, 248, 0.18);
-    border-color: #38bdf8;
-    color: #ffffff !important;
   }
 </style>

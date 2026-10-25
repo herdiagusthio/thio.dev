@@ -9,7 +9,7 @@ export interface Props {
   canonicalPath: string;
   schemaType: 'BlogPosting' | 'TechArticle';
   eyebrow: string;
-  statusLabel: string;
+  statusLabel?: string; // ADR lifecycle (ACCEPTED/SUPERSEDED); articles are always published, so they omit it
   showSummary?: boolean;
   back: { href: string; label: string };
   prev: NavLink | null;
@@ -36,7 +36,7 @@ const { item, active, seoTitle, canonicalPath, schemaType, eyebrow, statusLabel,
           <span class="eyebrow">[{eyebrow}]</span>
           {item.date && <span class="eyebrow">[{item.date}]</span>}
           <span class="reading-pill"><span aria-hidden="true">⏱</span> {item.readingTimeMinutes} MIN READ</span>
-          <span class="status-pill">[{statusLabel}]</span>
+          {statusLabel && <span class="status-pill">[{statusLabel}]</span>}
         </div>
         <h1>{item.title}</h1>
         {showSummary && item.summaryText && <p class="summary-lead">{item.summaryText}</p>}

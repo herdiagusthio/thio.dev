@@ -86,7 +86,6 @@ const allTags = Array.from(new Set(items.flatMap((i) => i.tags))).slice(0, 10);
               <div class="card-header">
                 <span class="card-date">[{item.date}]</span>
                 <span class="card-reading"><span aria-hidden="true">⏱</span> {item.readingTimeMinutes} min read</span>
-                <span class="card-badge">[CASE STUDY]</span>
               </div>
               <h3 class="card-title">
                 <a href={`/showcase/${item.slug}`} class="title-link">{item.title}</a>
@@ -177,7 +176,7 @@ const allTags = Array.from(new Set(items.flatMap((i) => i.tags))).slice(0, 10);
     background: var(--gray-10);
     border: 1px solid var(--gray-30);
     text-decoration: none;
-    transition: all 0.2s;
+    transition: border-color 0.2s, background-color 0.2s;
   }
   .lab-card.highlight-cyan {
     border-color: rgba(56, 189, 248, 0.45);
