@@ -43,5 +43,5 @@ Every post must follow this 5-part structure:
 
 1. If the user provides a raw brain-dump, map it directly into the 5-part Blueprint above.
 2. Draft the content in a Markdown code block first for the user to review.
-3. Once approved, create the file in `content/blog/` with the appropriate Astro frontmatter (`title`, `date`, `category`, `status`, `tags`, `summary`, `canonical_url`).
+3. Once approved, create the file in `second-brain/knowledge/blog/<slug>.md`, never in this repo's `content/blog/` (the sync mirrors second-brain into it and deletes anything else). Frontmatter the build enforces: `title`, `date` (`YYYY-MM-DD`), `status: published`, `tags` (at least one); `summary` is optional but recommended. Without `status: published` the post stays private.
 4. Remind the user to run `./ship.sh` to deploy the new post.

@@ -1,25 +1,28 @@
 # thio.dev
 
-Astro 7 static site — Herdi Agusthio's personal engineering console (blog, case studies, ADRs, live agent office). Output is plain HTML served by Caddy from `/var/www/thio.dev` on a VPS; no server runtime.
+Astro 7 static site — Herdi Agusthio's personal engineering console (blog, case studies, ADRs, live agent office). Output is plain HTML served by Caddy from `/var/www/thio.dev` on a VPS; no server runtime. See README.md for routes and commands.
 
 ## Commands
 
-- `npm run build` — runs `scripts/sync-content.mjs` first: mirrors `../second-brain` (or `$SECOND_BRAIN_DIR`) into `content/` and **deletes** any `content/**/*.md` not present in the source. To build without touching `content/`: `npx astro build`.
-- `npm run check` — `astro check`. Only known errors are in `src/lib/links.ts` (dead code, see below).
-- `./ship.sh` — the real deploy path: build, verify `dist/index.html` + `dist/k8s/index.html`, rsync to `/var/www/thio.dev`. Run on the VPS.
-- `.github/workflows/deploy.yml` is broken: pnpm with no `pnpm-lock.yaml`, Node 20 (Astro needs >=22.12), no deploy step. The working npm/Node 22/scp version is in commit `a026a4d`.
+- `npm run build` / `npm run dev` run `scripts/sync-content.mjs` first, which mirrors `../second-brain` (or `$SECOND_BRAIN_DIR`) into `content/` and **deletes** `content/**/*.md` not public in the source. Use `npx astro build` to build without touching `content/`.
+- `npm run check` (astro check) and `npm test` (node:test over `scripts/*.test.mjs`, `src/**/*.test.ts`) must stay green; CI runs both plus the build. CI never deploys — `./ship.sh` on the VPS does.
 
 ## Content pipeline
 
-- `content/` is generated from second-brain but committed, so builds work when the sibling repo is absent.
-- `src/lib/feed.ts` is the only content layer: reads `content/*` with `fs` at build time, gray-matter for frontmatter, marked for HTML. Astro content collections are **not** used — `src/lib/links.ts` and `src/lib/schema.ts` import `astro:content` but nothing imports them.
-- Routes: `blog/[slug]` ← `content/blog`, `showcase/[slug]` ← `content/engineering`, `decisions/[slug]` ← `content/decisions`. `content/journal` is synced but never rendered (`parseJournal`/`getFeed` have no callers).
-- Metadata fallback order: frontmatter → `- **Status:**` / `- **Date:**` bullets → `## Status` section → first `202x-xx-xx` anywhere in the body → file mtime. The sync's `copyFileSync` resets mtime, so an undated file gets re-dated to the build day — always set `date:` in frontmatter.
-- Decisions: `000-*` and `goai-*` are skipped; numbered `0NN-*` files are always shown unless status contains `internal`/`rejected`; every shown ADR is labelled "Accepted".
+- Privacy boundary = the sync allowlist (`isPublic` in `scripts/sync-content.mjs`): frontmatter `status: published` (blog, engineering) or `accepted|superseded` (decisions). `content/` is committed to a public repo, so keep it fail-closed.
+- Quality gate = `src/content.config.ts` (glob-loader collections, strict schema: `title`, `date` YYYY-MM-DD, `tags` ≥1, `status`). Fix bad frontmatter in second-brain, not in `content/`.
+- `src/lib/content.ts` `getEntries(kind)` is the only content API (view model + per-kind summary fallback); pure helpers live in `src/lib/text.ts` so node:test can import them without `astro:*`.
+- Markdown uses Astro's Satteri processor with an mdast plugin dropping the body's first H1 (`astro.config.mjs`); smart punctuation and syntax highlighting are off on purpose.
+- Routes: `blog/[slug]` ← blog, `showcase/[slug]` ← engineering, `decisions/[slug]` ← decisions; all render through `src/layouts/ArticleLayout.astro`. Every page uses `src/layouts/BaseLayout.astro`.
 
-## Pages worth knowing
+## Office page
 
-- `src/pages/office.astro` — client-side app: fetches `https://api.thio.103.217.144.64.nip.io/office` every 30s, spreads live stations over `STATIC_AGENTS`, renders with `innerHTML`. Pass every API field through the script's `escapeHtml` before interpolating.
-- `public/js/office3d.bundle.js` — prebuilt Three.js bundle exposing `window.Office3D.{init,update,destroy}`; its source lives outside this repo. `public/k8s/index.html` — standalone KubeQuest game, served as-is.
-- Canonical origin is hardcoded in `src/components/SeoHead.astro` (`siteOrigin`). `astro.config.mjs` `site` is unused and `base` only affects the favicon; nav links are absolute `/`.
+- `src/scripts/office.ts` (bundled module) renders the 2D office; data comes from `src/data/agents.ts` (single roster, also used by /about) and the live API `https://api.<site host>/office`, validated by `normalizeSnapshot` in `src/scripts/office-data.ts`.
+- All HTML built from data must go through the `html` tag in `office-data.ts` (escapes every interpolation); colors are hex-validated because they land in `style`. Clicks use `data-agent-id` delegation — no inline handlers.
+- The API only allows the production origin (CORS), so local runs show the static fallback; mock `fetch` to test live mode.
+- `public/js/office3d.bundle.js` is prebuilt from `../vps-dashboard` (`bun run build:3d`); `public/k8s/index.html` is a standalone game.
+
+## Config
+
+- `site` in `astro.config.mjs` (override `SITE_URL`) is the single origin: canonicals, JSON-LD, sitemap, RSS and the office API host derive from it. Canonical URLs have no trailing slash; the sitemap and RSS match.
 - Blog-post voice and structure: `.agents/skills/tulisan-si-thio/SKILL.md`.
