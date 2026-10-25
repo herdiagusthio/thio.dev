@@ -66,9 +66,9 @@ const allTags = Array.from(new Set(items.flatMap((i) => i.tags))).slice(0, 10);
           data-filter-input
         />
         <div class="tag-chips">
-          <button type="button" class="chip-btn active" data-filter-chip="all">All ({items.length})</button>
+          <button type="button" class="chip-btn active" aria-pressed="true" data-filter-chip="all">All ({items.length})</button>
           {allTags.map((tag) => (
-            <button type="button" class="chip-btn" data-filter-chip={tag}>#{tag}</button>
+            <button type="button" class="chip-btn" aria-pressed="false" data-filter-chip={tag}>#{tag}</button>
           ))}
         </div>
       </div>
@@ -85,7 +85,7 @@ const allTags = Array.from(new Set(items.flatMap((i) => i.tags))).slice(0, 10);
             <div>
               <div class="card-header">
                 <span class="card-date">[{item.date}]</span>
-                <span class="card-reading">⏱ {item.readingTimeMinutes} min read</span>
+                <span class="card-reading"><span aria-hidden="true">⏱</span> {item.readingTimeMinutes} min read</span>
                 <span class="card-badge">[CASE STUDY]</span>
               </div>
               <h3 class="card-title">
@@ -104,6 +104,8 @@ const allTags = Array.from(new Set(items.flatMap((i) => i.tags))).slice(0, 10);
           </article>
         ))}
       </div>
+      <p class="filter-empty" data-filter-empty hidden>No matches. Try another word or tag.</p>
+      <p class="sr-only" role="status" data-filter-status></p>
     </section>
 
     <!-- Architectural Decision Records (ADRs) -->
@@ -117,7 +119,7 @@ const allTags = Array.from(new Set(items.flatMap((i) => i.tags))).slice(0, 10);
           <article class="adr-row-card">
             <div class="adr-row-top">
               <span class="card-date">[{adr.date}]</span>
-              <span class="card-reading">⏱ {adr.readingTimeMinutes} min read</span>
+              <span class="card-reading"><span aria-hidden="true">⏱</span> {adr.readingTimeMinutes} min read</span>
               <span class="adr-accepted-pill">[{adr.status.toUpperCase()}]</span>
             </div>
             <h3 class="adr-row-title">

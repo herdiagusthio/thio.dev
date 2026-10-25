@@ -162,6 +162,12 @@ a:hover {
   border-color: var(--gray-80);
   background: var(--gray-10);
 }
+.filter-empty {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--gray-60);
+  padding: 2rem 0;
+}
 
 /* Shared Prose Styling for Markdown Articles, Case Studies & ADRs */
 .prose {

@@ -35,7 +35,7 @@ const { item, active, seoTitle, canonicalPath, schemaType, eyebrow, statusLabel,
         <div class="meta-row">
           <span class="eyebrow">[{eyebrow}]</span>
           {item.date && <span class="eyebrow">[{item.date}]</span>}
-          <span class="reading-pill">⏱ {item.readingTimeMinutes} MIN READ</span>
+          <span class="reading-pill"><span aria-hidden="true">⏱</span> {item.readingTimeMinutes} MIN READ</span>
           <span class="status-pill">[{statusLabel}]</span>
         </div>
         <h1>{item.title}</h1>
