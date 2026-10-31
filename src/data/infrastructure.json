@@ -1,0 +1,652 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-10-31T15:00:00Z",
+  "host": {
+    "name": "HermesHost",
+    "os": "Ubuntu 24.04 LTS (Linux 6.8)",
+    "cpu": "1 vCore (x86_64)",
+    "ram_mb": 1922,
+    "swap_mb": 4096,
+    "ram_headroom_policy": ">= 500 MB effective headroom (200 MB physical floor + 50% swap credit)",
+    "edge_proxy": {
+      "name": "Caddy v2.11.7 TLS Reverse Proxy",
+      "public_ports": [
+        80,
+        443
+      ],
+      "security_policy": "Strict 127.0.0.1 loopback isolation for all backend services; automatic Let's Encrypt TLS; HSTS, X-Frame-Options DENY, CSP, and per-request UUID tracing."
+    }
+  },
+  "applications": [
+    {
+      "id": "thio-dev",
+      "name": "thio.dev",
+      "title": "Personal Engineering Console, Blog & 3D Agent Showcase",
+      "category": "Public Web & Knowledge Publishing",
+      "purpose": "Serves Herdi Agusthio's technical engineering blog, Architectural Decision Records (ADRs), interactive 3D autonomous AI agent office showcase, and public system architecture documentation.",
+      "tech_stack": [
+        "Astro 5 SSG",
+        "TypeScript",
+        "Three.js (WebGL)",
+        "CSS Grid / Custom Tokens",
+        "Caddy File Server"
+      ],
+      "public_domain": "https://thio.103.217.144.64.nip.io",
+      "public_routes": [
+        {
+          "domain": "thio.103.217.144.64.nip.io",
+          "path": "/*",
+          "protocol": "HTTPS (TLS 1.3)"
+        },
+        {
+          "domain": "api.thio.103.217.144.64.nip.io",
+          "path": "/office",
+          "protocol": "HTTPS Reverse Proxy"
+        }
+      ],
+      "databases": [
+        {
+          "id": "second-brain-markdown",
+          "name": "Second-Brain Content Sync (Markdown + JSON)",
+          "engine": "Git SSOT + Build-Time Content Collections",
+          "public_summary": "Git-backed Markdown collections for Blog Articles, ADRs, and sanitized Public Infrastructure Projections.",
+          "tables": [
+            {
+              "name": "blog_collection",
+              "description": "Technical engineering articles and deep-dives",
+              "columns": [
+                "slug (string)",
+                "title (string)",
+                "pubDate (date)",
+                "description (string)",
+                "tags (string[])",
+                "draft (boolean)"
+              ]
+            },
+            {
+              "name": "decisions_collection",
+              "description": "Architectural Decision Records (ADR-001 through ADR-013+)",
+              "columns": [
+                "id (string)",
+                "title (string)",
+                "status (string)",
+                "date (date)",
+                "deciders (string[])"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vps-dashboard",
+      "name": "vps-dashboard",
+      "title": "Hermes VPS Cockpit & Operational Control Plane",
+      "category": "Private Infrastructure & AI Control Plane",
+      "purpose": "Single-pane operational cockpit providing real-time VPS telemetry, systemd service & cgroup control, port hygiene auditing, 3D visual AI agent office, multi-agent Kanban board, Caren financial ledger, and live infrastructure topology introspection.",
+      "tech_stack": [
+        "Bun Runtime",
+        "TypeScript",
+        "SQLite (bun:sqlite)",
+        "Three.js",
+        "Vanilla JS / CSS",
+        "WebSockets"
+      ],
+      "public_domain": "https://vps.103.217.144.64.nip.io",
+      "public_routes": [
+        {
+          "domain": "vps.103.217.144.64.nip.io",
+          "path": "/*",
+          "protocol": "HTTPS + WSS Reverse Proxy"
+        }
+      ],
+      "databases": [
+        {
+          "id": "finance-db",
+          "name": "Caren Financial Intelligence Ledger (finance.db)",
+          "engine": "SQLite 3 (WAL Mode)",
+          "public_summary": "Double-verified personal finance ledger powering expense tracking, receipt vision OCR, and monthly category budgets.",
+          "tables": [
+            {
+              "name": "transactions",
+              "description": "Expense, income, and investment ledger entries synced across Telegram, CLI, and Google Sheets",
+              "columns": [
+                "id (INTEGER PK)",
+                "date (TEXT)",
+                "type (TEXT)",
+                "category (TEXT)",
+                "amount (REAL)",
+                "currency (TEXT)",
+                "description (TEXT)",
+                "notes (TEXT)",
+                "created_at (TEXT)"
+              ]
+            },
+            {
+              "name": "budgets",
+              "description": "Monthly category spending guardrails monitored by Caren",
+              "columns": [
+                "category (TEXT PK)",
+                "monthly_limit (REAL)",
+                "currency (TEXT)"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hermes-agent",
+      "name": "hermes-agent",
+      "title": "Hermes Autonomous 7-Agent Workforce & Gateway",
+      "category": "AI Agent Orchestration & Autonomous SDLC",
+      "purpose": "Runs the 7 autonomous specialist AI profiles (LEADYA, Prime, Antigravity, Sysca, Luna, Lexa, Caren), Telegram forum topic routing, A2A inter-agent protocol, autonomous Kanban worker loop, and 6-stage AI-DLC pipeline.",
+      "tech_stack": [
+        "Python 3.12+",
+        "FastAPI / Starlette",
+        "SQLite 3 (WAL + FTS5)",
+        "Telegram Bot API",
+        "MCP Protocol"
+      ],
+      "public_domain": "https://a2a.103.217.144.64.nip.io",
+      "public_routes": [
+        {
+          "domain": "a2a.103.217.144.64.nip.io",
+          "path": "/*",
+          "protocol": "HTTPS Reverse Proxy (A2A Gateway)"
+        },
+        {
+          "domain": "hermes.103.217.144.64.nip.io",
+          "path": "/*",
+          "protocol": "HTTPS Redirect"
+        }
+      ],
+      "databases": [
+        {
+          "id": "kanban-db",
+          "name": "Multi-Agent Kanban & Dispatch Store (kanban.db)",
+          "engine": "SQLite 3 (WAL Mode)",
+          "public_summary": "Task state machine, DAG dependencies, execution leases, heartbeats, and audit trail for autonomous agent missions.",
+          "tables": [
+            {
+              "name": "tasks",
+              "description": "Kanban task definitions, assignees, status, locks, and completion contracts",
+              "columns": [
+                "id (TEXT PK)",
+                "title (TEXT)",
+                "body (TEXT)",
+                "assignee (TEXT)",
+                "status (TEXT)",
+                "priority (INTEGER)",
+                "workspace_path (TEXT)",
+                "branch_name (TEXT)",
+                "result (TEXT)"
+              ]
+            },
+            {
+              "name": "task_links",
+              "description": "Parent-child DAG dependency edges between tasks",
+              "columns": [
+                "parent_id (TEXT)",
+                "child_id (TEXT)"
+              ]
+            },
+            {
+              "name": "task_runs",
+              "description": "Worker execution attempts, PIDs, heartbeats, and outcomes",
+              "columns": [
+                "id (INTEGER PK)",
+                "task_id (TEXT)",
+                "profile (TEXT)",
+                "status (TEXT)",
+                "worker_pid (INTEGER)",
+                "started_at (INTEGER)",
+                "ended_at (INTEGER)",
+                "outcome (TEXT)"
+              ]
+            },
+            {
+              "name": "task_events",
+              "description": "Immutable event stream of task transitions and agent telemetry",
+              "columns": [
+                "id (INTEGER PK)",
+                "task_id (TEXT)",
+                "run_id (INTEGER)",
+                "kind (TEXT)",
+                "payload (TEXT)",
+                "created_at (INTEGER)"
+              ]
+            },
+            {
+              "name": "task_comments",
+              "description": "Agent handoff notes, code review verdicts, and deliverables",
+              "columns": [
+                "id (INTEGER PK)",
+                "task_id (TEXT)",
+                "author (TEXT)",
+                "body (TEXT)",
+                "created_at (INTEGER)"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "sdlc-db",
+          "name": "AI-DLC 6-Stage Pipeline Store (sdlc.db)",
+          "engine": "SQLite 3 (WAL Mode)",
+          "public_summary": "Tracks 6-stage AI-Driven Development Lifecycle runs (Luna -> Prime -> Antigravity -> Scanner -> Prime Review -> Sysca Deploy).",
+          "tables": [
+            {
+              "name": "sdlc_runs",
+              "description": "Top-level SDLC pipeline runs, isolated git worktrees, and stage cursors",
+              "columns": [
+                "id (TEXT PK)",
+                "project (TEXT)",
+                "project_dir (TEXT)",
+                "goal (TEXT)",
+                "autonomy (TEXT)",
+                "current_stage (TEXT)",
+                "status (TEXT)",
+                "worktree_dir (TEXT)"
+              ]
+            },
+            {
+              "name": "sdlc_stages",
+              "description": "Per-stage execution status, security scanner JSON results, and artifact links",
+              "columns": [
+                "id (INTEGER PK)",
+                "run_id (TEXT)",
+                "stage_num (INTEGER)",
+                "stage_name (TEXT)",
+                "agent_profile (TEXT)",
+                "status (TEXT)",
+                "artifact_path (TEXT)",
+                "scan_json (TEXT)"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "hermes-state-db",
+          "name": "Agent Session & Memory Store (state.db)",
+          "engine": "SQLite 3 (WAL + FTS5)",
+          "public_summary": "Conversation sessions, FTS5 searchable message transcripts, token cost accounting, and A2A gateway routing tables.",
+          "tables": [
+            {
+              "name": "sessions",
+              "description": "Conversation sessions, model configuration, token counters, and cost tracking",
+              "columns": [
+                "id (TEXT PK)",
+                "source (TEXT)",
+                "session_key (TEXT)",
+                "model (TEXT)",
+                "message_count (INTEGER)",
+                "input_tokens (INTEGER)",
+                "output_tokens (INTEGER)",
+                "estimated_cost_usd (REAL)"
+              ]
+            },
+            {
+              "name": "messages",
+              "description": "Full turn-by-turn message history and tool call payloads indexed with FTS5",
+              "columns": [
+                "id (INTEGER PK)",
+                "session_id (TEXT)",
+                "role (TEXT)",
+                "content (TEXT)",
+                "tool_calls (TEXT)",
+                "timestamp (REAL)"
+              ]
+            },
+            {
+              "name": "gateway_heartbeats",
+              "description": "Live health heartbeats for active agent gateway backends",
+              "columns": [
+                "backend_id (TEXT PK)",
+                "pid (INTEGER)",
+                "profile (TEXT)",
+                "last_heartbeat (REAL)"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "9router",
+      "name": "9router",
+      "title": "Unified LLM Inference Router & Combo Proxy",
+      "category": "AI Model Routing & Token Economics",
+      "purpose": "Provides an OpenAI-compatible inference gateway on localhost, managing multi-provider fallback combos (agentcombo, agenticprojectcombo, croncombo), rate-limit recovery, and token cost telemetry.",
+      "tech_stack": [
+        "Node.js",
+        "Next.js 16",
+        "TypeScript",
+        "OpenAI-Compatible Proxy"
+      ],
+      "public_domain": "https://router.103.217.144.64.nip.io",
+      "public_routes": [
+        {
+          "domain": "router.103.217.144.64.nip.io",
+          "path": "/*",
+          "protocol": "HTTPS Reverse Proxy"
+        }
+      ],
+      "databases": [
+        {
+          "id": "9router-store",
+          "name": "9Router Combo & Provider Configuration Store",
+          "engine": "Local JSON State (~/.9router)",
+          "public_summary": "Stores model combo routing chains, provider health state, and token usage counters.",
+          "tables": [
+            {
+              "name": "combos",
+              "description": "Tiered model routing chains (agentcombo, agenticprojectcombo, croncombo)",
+              "columns": [
+                "id (string)",
+                "name (string)",
+                "models (string[])",
+                "strategy (fallback|round-robin)"
+              ]
+            },
+            {
+              "name": "providers",
+              "description": "Configured upstream LLM providers and endpoint health status",
+              "columns": [
+                "provider_id (string)",
+                "protocol (openai|gemini|claude)",
+                "status (active|cooldown)"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nikahyuk-api",
+      "name": "nikahyuk-api",
+      "title": "NikahYuk Wedding Planning & Vendor Marketplace API",
+      "category": "Production Backend API",
+      "purpose": "High-concurrency Go REST API powering wedding budget calculation, vendor service marketplace, 3-axis lead management pipeline, interactive wedding checklists, digital E-Vites, and guest RSVP tracking.",
+      "tech_stack": [
+        "Go (Golang) 1.26",
+        "PostgreSQL 16",
+        "golang-migrate",
+        "JWT + Google OAuth2",
+        "Swagger / OpenAPI"
+      ],
+      "public_domain": "https://103.217.144.64.nip.io",
+      "public_routes": [
+        {
+          "domain": "103.217.144.64.nip.io",
+          "path": "/*",
+          "protocol": "HTTPS Reverse Proxy"
+        }
+      ],
+      "databases": [
+        {
+          "id": "postgresql-nikahyuk",
+          "name": "PostgreSQL 16 (nikahyuk_db)",
+          "engine": "PostgreSQL 16",
+          "public_summary": "Relational schema with 18 normalized tables covering users, vendors, services, regions, wedding plans, E-vites, and guest RSVPs.",
+          "tables": [
+            {
+              "name": "users",
+              "description": "Authenticated couples and vendor accounts (Google SSO + email/password + token versioning)",
+              "columns": [
+                "id (UUID PK)",
+                "email (VARCHAR UNIQUE)",
+                "full_name (VARCHAR)",
+                "phone_number (VARCHAR)",
+                "role (user_role: USER|VENDOR)",
+                "google_id (VARCHAR)",
+                "token_version (INT)",
+                "created_at (TIMESTAMPTZ)"
+              ]
+            },
+            {
+              "name": "vendors",
+              "description": "Wedding vendor business profiles and WhatsApp contact endpoints",
+              "columns": [
+                "id (UUID PK)",
+                "user_id (UUID FK->users)",
+                "business_name (VARCHAR)",
+                "description (TEXT)",
+                "address (TEXT)",
+                "whatsapp_number (VARCHAR)",
+                "is_active (BOOLEAN)"
+              ]
+            },
+            {
+              "name": "services",
+              "description": "Marketplace vendor offerings with BASE or PER_PAX pricing models",
+              "columns": [
+                "id (UUID PK)",
+                "vendor_id (UUID FK->vendors)",
+                "service_name (VARCHAR)",
+                "pricing_model (BASE|PER_PAX)",
+                "base_price (DECIMAL)",
+                "price_per_pax (DECIMAL)",
+                "max_pax (INT)",
+                "availability (ACTIVE|INACTIVE)"
+              ]
+            },
+            {
+              "name": "regions",
+              "description": "Indonesian geographical hierarchy (province, city, district)",
+              "columns": [
+                "id (UUID PK)",
+                "province (VARCHAR)",
+                "city (VARCHAR)",
+                "district_region (VARCHAR)"
+              ]
+            },
+            {
+              "name": "service_categories & service_regions",
+              "description": "Many-to-many junction tables indexing services by category (VENUE, CATERING, DECORATION, MAKEUP, etc.) and region",
+              "columns": [
+                "service_id (UUID FK->services)",
+                "category (service_category)",
+                "region_id (UUID FK->regions)"
+              ]
+            },
+            {
+              "name": "wedding_plans & wedding_plan_services",
+              "description": "Interactive wedding budget plans, guest pax targets, and locked service price snapshots",
+              "columns": [
+                "id (UUID PK)",
+                "user_id (UUID FK->users)",
+                "plan_name (VARCHAR)",
+                "wedding_date (DATE)",
+                "region_id (UUID FK)",
+                "pax (INTEGER)",
+                "total_budget (DECIMAL)",
+                "estimated_total (DECIMAL)",
+                "remaining_budget (DECIMAL)",
+                "guest_count (INTEGER)"
+              ]
+            },
+            {
+              "name": "wedding_guests",
+              "description": "Guest list and unique token-based RSVP attendance & dietary tracking",
+              "columns": [
+                "id (UUID PK)",
+                "plan_id (UUID FK->wedding_plans)",
+                "name (TEXT)",
+                "email (TEXT)",
+                "status (pending|attending|declined)",
+                "plus_one (BOOLEAN)",
+                "dietary_notes (TEXT)",
+                "rsvp_token (UUID UNIQUE)"
+              ]
+            },
+            {
+              "name": "leads",
+              "description": "3-axis vendor lead pipeline (lifecycle: NEW|CONTACTED|CLOSED, classification: COLD|WARM|HOT|DEAL, unlock_status)",
+              "columns": [
+                "id (UUID PK)",
+                "user_id (UUID FK)",
+                "vendor_id (UUID FK)",
+                "service_id (UUID FK)",
+                "lifecycle (lead_lifecycle)",
+                "classification (lead_classification)",
+                "unlock_status (LOCKED|UNLOCKED)"
+              ]
+            },
+            {
+              "name": "evites, evite_modules, evite_rsvps, evite_wishes",
+              "description": "Customizable digital wedding invitations, RSVP submissions, and guest wishes",
+              "columns": [
+                "id (UUID PK)",
+                "user_id (UUID FK)",
+                "slug (VARCHAR UNIQUE)",
+                "bride_name (VARCHAR)",
+                "groom_name (VARCHAR)",
+                "event_date (TIMESTAMPTZ)",
+                "event_location (TEXT)",
+                "is_published (BOOLEAN)"
+              ]
+            },
+            {
+              "name": "master_checklists & checklist_progress",
+              "description": "Curated wedding preparation milestones and per-couple completion tracking",
+              "columns": [
+                "id (UUID PK)",
+                "user_id (UUID FK)",
+                "item_key (TEXT)",
+                "is_completed (BOOLEAN)",
+                "completed_at (TIMESTAMPTZ)"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "golinks",
+      "name": "golinks",
+      "title": "GoLinks Private Shortlink & Redirect Service",
+      "category": "Utility Microservice",
+      "purpose": "Ultra-lightweight Go shortlink redirector and click counter bound strictly to localhost with SQLite persistence.",
+      "tech_stack": [
+        "Go (Golang) 1.26",
+        "SQLite (modernc.org/sqlite)",
+        "HTML Templates"
+      ],
+      "public_domain": "Internal Loopback Service",
+      "public_routes": [
+        {
+          "domain": "Loopback-Only",
+          "path": "/*",
+          "protocol": "Loopback HTTP"
+        }
+      ],
+      "databases": [
+        {
+          "id": "golinks-db",
+          "name": "GoLinks SQLite Store (golinks.db)",
+          "engine": "SQLite 3 (WAL Mode)",
+          "public_summary": "Stores shortlink aliases, destination URLs, and atomic redirect click counters.",
+          "tables": [
+            {
+              "name": "links",
+              "description": "Shortlink alias mappings and click telemetry",
+              "columns": [
+                "id (INTEGER PK)",
+                "alias (TEXT UNIQUE)",
+                "url (TEXT)",
+                "clicks (INTEGER)",
+                "created_at (DATETIME)",
+                "updated_at (DATETIME)"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "math-comp-simulator",
+      "name": "math-comp-simulator",
+      "title": "Mathematics Competition Simulator",
+      "category": "Educational Web Application",
+      "purpose": "Interactive timed mathematics competition simulator and problem training platform served via Caddy TLS proxy.",
+      "tech_stack": [
+        "Go (Golang) 1.26",
+        "HTML5 / CSS3 / Vanilla JS",
+        "In-Memory + JSON Problem Bank"
+      ],
+      "public_domain": "https://math.103.217.144.64.nip.io",
+      "public_routes": [
+        {
+          "domain": "math.103.217.144.64.nip.io",
+          "path": "/*",
+          "protocol": "HTTPS Reverse Proxy"
+        }
+      ],
+      "databases": [
+        {
+          "id": "math-problem-store",
+          "name": "Competition Problem & Session Store",
+          "engine": "Go Embedded State / JSON",
+          "public_summary": "Structured math competition problem sets, scoring tiers, and timed exam sessions.",
+          "tables": [
+            {
+              "name": "problems",
+              "description": "Curated math competition questions, difficulty weights, and solution keys",
+              "columns": [
+                "id (string)",
+                "topic (algebra|geometry|number_theory|combinatorics)",
+                "difficulty (int)",
+                "prompt (string)",
+                "answer (string)"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "second-brain",
+      "name": "second-brain & GBrain",
+      "title": "Second-Brain SSOT Repository & GBrain Vector Memory",
+      "category": "Knowledge Graph & Semantic Memory",
+      "purpose": "Single Source of Truth (SSOT) Git repository housing all ADRs, PRDs, engineering plans, blog posts, infrastructure inventory, and the GBrain hybrid semantic/keyword MCP server.",
+      "tech_stack": [
+        "Git / Markdown",
+        "Bun / TypeScript",
+        "Python 3",
+        "SQLite Vector & FTS Index",
+        "MCP Server"
+      ],
+      "public_domain": "Internal Loopback Service",
+      "public_routes": [
+        {
+          "domain": "second-brain.git",
+          "path": "infrastructure/ + decisions/ + knowledge/blog/",
+          "protocol": "Git + Build Pipeline"
+        }
+      ],
+      "databases": [
+        {
+          "id": "second-brain-ssot",
+          "name": "Second-Brain Declarative Inventory & ADR Graph",
+          "engine": "Git YAML / JSON / Markdown + GBrain SQLite Index",
+          "public_summary": "Version-controlled YAML/JSON infrastructure catalog, ADRs, and hybrid vector embeddings for agent memory recall.",
+          "tables": [
+            {
+              "name": "infrastructure/catalog.json & inventory.yaml",
+              "description": "Declarative application catalog and contract-validated asset inventory",
+              "columns": [
+                "id (string)",
+                "kind (host|application|service|database|route)",
+                "tech_stack (string[])",
+                "public_routes (object[])",
+                "databases (object[])"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

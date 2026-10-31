@@ -1,0 +1,652 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ContactCta from '../components/ContactCta.astro';
+import infra from '../data/infrastructure.json';
+
+const host = infra.host;
+const apps = infra.applications || [];
+const totalDatabases = apps.reduce((sum, app) => sum + (app.databases?.length || 0), 0);
+const totalTables = apps.reduce(
+  (sum, app) => sum + (app.databases || []).reduce((s, d) => s + (d.tables?.length || 0), 0),
+  0
+);
+const totalPublicRoutes = apps.reduce((sum, app) => sum + (app.public_routes?.length || 0), 0);
+
+// Precompute SVG coordinates for the 4-layer architecture diagram
+const rowHeight = 74;
+const topPad = 74;
+const svgHeight = Math.max(540, topPad + apps.length * rowHeight + 40);
+const svgWidth = 1080;
+const col1X = 20;
+const col1W = 230;
+const col2X = 310;
+const col2W = 206;
+const col3X = 576;
+const col3W = 244;
+const col4X = 876;
+const col4W = 184;
+const caddyY = Math.round(svgHeight / 2 - 92);
+const caddyH = 184;
+const caddyCenterY = caddyY + caddyH / 2;
+---
+
+<BaseLayout
+  title="System Infrastructure, Applications & Database Architecture — thio.dev"
+  description="Complete production architecture of Herdi Agusthio's single-VPS engineering cloud: 8 polyglot applications, Caddy TLS 1.3 ingress isolation, tech stacks, and PostgreSQL / SQLite database schemas."
+  canonicalPath="/infrastructure"
+  active="infrastructure"
+>
+  <main id="main" class="wrap main-container">
+    <section class="page-hero">
+      <div class="meta-status">
+        <span class="status-indicator"></span>
+        <span class="mono-label">[SYS_TOPOLOGY: PUBLIC_ARCHITECTURE_PROJECTION]</span>
+      </div>
+      <h1 class="page-title">Server Infrastructure, Applications &amp; Database Schemas</h1>
+      <div class="prose">
+        <p>
+          Every application, AI agent, and database in my ecosystem runs on a single hardened Linux VPS (<strong>{host.name}</strong> — {host.os}, {host.cpu}, {host.ram_mb} MB physical RAM + {host.swap_mb} MB swap).
+        </p>
+        <p>
+          This page is automatically projected from the declarative infrastructure catalog in <code>second-brain/infrastructure/catalog.json</code>. It documents <strong>how many applications run on the server</strong>, <strong>how public traffic communicates safely with internal services</strong>, the <strong>tech stack</strong> behind each system, and the <strong>database schemas</strong> powering each domain.
+        </p>
+      </div>
+
+      <div class="kpi-strip">
+        <div class="kpi-box">
+          <span class="kpi-label">[ RUNNING APPS ]</span>
+          <strong class="kpi-val">{apps.length}</strong>
+          <span class="kpi-sub">Polyglot Production Systems</span>
+        </div>
+        <div class="kpi-box">
+          <span class="kpi-label">[ PUBLIC ROUTES ]</span>
+          <strong class="kpi-val">{totalPublicRoutes}</strong>
+          <span class="kpi-sub">Caddy TLS 1.3 Endpoints</span>
+        </div>
+        <div class="kpi-box">
+          <span class="kpi-label">[ DATABASES ]</span>
+          <strong class="kpi-val">{totalDatabases}</strong>
+          <span class="kpi-sub">{totalTables} Domain Tables &amp; Schemas</span>
+        </div>
+        <div class="kpi-box">
+          <span class="kpi-label">[ NETWORK ISOLATION ]</span>
+          <strong class="kpi-val">127.0.0.1</strong>
+          <span class="kpi-sub">Zero Wildcard Socket Bindings</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 1: VISUAL ARCHITECTURE TOPOLOGY DIAGRAM -->
+    <section class="content-section">
+      <div class="section-header-row">
+        <div>
+          <h2 class="section-head">01 // End-to-End Server &amp; Network Topology</h2>
+          <p class="section-sub">
+            Visualizing the 4-tier request flow: Public DNS &amp; HTTPS Ingress → Caddy v2.11 TLS Reverse Proxy → Loopback Services → Databases
+          </p>
+        </div>
+      </div>
+
+      <div class="diagram-frame">
+        <svg
+          viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+          width="100%"
+          height="auto"
+          role="img"
+          aria-label="Four-tier server architecture diagram showing public domains routing through Caddy TLS proxy to 8 loopback applications and their databases"
+        >
+          <g font-family="monospace" font-size="11" font-weight="700" fill="#94a3b8">
+            <text x={col1X + 6} y="30">1. PUBLIC EDGE &amp; DNS</text>
+            <text x={col2X + 6} y="30">2. TLS REVERSE PROXY</text>
+            <text x={col3X + 6} y="30">3. LOOPBACK APPS (127.0.0.1)</text>
+            <text x={col4X + 6} y="30">4. PERSISTENCE &amp; SSOT</text>
+          </g>
+          <line x1="16" y1="42" x2={svgWidth - 16} y2="42" stroke="#1e293b" stroke-width="1" />
+
+          {apps.map((app, idx) => {
+            const cy = topPad + idx * rowHeight + 28;
+            const x1 = col1X + col1W;
+            const x2 = col2X;
+            const c1x = Math.round((x1 + x2) / 2);
+            const x3 = col2X + col2W;
+            const x4 = col3X;
+            const c2x = Math.round((x3 + x4) / 2);
+            const x5 = col3X + col3W;
+            const x6 = col4X;
+            const c3x = Math.round((x5 + x6) / 2);
+            const isPublicHttps = app.public_domain.startsWith('https://');
+            const domainText = app.public_domain.replace(/^https?:\/\//, '').slice(0, 30);
+            const protoText = app.public_routes?.[0]?.protocol || 'Loopback';
+            const stackText = (app.tech_stack || []).slice(0, 2).join(' · ').slice(0, 31);
+            const primaryDb = app.databases?.[0];
+            const dbEngine = primaryDb ? primaryDb.engine.split('(')[0].trim().slice(0, 23) : 'Stateless';
+            const appTableCount = (app.databases || []).reduce((s, d) => s + (d.tables?.length || 0), 0);
+
+            return (
+              <g>
+                <path
+                  d={`M ${x1} ${cy} C ${c1x} ${cy}, ${c1x} ${caddyCenterY}, ${x2} ${caddyCenterY}`}
+                  fill="none"
+                  stroke="#38bdf8"
+                  stroke-width="1.5"
+                  stroke-opacity="0.55"
+                  stroke-dasharray={isPublicHttps ? undefined : '4 4'}
+                />
+                <path
+                  d={`M ${x3} ${caddyCenterY} C ${c2x} ${caddyCenterY}, ${c2x} ${cy}, ${x4} ${cy}`}
+                  fill="none"
+                  stroke="#38bdf8"
+                  stroke-width="1.75"
+                  stroke-opacity="0.75"
+                />
+                <path
+                  d={`M ${x5} ${cy} C ${c3x} ${cy}, ${c3x} ${cy}, ${x6} ${cy}`}
+                  fill="none"
+                  stroke="#a78bfa"
+                  stroke-width="1.5"
+                  stroke-opacity="0.7"
+                />
+
+                {/* Tier 1: Public Route */}
+                <g transform={`translate(${col1X}, ${cy - 23})`}>
+                  <rect width={col1W} height="46" rx="6" fill="#0f172a" stroke="#1e293b" stroke-width="1.4" />
+                  <circle cx="13" cy="17" r="4" fill={isPublicHttps ? '#10b981' : '#64748b'} />
+                  <text x="24" y="20" fill="#e2e8f0" font-family="monospace" font-size="10.5" font-weight="600">
+                    {domainText}
+                  </text>
+                  <text x="13" y="36" fill="#94a3b8" font-family="sans-serif" font-size="9.5">
+                    {protoText}
+                  </text>
+                </g>
+
+                {/* Tier 3: Application */}
+                <g transform={`translate(${col3X}, ${cy - 25})`}>
+                  <rect width={col3W} height="50" rx="6" fill="#111827" stroke="#0284c7" stroke-width="1.4" />
+                  <circle cx="13" cy="17" r="4" fill="#10b981" />
+                  <text x="24" y="20" fill="#f8fafc" font-family="monospace" font-size="11.5" font-weight="700">
+                    {app.name}
+                  </text>
+                  <text x="13" y="38" fill="#94a3b8" font-family="sans-serif" font-size="9.5">
+                    {stackText}
+                  </text>
+                </g>
+
+                {/* Tier 4: Database */}
+                <g transform={`translate(${col4X}, ${cy - 23})`}>
+                  <rect width={col4W} height="46" rx="6" fill="#1e1b4b" stroke="#6d28d9" stroke-width="1.3" />
+                  <text x="11" y="19" fill="#ddd6fe" font-family="monospace" font-size="10.5" font-weight="700">
+                    {dbEngine}
+                  </text>
+                  <text x="11" y="35" fill="#c4b5fd" font-family="sans-serif" font-size="9.5">
+                    {(app.databases || []).length} DB · {appTableCount} schema{appTableCount === 1 ? '' : 's'}
+                  </text>
+                </g>
+              </g>
+            );
+          })}
+
+          {/* Tier 2: Central Caddy TLS Proxy */}
+          <g transform={`translate(${col2X}, ${caddyY})`}>
+            <rect width={col2W} height={caddyH} rx="10" fill="#0c192c" stroke="#38bdf8" stroke-width="2" />
+            <rect x="12" y="14" width={col2W - 24} height="22" rx="4" fill="#0369a1" />
+            <text x={col2W / 2} y="29" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="10.5" font-weight="700">
+              CADDY TLS EDGE PROXY
+            </text>
+            <text x={col2W / 2} y="56" text-anchor="middle" fill="#e2e8f0" font-family="sans-serif" font-size="10.5" font-weight="600">
+              {host.edge_proxy.name}
+            </text>
+            <text x={col2W / 2} y="78" text-anchor="middle" fill="#38bdf8" font-family="monospace" font-size="10">
+              Ports :80 / :443 (TLS 1.3)
+            </text>
+            <text x={col2W / 2} y="100" text-anchor="middle" fill="#10b981" font-family="monospace" font-size="10">
+              → 127.0.0.1 Loopback Only
+            </text>
+            <text x={col2W / 2} y="122" text-anchor="middle" fill="#cbd5e1" font-family="sans-serif" font-size="9.5">
+              HSTS · CSP · X-Frame DENY
+            </text>
+            <text x={col2W / 2} y="144" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="9.5">
+              X-Request-ID UUID Tracing
+            </text>
+            <text x={col2W / 2} y="164" text-anchor="middle" fill="#64748b" font-family="monospace" font-size="9">
+              Zero Wildcard Exposure
+            </text>
+          </g>
+        </svg>
+      </div>
+    </section>
+
+    <!-- SECTION 2: HOW THE SERVER COMMUNICATES WITH THE PUBLIC -->
+    <section class="content-section">
+      <h2 class="section-head">02 // How the Server Communicates with the Public</h2>
+      <div class="protocol-grid">
+        <div class="protocol-card">
+          <div class="protocol-step">[ STEP 01 · EDGE TLS TERMINATION ]</div>
+          <h3>Single Public Ingress via Caddy 2.11</h3>
+          <p>
+            Only TCP ports <code>80</code> and <code>443</code> face the public internet for web traffic. Caddy automatically provisions TLS 1.3 certificates, compresses responses with <code>zstd</code>/<code>gzip</code>, injects <code>HSTS</code>, <code>X-Frame-Options: DENY</code>, and <code>X-Content-Type-Options: nosniff</code>, and stamps every request with an <code>X-Request-ID</code> UUID.
+          </p>
+        </div>
+        <div class="protocol-card">
+          <div class="protocol-step">[ STEP 02 · STRICT LOOPBACK BINDING ]</div>
+          <h3>Zero-Wildcard 127.0.0.1 Isolation</h3>
+          <p>
+            Every backend API, microservice, and AI gateway is forbidden from binding to <code>0.0.0.0</code> or <code>::</code>. Services bind exclusively to <code>127.0.0.1</code> loopback sockets and are reachable only when explicitly proxied by a Caddy virtual host or authenticated SSH tunnel.
+          </p>
+        </div>
+        <div class="protocol-card">
+          <div class="protocol-step">[ STEP 03 · PRIVATE DATA PERSISTENCE ]</div>
+          <h3>Local-Only PostgreSQL 16 &amp; SQLite WAL</h3>
+          <p>
+            Relational workloads (<code>nikahyuk-api</code>) run on PostgreSQL 16 bound to loopback, while operational and agent state stores use SQLite 3 in Write-Ahead Logging (<code>WAL</code>) mode with Full-Text Search (<code>FTS5</code>) and automated encrypted off-site backups.
+          </p>
+        </div>
+        <div class="protocol-card">
+          <div class="protocol-step">[ STEP 04 · DECLARATIVE + LIVE SYNC ]</div>
+          <h3>SSOT Catalog &amp; Live Drift Detection</h3>
+          <p>
+            Application metadata and schemas are maintained in <code>second-brain/infrastructure/catalog.json</code>. The private VPS Cockpit combines this catalog with live <code>ss -tulpn</code> and SQLite introspection, while <code>thio.dev</code> publishes this sanitized projection at build time.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: APPLICATIONS, TECH STACKS & DATABASE SCHEMAS -->
+    <section class="content-section">
+      <h2 class="section-head">03 // Running Applications, Tech Stacks &amp; Database Schemas ({apps.length})</h2>
+      <p class="section-sub">
+        Detailed breakdown of every application hosted on the server, its architectural purpose, technology stack, public routing, and underlying database schema.
+      </p>
+
+      <div class="app-list">
+        {apps.map((app, index) => (
+          <article class="app-card" id={`app-${app.id}`}>
+            <div class="app-card-header">
+              <div>
+                <div class="app-meta-row">
+                  <span class="app-index">APP_0{index + 1}</span>
+                  <span class="app-category">{app.category}</span>
+                </div>
+                <h3 class="app-name">
+                  {app.name} <span class="app-title-muted">— {app.title}</span>
+                </h3>
+              </div>
+              {app.public_domain.startsWith('https://') ? (
+                <a href={app.public_domain} target="_blank" rel="noopener" class="domain-pill">
+                  {app.public_domain.replace(/^https:\/\//, '')} ↗
+                </a>
+              ) : (
+                <span class="domain-pill internal">{app.public_domain}</span>
+              )}
+            </div>
+
+            <p class="app-purpose">{app.purpose}</p>
+
+            <div class="app-two-col">
+              <div class="app-box">
+                <div class="box-label">[ TECH STACK ]</div>
+                <div class="tag-list">
+                  {(app.tech_stack || []).map((t) => (
+                    <span class="tech-tag">{t}</span>
+                  ))}
+                </div>
+              </div>
+
+              <div class="app-box">
+                <div class="box-label">[ PUBLIC COMMUNICATION ROUTES ]</div>
+                <div class="route-list">
+                  {(app.public_routes || []).map((r) => (
+                    <div class="route-row">
+                      <code class="route-domain">{r.domain}{r.path}</code>
+                      <span class="route-proto">{r.protocol}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div class="db-section">
+              <div class="box-label">[ DATABASE ARCHITECTURE &amp; DOMAIN SCHEMAS ({(app.databases || []).length}) ]</div>
+              {(app.databases || []).map((db) => (
+                <div class="db-card">
+                  <div class="db-header">
+                    <div>
+                      <strong class="db-name">{db.name}</strong>
+                      <span class="db-engine">{db.engine}</span>
+                    </div>
+                    <span class="db-count">{(db.tables || []).length} schema{(db.tables || []).length === 1 ? '' : 's'}</span>
+                  </div>
+                  {db.public_summary && <p class="db-summary">{db.public_summary}</p>}
+
+                  <div class="table-grid">
+                    {(db.tables || []).map((tbl) => (
+                      <div class="schema-table-card">
+                        <div class="schema-table-head">
+                          <code class="schema-table-name">{tbl.name}</code>
+                          {tbl.description && <span class="schema-table-desc">{tbl.description}</span>}
+                        </div>
+                        <div class="schema-cols">
+                          {(tbl.columns || []).map((col) => (
+                            <code class="schema-col-pill">{col}</code>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <ContactCta />
+  </main>
+  <a slot="footer" href="/" class="back-link">[ ← RETURN TO CONSOLE ]</a>
+</BaseLayout>
+
+<style>
+  .page-hero {
+    border-bottom: 1px dashed var(--gray-30);
+    padding-bottom: 2rem;
+    margin-bottom: 3rem;
+  }
+  .page-title {
+    margin-bottom: 1.25rem;
+  }
+  .kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+  @media (max-width: 760px) {
+    .kpi-strip {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  .kpi-box {
+    border: 1px solid var(--gray-20);
+    background: rgba(255, 255, 255, 0.015);
+    padding: 1rem 1.15rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .kpi-label {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: #38bdf8;
+    letter-spacing: 0.04em;
+  }
+  .kpi-val {
+    font-family: var(--font-mono);
+    font-size: 1.55rem;
+    color: var(--gray-100);
+    font-weight: 800;
+  }
+  .kpi-sub {
+    font-size: 0.8rem;
+    color: var(--gray-60);
+  }
+  .content-section {
+    margin-bottom: 3.75rem;
+  }
+  .section-head {
+    font-family: var(--font-sans);
+    font-size: 1.45rem;
+    font-weight: 800;
+    margin-bottom: 0.4rem;
+    letter-spacing: -0.02em;
+    border-bottom: 2px solid var(--gray-20);
+    padding-bottom: 0.5rem;
+  }
+  .section-sub {
+    font-size: 0.94rem;
+    color: var(--gray-60);
+    margin-bottom: 1.5rem;
+  }
+  .diagram-frame {
+    border: 1px solid var(--gray-20);
+    background: #090d16;
+    border-radius: 8px;
+    padding: 0.75rem;
+    overflow-x: auto;
+  }
+  .protocol-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+    margin-top: 1.25rem;
+  }
+  @media (max-width: 720px) {
+    .protocol-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .protocol-card {
+    border: 1px solid var(--gray-20);
+    padding: 1.25rem;
+    background: rgba(255, 255, 255, 0.01);
+  }
+  .protocol-step {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: #38bdf8;
+    margin-bottom: 0.4rem;
+    font-weight: 600;
+  }
+  .protocol-card h3 {
+    font-size: 1.08rem;
+    margin-bottom: 0.5rem;
+    color: var(--gray-100);
+  }
+  .protocol-card p {
+    font-size: 0.9rem;
+    color: var(--gray-70);
+    line-height: 1.55;
+    margin: 0;
+  }
+  .app-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+  }
+  .app-card {
+    border: 1px solid var(--gray-20);
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.012);
+    display: flex;
+    flex-direction: column;
+    gap: 1.15rem;
+  }
+  .app-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--gray-20);
+    padding-bottom: 0.9rem;
+  }
+  .app-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-bottom: 0.35rem;
+  }
+  .app-index {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    color: #10b981;
+    font-weight: 700;
+  }
+  .app-category {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    color: #38bdf8;
+  }
+  .app-name {
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin: 0;
+    color: var(--gray-100);
+  }
+  .app-title-muted {
+    font-weight: 400;
+    font-size: 1rem;
+    color: var(--gray-60);
+  }
+  .domain-pill {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    padding: 0.35rem 0.7rem;
+    border: 1px solid #38bdf8;
+    color: #38bdf8;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .domain-pill.internal {
+    border-color: var(--gray-30);
+    color: var(--gray-60);
+  }
+  .app-purpose {
+    font-size: 0.95rem;
+    color: var(--gray-80);
+    line-height: 1.6;
+    margin: 0;
+  }
+  .app-two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  @media (max-width: 720px) {
+    .app-two-col {
+      grid-template-columns: 1fr;
+    }
+  }
+  .app-box {
+    border: 1px solid var(--gray-20);
+    padding: 0.9rem 1rem;
+    background: rgba(0, 0, 0, 0.2);
+  }
+  .box-label {
+    font-family: var(--font-mono);
+    font-size: 0.73rem;
+    color: var(--gray-50);
+    margin-bottom: 0.6rem;
+    font-weight: 600;
+  }
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+  .tech-tag {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    padding: 0.2rem 0.55rem;
+    background: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    color: #e2e8f0;
+  }
+  .route-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .route-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    flex-wrap: wrap;
+  }
+  .route-domain {
+    color: #38bdf8;
+    font-size: 0.78rem;
+  }
+  .route-proto {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--gray-60);
+  }
+  .db-section {
+    border-top: 1px dashed var(--gray-20);
+    padding-top: 1rem;
+  }
+  .db-card {
+    border: 1px solid rgba(139, 92, 246, 0.35);
+    background: rgba(30, 27, 75, 0.18);
+    padding: 1rem;
+    margin-top: 0.6rem;
+  }
+  .db-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .db-name {
+    font-family: var(--font-mono);
+    color: #ddd6fe;
+    font-size: 0.92rem;
+    margin-right: 0.75rem;
+  }
+  .db-engine {
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    color: #a78bfa;
+  }
+  .db-count {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    color: #c4b5fd;
+  }
+  .db-summary {
+    font-size: 0.86rem;
+    color: var(--gray-70);
+    margin: 0.45rem 0 0.75rem 0;
+  }
+  .table-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .schema-table-card {
+    background: rgba(9, 13, 22, 0.75);
+    border: 1px solid var(--gray-20);
+    padding: 0.65rem 0.85rem;
+  }
+  .schema-table-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.4rem;
+  }
+  .schema-table-name {
+    color: #c4b5fd;
+    font-weight: 700;
+    font-size: 0.82rem;
+  }
+  .schema-table-desc {
+    font-size: 0.78rem;
+    color: var(--gray-60);
+  }
+  .schema-cols {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+  .schema-col-pill {
+    font-size: 0.73rem;
+    padding: 0.12rem 0.45rem;
+    background: rgba(30, 41, 59, 0.85);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    color: #cbd5e1;
+  }
+</style>

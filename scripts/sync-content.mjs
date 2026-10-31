@@ -79,7 +79,70 @@ function main() {
     console.log(`  ${dest}/  ${n} file(s)`);
     total += n;
   }
+
+  // Sync sanitized public infrastructure catalog when available in second-brain
+  const catalogPath = path.join(source, 'infrastructure', 'catalog.json');
+  if (fs.existsSync(catalogPath)) {
+    const rawCatalog = JSON.parse(fs.readFileSync(catalogPath, 'utf8'));
+    const publicCatalog = sanitizeCatalogForPublic(rawCatalog);
+    const dataDir = path.join(siteRoot, 'src', 'data');
+    fs.mkdirSync(dataDir, { recursive: true });
+    fs.writeFileSync(path.join(dataDir, 'infrastructure.json'), JSON.stringify(publicCatalog, null, 2) + '\n');
+    console.log(`  src/data/infrastructure.json  (${publicCatalog.applications.length} public apps synced)`);
+  }
+
   console.log(`✓ Synced ${total} file(s).`);
+}
+
+export function sanitizeCatalogForPublic(raw) {
+  const host = raw.host || {};
+  const apps = Array.isArray(raw.applications) ? raw.applications : [];
+  const publicApps = apps
+    .filter((a) => a.visibility === 'public')
+    .map((app) => ({
+      id: app.id,
+      name: app.name,
+      title: app.title,
+      category: app.category,
+      purpose: app.purpose,
+      tech_stack: app.tech_stack || [],
+      public_domain: app.public_domain?.startsWith('https://') ? app.public_domain : 'Internal Loopback Service',
+      public_routes: (app.public_routes || []).map((r) => ({
+        domain: r.domain?.startsWith('127.') ? 'Loopback-Only' : r.domain,
+        path: r.path || '/*',
+        protocol: r.protocol || 'HTTPS',
+      })),
+      databases: (app.databases || []).map((db) => ({
+        id: db.id,
+        name: db.name,
+        engine: String(db.engine || '').replace(/\s*\(127\.0\.0\.1[^)]*\)/g, '').trim(),
+        public_summary: db.public_summary || '',
+        tables: (db.tables || []).map((t) => ({
+          name: t.name,
+          description: t.description || '',
+          columns: t.columns || [],
+        })),
+      })),
+    }));
+
+  return {
+    schema_version: raw.schema_version || 1,
+    updated_at: raw.updated_at || new Date().toISOString(),
+    host: {
+      name: host.name || 'HermesHost',
+      os: host.os || 'Ubuntu 24.04 LTS',
+      cpu: host.cpu || '1 vCore',
+      ram_mb: host.ram_mb || 1922,
+      swap_mb: host.swap_mb || 4096,
+      ram_headroom_policy: host.ram_headroom_policy || '>= 500 MB effective headroom',
+      edge_proxy: {
+        name: host.edge_proxy?.name || 'Caddy v2.11 TLS Reverse Proxy',
+        public_ports: host.edge_proxy?.public_ports || [80, 443],
+        security_policy: host.edge_proxy?.security_policy || 'Strict loopback isolation for all backend services',
+      },
+    },
+    applications: publicApps,
+  };
 }
 
 // realpath: import.meta.url is symlink-resolved, argv[1] is not.
