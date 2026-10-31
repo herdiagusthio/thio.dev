@@ -80,69 +80,142 @@ function main() {
     total += n;
   }
 
-  // Sync sanitized public infrastructure catalog when available in second-brain
-  const catalogPath = path.join(source, 'infrastructure', 'catalog.json');
-  if (fs.existsSync(catalogPath)) {
-    const rawCatalog = JSON.parse(fs.readFileSync(catalogPath, 'utf8'));
-    const publicCatalog = sanitizeCatalogForPublic(rawCatalog);
-    const dataDir = path.join(siteRoot, 'src', 'data');
-    fs.mkdirSync(dataDir, { recursive: true });
-    fs.writeFileSync(path.join(dataDir, 'infrastructure.json'), JSON.stringify(publicCatalog, null, 2) + '\n');
-    console.log(`  src/data/infrastructure.json  (${publicCatalog.applications.length} public apps synced)`);
-  }
+  // Infrastructure page data: always rewritten, so a missing catalog never leaves a stale snapshot.
+  const infra = loadPublicCatalog(path.join(source, 'infrastructure', 'catalog.json'));
+  fs.mkdirSync(path.join(siteRoot, 'content'), { recursive: true });
+  fs.writeFileSync(path.join(siteRoot, 'content', 'infrastructure.json'), JSON.stringify(infra, null, 2) + '\n');
+  console.log(`  infrastructure.json  ${infra.applications.length} public app(s), ${infra.internal_services.length} internal`);
 
   console.log(`✓ Synced ${total} file(s).`);
 }
 
-export function sanitizeCatalogForPublic(raw) {
-  const host = raw.host || {};
-  const apps = Array.isArray(raw.applications) ? raw.applications : [];
-  const publicApps = apps
-    .filter((a) => a.visibility === 'public')
-    .map((app) => ({
-      id: app.id,
-      name: app.name,
-      title: app.title,
-      category: app.category,
-      purpose: app.purpose,
-      tech_stack: app.tech_stack || [],
-      public_domain: app.public_domain?.startsWith('https://') ? app.public_domain : 'Internal Loopback Service',
-      public_routes: (app.public_routes || []).map((r) => ({
-        domain: r.domain?.startsWith('127.') ? 'Loopback-Only' : r.domain,
-        path: r.path || '/*',
-        protocol: r.protocol || 'HTTPS',
-      })),
-      databases: (app.databases || []).map((db) => ({
-        id: db.id,
-        name: db.name,
-        engine: String(db.engine || '').replace(/\s*\(127\.0\.0\.1[^)]*\)/g, '').trim(),
-        public_summary: db.public_summary || '',
-        tables: (db.tables || []).map((t) => ({
-          name: t.name,
-          description: t.description || '',
-          columns: t.columns || [],
-        })),
-      })),
-    }));
+// Infrastructure catalog -> public projection. The catalog is private (paths, ports, IPs, schemas),
+// so the projection is built field by field from an allowlist: nothing in the input is passed through.
+// visibility "public": full card; "internal": name and purpose only; anything else: omitted.
+const SLUG = /^[a-z0-9][a-z0-9-]{0,63}$/;
+// A DNS name whose last label starts with a letter: no IP literals, no "localhost", no "Loopback-Only".
+const HOSTNAME = /^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
+const URL_PATH = /^\/[A-Za-z0-9\-._~%/*]{0,200}$/;
 
+const isObject = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
+const text = (v, max = 160) =>
+  typeof v === 'string' || typeof v === 'number' ? String(v).replace(/\s+/g, ' ').trim().slice(0, max) : '';
+const texts = (v) => (Array.isArray(v) ? v.map((x) => text(x, 60)).filter(Boolean).slice(0, 20) : []);
+const count = (v) => (typeof v === 'number' && Number.isFinite(v) && v >= 0 ? v : null);
+
+// "a.example.com" or "https://a.example.com/..." -> "a.example.com"; anything else -> null.
+function publicHost(value) {
+  if (typeof value !== 'string') return null;
+  let host = value.trim().toLowerCase();
+  if (host.includes('://')) {
+    let url;
+    try {
+      url = new URL(host);
+    } catch {
+      return null;
+    }
+    if (url.protocol !== 'https:' || url.port || url.username || url.password) return null;
+    host = url.hostname;
+  }
+  return HOSTNAME.test(host) && !host.startsWith('127.') ? host : null;
+}
+
+function publicRoute(r) {
+  if (!isObject(r) || !/\bhttps\b/i.test(text(r.protocol))) return null;
+  const domain = publicHost(r.domain);
+  const routePath = r.path == null ? '/*' : r.path;
+  if (!domain || typeof routePath !== 'string' || !URL_PATH.test(routePath)) return null;
+  return { domain, path: routePath, protocol: text(r.protocol, 60) };
+}
+
+// Engine label without loopback addresses or filesystem paths: "PostgreSQL 16 (127.0.0.1:5432)" -> "PostgreSQL 16".
+function engineLabel(v) {
+  return text(v, 400)
+    .replace(/\([^)]*(?:127\.|localhost|~|\/)[^)]*\)/gi, ' ')
+    .replace(/(?:^|\s)(?:~|\.{0,2}\/)\S+/g, ' ')
+    .replace(/\b127(?:\.\d{1,3}){3}(?::\d+)?/g, ' ')
+    .replace(/\blocalhost(?::\d+)?/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 80);
+}
+
+function publicDatabase(db) {
+  if (!isObject(db)) return null;
+  const tableCount = Number.isInteger(db.table_count) && db.table_count >= 0 ? db.table_count : null;
   return {
-    schema_version: raw.schema_version || 1,
-    updated_at: raw.updated_at || new Date().toISOString(),
-    host: {
-      name: host.name || 'HermesHost',
-      os: host.os || 'Ubuntu 24.04 LTS',
-      cpu: host.cpu || '1 vCore',
-      ram_mb: host.ram_mb || 1922,
-      swap_mb: host.swap_mb || 4096,
-      ram_headroom_policy: host.ram_headroom_policy || '>= 500 MB effective headroom',
-      edge_proxy: {
-        name: host.edge_proxy?.name || 'Caddy v2.11 TLS Reverse Proxy',
-        public_ports: host.edge_proxy?.public_ports || [80, 443],
-        security_policy: host.edge_proxy?.security_policy || 'Strict loopback isolation for all backend services',
-      },
-    },
-    applications: publicApps,
+    name: text(db.name, 120),
+    engine: engineLabel(db.engine),
+    summary: text(db.public_summary, 600),
+    table_count: tableCount ?? (Array.isArray(db.tables) ? db.tables.length : 0),
   };
+}
+
+function minimalEntry(app) {
+  return {
+    id: app.id,
+    name: text(app.name, 80),
+    title: text(app.title),
+    category: text(app.category, 80),
+    purpose: text(app.purpose, 600),
+    tech_stack: texts(app.tech_stack),
+  };
+}
+
+function publicHostFacts(host) {
+  const edge = isObject(host.edge_proxy) ? host.edge_proxy : {};
+  const ports = Array.isArray(edge.public_ports) ? edge.public_ports : [];
+  return {
+    name: text(host.name, 80),
+    // No kernel: drop "(Linux 6.8)", ", kernel 6.8.0-45" and "Linux 6.8".
+    os: text(host.os, 200)
+      .replace(/\s*\([^)]*\)/g, '')
+      .replace(/[,;]?\s*\b(?:kernel\b.*|linux\s+v?\d.*)$/i, '')
+      .trim()
+      .slice(0, 80),
+    cpu: text(host.cpu, 80),
+    ram_mb: count(host.ram_mb),
+    swap_mb: count(host.swap_mb),
+    edge_proxy: {
+      name: text(edge.name, 80),
+      public_ports: ports.filter((p) => Number.isInteger(p) && p > 0 && p <= 65535),
+    },
+  };
+}
+
+// Throws on a catalog with the wrong shape, so a broken catalog fails the build.
+export function sanitizeCatalogForPublic(raw) {
+  if (!isObject(raw) || !Array.isArray(raw.applications) || (raw.host != null && !isObject(raw.host))) {
+    throw new Error('infrastructure catalog: expected an object with an applications array (and an optional host object)');
+  }
+  const apps = raw.applications.filter((a) => isObject(a) && typeof a.id === 'string' && SLUG.test(a.id));
+  return {
+    schema_version: 2,
+    updated_at: typeof raw.updated_at === 'string' ? text(raw.updated_at, 40) : null,
+    host: raw.host == null ? null : publicHostFacts(raw.host),
+    applications: apps
+      .filter((a) => a.visibility === 'public')
+      .map((app) => {
+        const domain = typeof app.public_domain === 'string' && /^https:\/\//i.test(app.public_domain.trim()) ? publicHost(app.public_domain) : null;
+        return {
+          ...minimalEntry(app),
+          public_domain: domain ? `https://${domain}` : null,
+          public_routes: (Array.isArray(app.public_routes) ? app.public_routes : []).map(publicRoute).filter(Boolean),
+          databases: (Array.isArray(app.databases) ? app.databases : []).map(publicDatabase).filter(Boolean),
+        };
+      }),
+    internal_services: apps.filter((a) => a.visibility === 'internal').map(minimalEntry),
+  };
+}
+
+// A missing catalog publishes nothing; one that exists but is unreadable or malformed fails the build.
+export function loadPublicCatalog(file) {
+  if (!fs.existsSync(file)) return sanitizeCatalogForPublic({ applications: [] });
+  try {
+    return sanitizeCatalogForPublic(JSON.parse(fs.readFileSync(file, 'utf8')));
+  } catch (err) {
+    throw new Error(`invalid infrastructure catalog ${file}: ${err.message}`);
+  }
 }
 
 // realpath: import.meta.url is symlink-resolved, argv[1] is not.

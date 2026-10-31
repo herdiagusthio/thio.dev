@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-10-31T15:00:00Z",
+  "host": {
+    "name": "SampleHost",
+    "ip": "PRIVATE-FIXTURE",
+    "os": "Ubuntu 24.04 LTS (Linux PRIVATE-FIXTURE)",
+    "cpu": "1 vCPU",
+    "ram_mb": 2048,
+    "swap_mb": 4096,
+    "ram_headroom_policy": "PRIVATE-FIXTURE headroom policy",
+    "edge_proxy": {
+      "name": "Caddy",
+      "config_path": "/etc/PRIVATE-FIXTURE/Caddyfile",
+      "admin_socket": "unix//var/lib/PRIVATE-FIXTURE/admin.sock",
+      "public_ports": [80, 443],
+      "security_policy": "PRIVATE-FIXTURE policy prose"
+    }
+  },
+  "applications": [
+    {
+      "id": "sample-site",
+      "name": "sample-site",
+      "title": "Sample public website",
+      "category": "Public web",
+      "purpose": "A public sample app: it must be on /infrastructure as a full card.",
+      "tech_stack": ["Astro", "TypeScript"],
+      "public_domain": "https://sample.example.com",
+      "public_routes": [
+        { "domain": "sample.example.com", "path": "/*", "target": "Static files", "protocol": "HTTPS" },
+        { "domain": "127.0.0.1:3040", "path": "/PRIVATE-FIXTURE", "target": "127.0.0.1:3040", "protocol": "Loopback HTTP" }
+      ],
+      "internal_bind": "127.0.0.1:3000",
+      "repo_path": "/home/PRIVATE-FIXTURE/sample-site",
+      "visibility": "public",
+      "databases": [
+        {
+          "id": "sample-db",
+          "name": "Sample store",
+          "engine": "SQLite 3 (~/PRIVATE-FIXTURE/sample.db)",
+          "sqlite_path": "/home/PRIVATE-FIXTURE/sample.db",
+          "public_summary": "Sample data: only this summary and the table count are public.",
+          "tables": [
+            { "name": "PRIVATE-FIXTURE_users", "description": "PRIVATE-FIXTURE table", "columns": ["id", "PRIVATE-FIXTURE_email"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sample-worker",
+      "name": "sample-worker",
+      "title": "Sample internal worker",
+      "category": "Internal service",
+      "purpose": "An internal sample app: listed by name and purpose only.",
+      "tech_stack": ["Go"],
+      "public_domain": "https://admin.example.com/PRIVATE-FIXTURE",
+      "public_routes": [
+        { "domain": "admin.example.com", "path": "/PRIVATE-FIXTURE", "target": "127.0.0.1:9000", "protocol": "HTTPS Reverse Proxy" }
+      ],
+      "visibility": "internal",
+      "databases": [
+        {
+          "id": "worker-db",
+          "name": "PRIVATE-FIXTURE worker store",
+          "engine": "SQLite 3",
+          "public_summary": "PRIVATE-FIXTURE internal summary",
+          "tables": [{ "name": "PRIVATE-FIXTURE_jobs", "columns": ["PRIVATE-FIXTURE_secret"] }]
+        }
+      ]
+    },
+    {
+      "id": "private-fixture-app",
+      "name": "private-fixture-app",
+      "title": "PRIVATE-FIXTURE app without visibility",
+      "category": "Private",
+      "purpose": "No visibility field, so it stays private.",
+      "tech_stack": ["PRIVATE-FIXTURE"],
+      "public_domain": "https://private.example.com"
+    }
+  ]
+}

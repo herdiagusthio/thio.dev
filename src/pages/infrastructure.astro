@@ -1,15 +1,39 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ContactCta from '../components/ContactCta.astro';
-import infra from '../data/infrastructure.json';
+
+// Public projection of second-brain's infrastructure catalog, written by scripts/sync-content.mjs
+// (sanitizeCatalogForPublic). Generated and git-ignored; a glob, so a build without it renders nothing.
+interface Projection {
+  updated_at: string | null;
+  host: {
+    name: string;
+    os: string;
+    cpu: string;
+    ram_mb: number | null;
+    swap_mb: number | null;
+    edge_proxy: { name: string; public_ports: number[] };
+  } | null;
+  applications: {
+    id: string;
+    name: string;
+    title: string;
+    category: string;
+    purpose: string;
+    tech_stack: string[];
+    public_domain: string | null;
+    public_routes: { domain: string; path: string; protocol: string }[];
+    databases: { name: string; engine: string; summary: string; table_count: number }[];
+  }[];
+  internal_services: { id: string; name: string; title: string; category: string; purpose: string; tech_stack: string[] }[];
+}
+const generated = import.meta.glob<Projection>('../../content/infrastructure.json', { eager: true, import: 'default' });
+const infra: Projection = Object.values(generated)[0] ?? { updated_at: null, host: null, applications: [], internal_services: [] };
 
 const host = infra.host;
-const apps = infra.applications || [];
-const totalDatabases = apps.reduce((sum, app) => sum + (app.databases?.length || 0), 0);
-const totalTables = apps.reduce(
-  (sum, app) => sum + (app.databases || []).reduce((s, d) => s + (d.tables?.length || 0), 0),
-  0
-);
+const apps = infra.applications;
+const totalDatabases = apps.reduce((sum, app) => sum + app.databases.length, 0);
+const totalTables = apps.reduce((sum, app) => sum + app.databases.reduce((s, d) => s + d.table_count, 0), 0);
 const totalPublicRoutes = apps.reduce((sum, app) => sum + (app.public_routes?.length || 0), 0);
 
 // Precompute SVG coordinates for the 4-layer architecture diagram
@@ -45,7 +69,7 @@ const caddyCenterY = caddyY + caddyH / 2;
       <h1 class="page-title">Server Infrastructure, Applications &amp; Database Schemas</h1>
       <div class="prose">
         <p>
-          Every application, AI agent, and database in my ecosystem runs on a single hardened Linux VPS (<strong>{host.name}</strong> — {host.os}, {host.cpu}, {host.ram_mb} MB physical RAM + {host.swap_mb} MB swap).
+          Every application, AI agent, and database in my ecosystem runs on a single hardened Linux VPS (<strong>{host?.name}</strong> — {host?.os}, {host?.cpu}, {host?.ram_mb} MB physical RAM + {host?.swap_mb} MB swap).
         </p>
         <p>
           This page is automatically projected from the declarative infrastructure catalog in <code>second-brain/infrastructure/catalog.json</code>. It documents <strong>how many applications run on the server</strong>, <strong>how public traffic communicates safely with internal services</strong>, the <strong>tech stack</strong> behind each system, and the <strong>database schemas</strong> powering each domain.
@@ -114,13 +138,13 @@ const caddyCenterY = caddyY + caddyH / 2;
             const x5 = col3X + col3W;
             const x6 = col4X;
             const c3x = Math.round((x5 + x6) / 2);
-            const isPublicHttps = app.public_domain.startsWith('https://');
-            const domainText = app.public_domain.replace(/^https?:\/\//, '').slice(0, 30);
+            const isPublicHttps = Boolean(app.public_domain);
+            const domainText = (app.public_domain ?? 'Internal').replace(/^https?:\/\//, '').slice(0, 30);
             const protoText = app.public_routes?.[0]?.protocol || 'Loopback';
             const stackText = (app.tech_stack || []).slice(0, 2).join(' · ').slice(0, 31);
             const primaryDb = app.databases?.[0];
             const dbEngine = primaryDb ? primaryDb.engine.split('(')[0].trim().slice(0, 23) : 'Stateless';
-            const appTableCount = (app.databases || []).reduce((s, d) => s + (d.tables?.length || 0), 0);
+            const appTableCount = app.databases.reduce((s, d) => s + d.table_count, 0);
 
             return (
               <g>
@@ -202,7 +226,7 @@ const caddyCenterY = caddyY + caddyH / 2;
               CADDY TLS EDGE PROXY
             </text>
             <text x={col2W / 2} y="56" text-anchor="middle" fill="#e2e8f0" font-family="sans-serif" font-size="10.5" font-weight="600">
-              {host.edge_proxy.name}
+              {host?.edge_proxy.name}
             </text>
             <text x={col2W / 2} y="78" text-anchor="middle" fill="#38bdf8" font-family="monospace" font-size="10">
               Ports :80 / :443 (TLS 1.3)
@@ -292,12 +316,12 @@ const caddyCenterY = caddyY + caddyH / 2;
                   {app.name} <span class="app-title-muted">— {app.title}</span>
                 </h3>
               </div>
-              {app.public_domain.startsWith('https://') ? (
+              {app.public_domain ? (
                 <a href={app.public_domain} target="_blank" rel="noopener" class="domain-pill">
                   {app.public_domain.replace(/^https:\/\//, '')} ↗
                 </a>
               ) : (
-                <span class="domain-pill internal">{app.public_domain}</span>
+                <span class="domain-pill internal">Not publicly routed</span>
               )}
             </div>
 
@@ -335,25 +359,9 @@ const caddyCenterY = caddyY + caddyH / 2;
                       <strong class="db-name">{db.name}</strong>
                       <span class="db-engine">{db.engine}</span>
                     </div>
-                    <span class="db-count">{(db.tables || []).length} schema{(db.tables || []).length === 1 ? '' : 's'}</span>
+                    <span class="db-count">{db.table_count} table{db.table_count === 1 ? '' : 's'}</span>
                   </div>
-                  {db.public_summary && <p class="db-summary">{db.public_summary}</p>}
-
-                  <div class="table-grid">
-                    {(db.tables || []).map((tbl) => (
-                      <div class="schema-table-card">
-                        <div class="schema-table-head">
-                          <code class="schema-table-name">{tbl.name}</code>
-                          {tbl.description && <span class="schema-table-desc">{tbl.description}</span>}
-                        </div>
-                        <div class="schema-cols">
-                          {(tbl.columns || []).map((col) => (
-                            <code class="schema-col-pill">{col}</code>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  {db.summary && <p class="db-summary">{db.summary}</p>}
                 </div>
               ))}
             </div>

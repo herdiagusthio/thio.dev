@@ -39,6 +39,7 @@ second-brain (private) ──sync allowlist──▶ content/ (generated, git-ig
 - `scripts/sync-content.mjs` copies a file only when its YAML frontmatter `status` is public: `published` for `knowledge/blog` and `knowledge/engineering`, `accepted` or `superseded` for `decisions`, which must also be numbered ADRs (`NNN-*.md`; pipeline tickets like `sdlc-*` never sync). Everything else stays private and is pruned from `content/`.
 - `src/content.config.ts` enforces the frontmatter: `title`, `date` (`YYYY-MM-DD`), `tags` (at least one), `status`, and for blog posts and case studies a `summary` of at least 40 characters. Optional: `lang: id` for Indonesian posts, `featured: true` for homepage case studies. Bad frontmatter fails the build.
 - Write content in second-brain, never directly in `content/` — the sync deletes anything that is not in the source.
+- `/infrastructure` reads `content/infrastructure.json`, which the sync rewrites on every run from `infrastructure/catalog.json` through `sanitizeCatalogForPublic`. It builds each field from an allowlist: apps with `visibility: public` get a full card, `internal` ones only their name, purpose and stack, and anything else is left out. No IPs, paths, kernel, or table and column names. A missing catalog gives an empty page; a malformed one fails the sync.
 
 **Release order:** when a change needs second-brain frontmatter (e.g. a new required field), merge and pull second-brain on the VPS before shipping thio.dev, otherwise the build fails on the affected entries.
 
