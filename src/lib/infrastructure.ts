@@ -52,3 +52,46 @@ export function infraCounts(p: Projection) {
     databases: p.applications.reduce((n, app) => n + app.databases.length, 0),
   };
 }
+
+export const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
+
+export const fit = (text: string, max: number) => (text.length <= max ? text : `${text.slice(0, max - 1)}…`);
+
+// Characters that fit each diagram label at its font size (src/pages/infrastructure.astro): the SVG
+// cannot wrap text, so labels are cut here and the card below has the full value.
+export const LABEL_CHARS = { host: 29, name: 21, stack: 24, data: 19 };
+
+export interface DiagramRow {
+  id: string;
+  href: string;
+  host: string | null; // null: not publicly routed, so no ingress node and no path through Caddy
+  hostNote: string;
+  name: string;
+  stack: string;
+  data: { label: string; note: string } | null;
+}
+
+// Public apps get a row each; internal services collapse into one node with no public path.
+export function diagramModel(p: Projection) {
+  const rows: DiagramRow[] = p.applications.map((app) => {
+    const hosts = appHosts(app);
+    const tables = app.databases.reduce((n, d) => n + d.table_count, 0);
+    const first = app.databases[0];
+    return {
+      id: app.id,
+      href: `#app-${app.id}`,
+      host: hosts.length ? fit(hosts[0], LABEL_CHARS.host) : null,
+      hostNote: hosts.length > 1 ? `+${plural(hosts.length - 1, 'more host')}` : hosts.length ? 'HTTPS' : '',
+      name: fit(app.name, LABEL_CHARS.name),
+      stack: fit(app.tech_stack.slice(0, 2).join(' · '), LABEL_CHARS.stack),
+      data: first
+        ? { label: fit(first.engine || first.name, LABEL_CHARS.data), note: `${plural(app.databases.length, 'DB')} · ${plural(tables, 'table')}` }
+        : null,
+    };
+  });
+  const n = p.internal_services.length;
+  return {
+    rows,
+    internal: n ? { href: '#internal-services', label: plural(n, 'internal service'), note: 'not publicly routed' } : null,
+  };
+}
