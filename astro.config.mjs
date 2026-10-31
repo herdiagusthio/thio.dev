@@ -24,6 +24,7 @@ export default defineConfig({
     '/showcase/scatter-gather-aggregation': '/showcase/gold-standard-flight-aggregation',
     '/showcase/primitive-obsession-hexagonal': '/showcase/gold-standard-hexagonal-refactor',
     '/showcase/atomic-guest-sync': '/showcase/atomic-consistency-sync',
+    '/showcase/preventing-domain-leakage': '/showcase/gold-standard-hexagonal-refactor',
   },
   // Self-hosted from src/assets/fonts (OFL-1.1, licenses alongside): no request to Google, at build
   // time or in the browser. One variable woff2 per family; the discrete weights match the old Google
