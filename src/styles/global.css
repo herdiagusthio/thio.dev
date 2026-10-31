@@ -81,6 +81,10 @@ a:hover {
 }
 .nav-links a {
   text-decoration: none;
+  /* WCAG 2.5.8: targets at least 24px tall */
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
 }
 .foot {
   display: flex;

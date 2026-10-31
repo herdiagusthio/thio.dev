@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { diagramModel, EMPTY_PROJECTION, fit, infraCounts, LABEL_CHARS, type Projection, type PublicApp } from './infrastructure.ts';
+import { appLinks, diagramModel, EMPTY_PROJECTION, fit, infraCounts, LABEL_CHARS, type Projection, type PublicApp } from './infrastructure.ts';
 
 const app = (over: Partial<PublicApp> = {}): PublicApp => ({
   id: 'site',
@@ -84,4 +84,26 @@ test('diagramModel: one row per public app linking to its card; internal service
 test('diagramModel: no internal node without internal services, singular label for one', () => {
   assert.equal(diagramModel(EMPTY_PROJECTION).internal, null);
   assert.equal(diagramModel({ ...EMPTY_PROJECTION, internal_services: [internalService('x')] }).internal?.label, '1 internal service');
+});
+
+test('appLinks: one link per public host and path, labelled without the scheme', () => {
+  const cases: [string, Partial<PublicApp>, { href: string; label: string }[]][] = [
+    ['nothing public', {}, []],
+    ['domain only', { public_domain: 'https://a.example.com' }, [{ href: 'https://a.example.com/', label: 'a.example.com' }]],
+    [
+      'domain repeated as a /* route',
+      { public_domain: 'https://a.example.com', public_routes: [route('a.example.com')] },
+      [{ href: 'https://a.example.com/', label: 'a.example.com' }],
+    ],
+    [
+      'extra host with a path',
+      { public_domain: 'https://a.example.com', public_routes: [route('a.example.com'), route('api.a.example.com', '/office')] },
+      [
+        { href: 'https://a.example.com/', label: 'a.example.com' },
+        { href: 'https://api.a.example.com/office', label: 'api.a.example.com/office' },
+      ],
+    ],
+    ['wildcard below a path', { public_routes: [route('a.example.com', '/api/*')] }, [{ href: 'https://a.example.com/api/', label: 'a.example.com/api/*' }]],
+  ];
+  for (const [name, over, want] of cases) assert.deepEqual(appLinks(app(over)), want, name);
 });

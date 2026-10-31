@@ -44,6 +44,16 @@ export function appHosts(app: PublicApp): string[] {
   return [...new Set([...hosts, ...app.public_routes.map((r) => r.domain)])];
 }
 
+// Card links: the public domain, then each route; "/*" means the whole host.
+export function appLinks(app: PublicApp): { href: string; label: string }[] {
+  const routes = app.public_domain ? [{ domain: app.public_domain.replace(/^https:\/\//, ''), path: '/*' }] : [];
+  const links = [...routes, ...app.public_routes].map(({ domain, path }) => {
+    const shown = path === '/*' || path === '/' ? '' : path;
+    return { href: `https://${domain}${shown.replace(/\*$/, '') || '/'}`, label: `${domain}${shown}` };
+  });
+  return links.filter((link, i) => links.findIndex((l) => l.href === link.href) === i);
+}
+
 export function infraCounts(p: Projection) {
   return {
     publicApps: p.applications.length,
