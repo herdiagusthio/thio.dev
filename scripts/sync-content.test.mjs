@@ -229,6 +229,10 @@ test('sanitizeCatalogForPublic: public_domain keeps only https://<host>', () => 
     ['https://localhost', null],
     ['https://thio.example.com:8443', null],
     ['https://user:pass@thio.example.com', null],
+    ['https://admin.corp.internal', null],
+    ['https://nas.local', null],
+    ['https://router.home.arpa', null],
+    ['https://box.lan', null],
     ['Internal Loopback (127.0.0.1:3040)', null],
     ['Internal SSOT & MCP Stdio', null],
     ['javascript:alert(1)', null],
@@ -244,9 +248,14 @@ test('sanitizeCatalogForPublic: public_domain keeps only https://<host>', () => 
 test('sanitizeCatalogForPublic: public_routes keep only real https hosts', () => {
   const route = (over) => ({ domain: 'a.example.com', path: '/*', protocol: 'HTTPS Reverse Proxy', ...over });
   const cases = [
-    ['https host', route(), { domain: 'a.example.com', path: '/*', protocol: 'HTTPS Reverse Proxy' }],
-    ['url form is reduced to the host', route({ domain: 'https://a.example.com/x' }), { domain: 'a.example.com', path: '/*', protocol: 'HTTPS Reverse Proxy' }],
-    ['missing path means /*', route({ path: undefined }), { domain: 'a.example.com', path: '/*', protocol: 'HTTPS Reverse Proxy' }],
+    ['https host', route(), { domain: 'a.example.com', path: '/*', protocol: 'HTTPS' }],
+    ['url form is reduced to the host', route({ domain: 'https://a.example.com/x' }), { domain: 'a.example.com', path: '/*', protocol: 'HTTPS' }],
+    ['missing path means /*', route({ path: undefined }), { domain: 'a.example.com', path: '/*', protocol: 'HTTPS' }],
+    ['protocol prose is not published', route({ protocol: 'HTTPS (Loopback 127.0.0.1:8080 -> /srv/app)' }), { domain: 'a.example.com', path: '/*', protocol: 'HTTPS' }],
+    ['dot-dot path', route({ path: '/..' }), null],
+    ['encoded path', route({ path: '/%2e%2e/x' }), null],
+    ['internal tld', route({ domain: 'admin.corp.internal' }), null],
+    ['mdns name', route({ domain: 'nas.local' }), null],
     ['loopback ip', route({ domain: '127.0.0.1:3040', protocol: 'Loopback HTTP' }), null],
     ['loopback over https', route({ domain: '127.0.0.1' }), null],
     ['Loopback label', route({ domain: 'Loopback-Only' }), null],
@@ -277,6 +286,14 @@ test('sanitizeCatalogForPublic: databases publish name, engine, summary and a ta
     ['harmless parenthetical stays', 'SQLite 3 (WAL Mode)', 'SQLite 3 (WAL Mode)'],
     ['spaced slashes are not paths', 'Git YAML / JSON / Markdown', 'Git YAML / JSON / Markdown'],
     ['non-string', { name: 'pg' }, ''],
+    ['private ip with port', 'PostgreSQL 16 on 10.0.0.5:5432', 'PostgreSQL 16 on'],
+    ['bare private ip', 'PG 192.168.1.2', 'PG'],
+    ['ipv6 loopback', 'Postgres [::1]:5432', 'Postgres'],
+    ['unix socket uri', 'SQLite unix:/var/run/x.sock', 'SQLite'],
+    ['sqlite uri', 'sqlite:///var/lib/x.db', ''],
+    ['file uri', 'SQLite file:var/lib/x.db', 'SQLite'],
+    ['windows path', 'SQLite C:\\data\\x.db', 'SQLite'],
+    ['parenthetical with a location goes whole', 'PostgreSQL 16 (Loopback 127.0.0.1:8080 -> /srv/app)', 'PostgreSQL 16'],
   ];
   for (const [name, engine, want] of cases) {
     assert.equal(sanitizeApps([app({ databases: [{ name: 'db', engine }] })]).applications[0].databases[0].engine, want, name);
@@ -289,6 +306,8 @@ test('sanitizeCatalogForPublic: databases publish name, engine, summary and a ta
   assert.equal(db({ table_count: -1 }).table_count, 0, 'count must be >= 0');
   assert.equal(db({ public_summary: 'Holds orders.', summary: 'private summary' }).summary, 'Holds orders.');
   assert.equal(db({ summary: 'private summary' }).summary, '', 'only public_summary is published');
+  assert.equal(db({ name: '/var/lib/app/x.db' }).name, '', 'a path is not a name');
+  assert.equal(db({ name: 'Store (127.0.0.1:5432/app)' }).name, 'Store');
   assert.deepEqual(Object.keys(db({ tables: [{ name: 'users', columns: ['email'] }] })).sort(), ['engine', 'name', 'summary', 'table_count']);
   assert.deepEqual(sanitizeApps([app({ databases: ['x', null, 3] })]).applications[0].databases, [], 'non-objects dropped');
 });
@@ -321,6 +340,9 @@ test('sanitizeCatalogForPublic: host keeps sizing facts only, os without the ker
   const os = (value) => sanitizeCatalogForPublic(catalog([], { host: { os: value } })).host.os;
   assert.equal(os('Ubuntu 24.04 LTS, kernel 6.8.0-45-generic'), 'Ubuntu 24.04 LTS');
   assert.equal(os('Ubuntu 24.04 LTS Linux 6.8'), 'Ubuntu 24.04 LTS');
+  assert.equal(os('Ubuntu 24.04 6.8.0-45-generic'), 'Ubuntu 24.04');
+  assert.equal(os('Ubuntu 24.04 - 6.8.0-45-generic'), 'Ubuntu 24.04');
+  assert.equal(sanitizeCatalogForPublic(catalog([], { host: { ram_mb: 1.5 } })).host.ram_mb, null, 'MB must be an integer');
   const sizing = sanitizeCatalogForPublic(catalog([], { host: { ram_mb: '1922', swap_mb: Infinity } })).host;
   assert.equal(sizing.ram_mb, null);
   assert.equal(sizing.swap_mb, null);
@@ -331,6 +353,8 @@ test('sanitizeCatalogForPublic: host keeps sizing facts only, os without the ker
 test('sanitizeCatalogForPublic: updated_at is the catalog string or null', () => {
   assert.equal(sanitizeCatalogForPublic(catalog([], { updated_at: 1730000000 })).updated_at, null);
   assert.equal(sanitizeCatalogForPublic({ applications: [] }).updated_at, null);
+  assert.equal(sanitizeCatalogForPublic(catalog([], { updated_at: 'yesterday, from /home/me' })).updated_at, null, 'only a timestamp');
+  assert.equal(sanitizeCatalogForPublic(catalog([], { updated_at: '2026-11-01' })).updated_at, '2026-11-01');
 });
 
 test('sanitizeCatalogForPublic: a catalog with the wrong shape throws', () => {
@@ -364,4 +388,27 @@ test('loadPublicCatalog: the fixture catalog keeps every PRIVATE-FIXTURE sample 
   assert.deepEqual(out.internal_services.map((a) => a.id), ['sample-worker']);
   assert.equal(out.applications[0].databases[0].table_count, 1);
   assert.doesNotMatch(JSON.stringify(out), /private-fixture/i);
+});
+
+test('sanitizeCatalogForPublic: free text drops addresses, ports, paths and URIs', () => {
+  const out = sanitizeApps([
+    app({
+      name: 'cache 10.0.0.5',
+      title: 'Admin at https://admin.example.com/panel',
+      category: 'Internal (see ~/notes)',
+      purpose: 'Redis on 10.0.0.5:6379 for caching, config in /srv/app/redis.conf, bound to localhost.',
+      tech_stack: ['Redis 127.0.0.1:6379', '/srv/app', 'C:\\tools', 'Go 1.25', 'SQLite (modernc.org/sqlite)', 'HTML5 / CSS3'],
+    }),
+  ]).applications[0];
+  assert.equal(out.name, 'cache');
+  assert.equal(out.title, 'Admin at');
+  assert.equal(out.category, 'Internal');
+  assert.equal(out.purpose, 'Redis on for caching, config in bound to localhost.');
+  assert.deepEqual(out.tech_stack, ['Redis', 'Go 1.25', 'SQLite', 'HTML5 / CSS3']);
+});
+
+test('sanitizeCatalogForPublic: a duplicate id keeps only its first entry', () => {
+  const out = sanitizeApps([app({ title: 'first' }), app({ title: 'second' }), app({ title: 'third', visibility: 'internal' })]);
+  assert.deepEqual(out.applications.map((a) => a.title), ['first']);
+  assert.deepEqual(out.internal_services, []);
 });

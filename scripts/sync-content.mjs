@@ -95,13 +95,28 @@ function main() {
 const SLUG = /^[a-z0-9][a-z0-9-]{0,63}$/;
 // A DNS name whose last label starts with a letter: no IP literals, no "localhost", no "Loopback-Only".
 const HOSTNAME = /^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
-const URL_PATH = /^\/[A-Za-z0-9\-._~%/*]{0,200}$/;
+const PRIVATE_TLD = /\.(?:internal|local|lan|localdomain|localhost|home\.arpa|corp|intranet|private)$/;
+const URL_PATH = /^\/(?!.*\.\.)[A-Za-z0-9\-._~/*]{0,200}$/;
+const TIMESTAMP = /^\d{4}-\d{2}-\d{2}(?:[T ][\d:.]+(?:Z|[+-]\d{2}:?\d{2})?)?$/;
+// Reads as a location: IPv4, host:port, IPv6, a path, a domain with a path, a URI scheme, a backslash.
+const LOCATION =
+  /\d{1,3}(?:\.\d{1,3}){3}|[\w.-]+:\d{2,5}\b|::|\[[\da-f:.]*\]|(?:^|[\s(])(?:~|\.{0,2}\/)\S|\b[a-z0-9-]+(?:\.[a-z0-9-]+)*\.[a-z]{2,}\/|\\|\b[a-z][\w+.-]*:\/|\b(?:unix|file|sqlite|postgres(?:ql)?|mysql|redis|mongodb):/i;
 
 const isObject = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
+// Free text is author-controlled, so it is scrubbed too: a parenthetical holding a location goes whole,
+// any other word that reads as one goes on its own. "PostgreSQL 16 (127.0.0.1:5432)" -> "PostgreSQL 16".
+const scrub = (s) =>
+  s
+    .replace(/\([^)]*\)/g, (group) => (LOCATION.test(group) ? ' ' : group))
+    .split(' ')
+    .filter((word) => !LOCATION.test(word))
+    .join(' ');
 const text = (v, max = 160) =>
-  typeof v === 'string' || typeof v === 'number' ? String(v).replace(/\s+/g, ' ').trim().slice(0, max) : '';
+  typeof v === 'string' || typeof v === 'number'
+    ? scrub(String(v).replace(/\s+/g, ' ')).replace(/\s+/g, ' ').trim().slice(0, max)
+    : '';
 const texts = (v) => (Array.isArray(v) ? v.map((x) => text(x, 60)).filter(Boolean).slice(0, 20) : []);
-const count = (v) => (typeof v === 'number' && Number.isFinite(v) && v >= 0 ? v : null);
+const count = (v) => (Number.isInteger(v) && v >= 0 ? v : null);
 
 // "a.example.com" or "https://a.example.com/..." -> "a.example.com"; anything else -> null.
 function publicHost(value) {
@@ -117,7 +132,7 @@ function publicHost(value) {
     if (url.protocol !== 'https:' || url.port || url.username || url.password) return null;
     host = url.hostname;
   }
-  return HOSTNAME.test(host) && !host.startsWith('127.') ? host : null;
+  return HOSTNAME.test(host) && !host.startsWith('127.') && !PRIVATE_TLD.test(host) ? host : null;
 }
 
 function publicRoute(r) {
@@ -125,19 +140,7 @@ function publicRoute(r) {
   const domain = publicHost(r.domain);
   const routePath = r.path == null ? '/*' : r.path;
   if (!domain || typeof routePath !== 'string' || !URL_PATH.test(routePath)) return null;
-  return { domain, path: routePath, protocol: text(r.protocol, 60) };
-}
-
-// Engine label without loopback addresses or filesystem paths: "PostgreSQL 16 (127.0.0.1:5432)" -> "PostgreSQL 16".
-function engineLabel(v) {
-  return text(v, 400)
-    .replace(/\([^)]*(?:127\.|localhost|~|\/)[^)]*\)/gi, ' ')
-    .replace(/(?:^|\s)(?:~|\.{0,2}\/)\S+/g, ' ')
-    .replace(/\b127(?:\.\d{1,3}){3}(?::\d+)?/g, ' ')
-    .replace(/\blocalhost(?::\d+)?/gi, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, 80);
+  return { domain, path: routePath, protocol: 'HTTPS' };
 }
 
 function publicDatabase(db) {
@@ -145,7 +148,7 @@ function publicDatabase(db) {
   const tableCount = Number.isInteger(db.table_count) && db.table_count >= 0 ? db.table_count : null;
   return {
     name: text(db.name, 120),
-    engine: engineLabel(db.engine),
+    engine: text(db.engine, 80),
     summary: text(db.public_summary, 600),
     table_count: tableCount ?? (Array.isArray(db.tables) ? db.tables.length : 0),
   };
@@ -167,10 +170,11 @@ function publicHostFacts(host) {
   const ports = Array.isArray(edge.public_ports) ? edge.public_ports : [];
   return {
     name: text(host.name, 80),
-    // No kernel: drop "(Linux 6.8)", ", kernel 6.8.0-45" and "Linux 6.8".
+    // No kernel: drop "(Linux 6.8)", ", kernel 6.8.0-45", "Linux 6.8" and a trailing "6.8.0-45-generic".
     os: text(host.os, 200)
       .replace(/\s*\([^)]*\)/g, '')
       .replace(/[,;]?\s*\b(?:kernel\b.*|linux\s+v?\d.*)$/i, '')
+      .replace(/\s*[-,;]?\s*\b\d+\.\d+\.\d+[-\w.]*$/, '')
       .trim()
       .slice(0, 80),
     cpu: text(host.cpu, 80),
@@ -188,10 +192,13 @@ export function sanitizeCatalogForPublic(raw) {
   if (!isObject(raw) || !Array.isArray(raw.applications) || (raw.host != null && !isObject(raw.host))) {
     throw new Error('infrastructure catalog: expected an object with an applications array (and an optional host object)');
   }
-  const apps = raw.applications.filter((a) => isObject(a) && typeof a.id === 'string' && SLUG.test(a.id));
+  const seen = new Set(); // a duplicate id keeps its first entry only
+  const apps = raw.applications.filter(
+    (a) => isObject(a) && typeof a.id === 'string' && SLUG.test(a.id) && !seen.has(a.id) && seen.add(a.id),
+  );
   return {
     schema_version: 2,
-    updated_at: typeof raw.updated_at === 'string' ? text(raw.updated_at, 40) : null,
+    updated_at: typeof raw.updated_at === 'string' && TIMESTAMP.test(raw.updated_at.trim()) ? raw.updated_at.trim() : null,
     host: raw.host == null ? null : publicHostFacts(raw.host),
     applications: apps
       .filter((a) => a.visibility === 'public')

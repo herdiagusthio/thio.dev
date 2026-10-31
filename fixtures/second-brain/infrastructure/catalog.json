@@ -23,7 +23,7 @@
       "name": "sample-site",
       "title": "Sample public website",
       "category": "Public web",
-      "purpose": "A public sample app: it must be on /infrastructure as a full card.",
+      "purpose": "A public sample app: it must be on the infrastructure page as a full card.",
       "tech_stack": ["Astro", "TypeScript"],
       "public_domain": "https://sample.example.com",
       "public_routes": [
