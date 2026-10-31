@@ -125,30 +125,39 @@ const caddyCenterY = caddyY + caddyH / 2;
             return (
               <g>
                 <path
+                  class={`infra-flow-path infra-path-${app.id}`}
+                  data-app={app.id}
                   d={`M ${x1} ${cy} C ${c1x} ${cy}, ${c1x} ${caddyCenterY}, ${x2} ${caddyCenterY}`}
                   fill="none"
                   stroke="#38bdf8"
                   stroke-width="1.5"
                   stroke-opacity="0.55"
                   stroke-dasharray={isPublicHttps ? undefined : '4 4'}
+                  style="transition: all 0.25s ease;"
                 />
                 <path
+                  class={`infra-flow-path infra-path-${app.id}`}
+                  data-app={app.id}
                   d={`M ${x3} ${caddyCenterY} C ${c2x} ${caddyCenterY}, ${c2x} ${cy}, ${x4} ${cy}`}
                   fill="none"
                   stroke="#38bdf8"
                   stroke-width="1.75"
                   stroke-opacity="0.75"
+                  style="transition: all 0.25s ease;"
                 />
                 <path
+                  class={`infra-flow-path infra-path-${app.id}`}
+                  data-app={app.id}
                   d={`M ${x5} ${cy} C ${c3x} ${cy}, ${c3x} ${cy}, ${x6} ${cy}`}
                   fill="none"
                   stroke="#a78bfa"
                   stroke-width="1.5"
                   stroke-opacity="0.7"
+                  style="transition: all 0.25s ease;"
                 />
 
                 {/* Tier 1: Public Route */}
-                <g transform={`translate(${col1X}, ${cy - 23})`}>
+                <g class={`infra-flow-node infra-node-${app.id}`} data-app={app.id} transform={`translate(${col1X}, ${cy - 23})`} style="cursor: pointer;">
                   <rect width={col1W} height="46" rx="6" fill="#0f172a" stroke="#1e293b" stroke-width="1.4" />
                   <circle cx="13" cy="17" r="4" fill={isPublicHttps ? '#10b981' : '#64748b'} />
                   <text x="24" y="20" fill="#e2e8f0" font-family="monospace" font-size="10.5" font-weight="600">
@@ -160,7 +169,7 @@ const caddyCenterY = caddyY + caddyH / 2;
                 </g>
 
                 {/* Tier 3: Application */}
-                <g transform={`translate(${col3X}, ${cy - 25})`}>
+                <g class={`infra-flow-node infra-node-${app.id}`} data-app={app.id} transform={`translate(${col3X}, ${cy - 25})`} style="cursor: pointer;">
                   <rect width={col3W} height="50" rx="6" fill="#111827" stroke="#0284c7" stroke-width="1.4" />
                   <circle cx="13" cy="17" r="4" fill="#10b981" />
                   <text x="24" y="20" fill="#f8fafc" font-family="monospace" font-size="11.5" font-weight="700">
@@ -172,7 +181,7 @@ const caddyCenterY = caddyY + caddyH / 2;
                 </g>
 
                 {/* Tier 4: Database */}
-                <g transform={`translate(${col4X}, ${cy - 23})`}>
+                <g class={`infra-flow-node infra-node-${app.id}`} data-app={app.id} transform={`translate(${col4X}, ${cy - 23})`} style="cursor: pointer;">
                   <rect width={col4W} height="46" rx="6" fill="#1e1b4b" stroke="#6d28d9" stroke-width="1.3" />
                   <text x="11" y="19" fill="#ddd6fe" font-family="monospace" font-size="10.5" font-weight="700">
                     {dbEngine}
@@ -252,14 +261,27 @@ const caddyCenterY = caddyY + caddyH / 2;
 
     <!-- SECTION 3: APPLICATIONS, TECH STACKS & DATABASE SCHEMAS -->
     <section class="content-section">
-      <h2 class="section-head">03 // Running Applications, Tech Stacks &amp; Database Schemas ({apps.length})</h2>
-      <p class="section-sub">
-        Detailed breakdown of every application hosted on the server, its architectural purpose, technology stack, public routing, and underlying database schema.
-      </p>
+      <div class="search-bar-row">
+        <div>
+          <h2 class="section-head">03 // Running Applications, Tech Stacks &amp; Database Schemas ({apps.length})</h2>
+          <p class="section-sub">
+            Detailed breakdown of every application hosted on the server, its architectural purpose, technology stack, public routing, and underlying database schema. Hover any card or node to highlight its path.
+          </p>
+        </div>
+        <div class="db-search-box">
+          <input
+            id="publicDbSearch"
+            type="search"
+            placeholder="🔍 Search tables or columns (e.g. users, rsvp, transactions)..."
+            aria-label="Filter database tables or columns"
+          />
+          <span id="publicDbSearchBadge" class="search-badge" style="display:none;"></span>
+        </div>
+      </div>
 
       <div class="app-list">
         {apps.map((app, index) => (
-          <article class="app-card" id={`app-${app.id}`}>
+          <article class="app-card" id={`app-${app.id}`} data-app-id={app.id}>
             <div class="app-card-header">
               <div>
                 <div class="app-meta-row">
@@ -649,4 +671,125 @@ const caddyCenterY = caddyY + caddyH / 2;
     border: 1px solid rgba(148, 163, 184, 0.2);
     color: #cbd5e1;
   }
+  .search-bar-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+  .db-search-box {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+    max-width: 440px;
+    min-width: 260px;
+    margin-top: 0.5rem;
+  }
+  .db-search-box input {
+    width: 100%;
+    padding: 0.55rem 0.9rem;
+    font-size: 0.82rem;
+    background: rgba(15, 23, 42, 0.75);
+    border: 1px solid var(--gray-30);
+    color: var(--gray-100);
+    border-radius: 4px;
+    font-family: var(--font-sans);
+  }
+  .db-search-box input:focus {
+    outline: none;
+    border-color: #38bdf8;
+  }
+  .search-badge {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    padding: 0.25rem 0.6rem;
+    border: 1px solid #38bdf8;
+    color: #38bdf8;
+    white-space: nowrap;
+    border-radius: 4px;
+  }
+  .app-card {
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .schema-table-card {
+    transition: opacity 0.2s ease;
+  }
 </style>
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    const svgPaths = document.querySelectorAll('.infra-flow-path');
+    const appCards = document.querySelectorAll('.app-card');
+    const svgNodes = document.querySelectorAll('.infra-flow-node');
+
+    function highlightApp(appId) {
+      if (!appId) {
+        svgPaths.forEach((p) => {
+          p.style.opacity = '';
+          p.style.strokeWidth = '';
+          p.style.filter = '';
+        });
+        appCards.forEach((c) => {
+          c.style.borderColor = '';
+          c.style.boxShadow = '';
+        });
+        return;
+      }
+      svgPaths.forEach((p) => {
+        if (p.getAttribute('data-app') === appId) {
+          p.style.opacity = '1';
+          p.style.strokeWidth = '3.2';
+          p.style.filter = 'drop-shadow(0 0 5px rgba(56,189,248,0.85))';
+        } else {
+          p.style.opacity = '0.12';
+          p.style.strokeWidth = '1';
+          p.style.filter = 'none';
+        }
+      });
+      appCards.forEach((c) => {
+        if (c.getAttribute('data-app-id') === appId) {
+          c.style.borderColor = '#38bdf8';
+          c.style.boxShadow = '0 0 16px rgba(56,189,248,0.12)';
+        } else {
+          c.style.borderColor = '';
+          c.style.boxShadow = '';
+        }
+      });
+    }
+
+    appCards.forEach((card) => {
+      card.addEventListener('mouseenter', () => highlightApp(card.getAttribute('data-app-id')));
+      card.addEventListener('mouseleave', () => highlightApp(null));
+    });
+
+    svgNodes.forEach((node) => {
+      node.addEventListener('mouseenter', () => highlightApp(node.getAttribute('data-app')));
+      node.addEventListener('mouseleave', () => highlightApp(null));
+    });
+
+    const searchInput = document.getElementById('publicDbSearch');
+    const searchBadge = document.getElementById('publicDbSearchBadge');
+    searchInput?.addEventListener('input', (e) => {
+      const q = e.target.value.trim().toLowerCase();
+      const tableCards = document.querySelectorAll('.schema-table-card');
+      if (!q) {
+        tableCards.forEach((t) => (t.style.display = ''));
+        if (searchBadge) searchBadge.style.display = 'none';
+        return;
+      }
+      let count = 0;
+      tableCards.forEach((t) => {
+        const hit = t.textContent.toLowerCase().includes(q);
+        t.style.display = hit ? '' : 'none';
+        if (hit) count++;
+      });
+      if (searchBadge) {
+        searchBadge.style.display = 'inline-block';
+        searchBadge.textContent = `${count} table${count === 1 ? '' : 's'} matched`;
+      }
+    });
+  });
+</script>
