@@ -98,16 +98,20 @@ const HOSTNAME = /^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]
 const PRIVATE_TLD = /\.(?:internal|local|lan|localdomain|localhost|home\.arpa|corp|intranet|private)$/;
 const URL_PATH = /^\/(?!.*\.\.)[A-Za-z0-9\-._~/*]{0,200}$/;
 const TIMESTAMP = /^\d{4}-\d{2}-\d{2}(?:[T ][\d:.]+(?:Z|[+-]\d{2}:?\d{2})?)?$/;
-// Reads as a location: IPv4, host:port, IPv6, a path, a domain with a path, a URI scheme, a backslash.
+// Reads as a location or contact: IPv4 (dotted, 0x hex, or a long decimal), :port, "port N", IPv6, a
+// path, a domain with a path, a URI scheme, a backslash, an @ (emails, @port), a run of 6+ digits.
 const LOCATION =
-  /\d{1,3}(?:\.\d{1,3}){3}|[\w.-]+:\d{2,5}\b|::|\[[\da-f:.]*\]|(?:^|[\s(])(?:~|\.{0,2}\/)\S|\b[a-z0-9-]+(?:\.[a-z0-9-]+)*\.[a-z]{2,}\/|\\|\b[a-z][\w+.-]*:\/|\b(?:unix|file|sqlite|postgres(?:ql)?|mysql|redis|mongodb):/i;
+  /\d{1,3}(?:\.\d{1,3}){3}|:\d{2,5}\b|\bports?\s+\d{1,5}\b|::|\[[\da-f:.]*\]|(?:^|[\s(])(?:~|\.{0,2}\/)\S|\b[a-z0-9-]+(?:\.[a-z0-9-]+)*\.[a-z]{2,}\/|\\|\b[a-z][\w+.-]*:\/|\b(?:unix|file|sqlite|postgres(?:ql)?|mysql|redis|mongodb):|@|\d{6,}|\b0x[\da-f]+\b/i;
+const PORT_PHRASE = /\bports?\s+\d{1,5}(?:(?:\s*,\s*|\s+(?:and|or)\s+|\s*\/\s*)\d{1,5})*\b/gi;
 
 const isObject = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
-// Free text is author-controlled, so it is scrubbed too: a parenthetical holding a location goes whole,
-// any other word that reads as one goes on its own. "PostgreSQL 16 (127.0.0.1:5432)" -> "PostgreSQL 16".
+// Free text is author-trusted and published; this scrub is defense in depth. A parenthetical holding
+// a location goes whole, then "port(s) N", then any word that reads as one.
+// "PostgreSQL 16 (127.0.0.1:5432)" -> "PostgreSQL 16".
 const scrub = (s) =>
   s
     .replace(/\([^)]*\)/g, (group) => (LOCATION.test(group) ? ' ' : group))
+    .replace(PORT_PHRASE, ' ')
     .split(' ')
     .filter((word) => !LOCATION.test(word))
     .join(' ');

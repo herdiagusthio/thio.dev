@@ -442,3 +442,32 @@ test('sanitizeCatalogForPublic: hosts that embed a non-public IPv4 are dropped, 
     assert.equal(out.public_routes.length, kept ? 1 : 0, `route ${host}`);
   }
 });
+
+test('sanitizeCatalogForPublic: free text drops emails, port forms, long digit runs and integer IPs', () => {
+  const field = {
+    purpose: (v) => sanitizeApps([app({ purpose: v })]).applications[0].purpose,
+    title: (v) => sanitizeApps([app({ title: v })]).applications[0].title,
+    name: (v) => sanitizeApps([app({ name: v })]).applications[0].name,
+    category: (v) => sanitizeApps([app({ category: v })]).applications[0].category,
+    tech: (v) => sanitizeApps([app({ tech_stack: [v] })]).applications[0].tech_stack.join(),
+    engine: (v) => sanitizeApps([app({ databases: [{ name: 'db', engine: v }] })]).applications[0].databases[0].engine,
+    summary: (v) => sanitizeApps([app({ databases: [{ name: 'db', public_summary: v }] })]).applications[0].databases[0].summary,
+    internalPurpose: (v) => sanitizeApps([app({ visibility: 'internal', purpose: v })]).internal_services[0].purpose,
+  };
+  const cases = [
+    ['purpose', 'contact ops@example.com on port 5432', 'contact on'],
+    ['purpose', 'Caddy listens on ports 80 and 443 here', 'Caddy listens on here'],
+    ['purpose', 'Cache (port 6379) for sessions', 'Cache for sessions'],
+    ['title', 'Admin API @8080', 'Admin API'],
+    ['name', 'api :8080', 'api'],
+    ['category', 'Ops, call 0812345678', 'Ops, call'],
+    ['tech', 'Redis :6379', 'Redis'],
+    ['engine', 'PostgreSQL 16 on port 5432', 'PostgreSQL 16 on'],
+    ['engine', 'Upstream 0x7f000001', 'Upstream'],
+    ['summary', 'Mirrors 2130706433 nightly, mail dba@corp.example', 'Mirrors nightly, mail'],
+    ['internalPurpose', 'Worker reachable at admin@10.0.0.5 or PORT 9000', 'Worker reachable at or'],
+    // Kept: versions, short numbers, times without a port shape
+    ['purpose', 'Go 1.25, Python 3.14, 1922 MB of RAM, 6-stage pipeline, 16:9 video', 'Go 1.25, Python 3.14, 1922 MB of RAM, 6-stage pipeline, 16:9 video'],
+  ];
+  for (const [name, input, want] of cases) assert.equal(field[name](input), want, `${name}: ${input}`);
+});
