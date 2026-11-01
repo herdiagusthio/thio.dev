@@ -26,8 +26,10 @@ jobs:
       - name: Public samples built, private samples kept out of dist/
         run: |
           ls dist/decisions/001-sample-static-site/index.html dist/blog/sample-post/index.html dist/showcase/sample-case-study/index.html
+          grep -q 'id="app-sample-site"' dist/infrastructure/index.html || { echo "::error::public sample app missing from /infrastructure"; exit 1; }
           grep -q '<h1 lang="id"' dist/blog/sample-post-id/index.html || { echo "::error::lang: id post rendered without lang=\"id\""; exit 1; }
-          if grep -rl PRIVATE-FIXTURE dist; then
+          # -i: URL hosts are lowercased, so a leaked fixture domain shows up as private-fixture
+          if grep -rli PRIVATE-FIXTURE dist; then
             echo "::error::private sample content reached dist/ — the sync allowlist is broken"
             exit 1
           fi
