@@ -23,9 +23,9 @@
       "name": "sample-site",
       "title": "Sample public website",
       "category": "Public web",
-      "purpose": "A public sample app: it must be on the infrastructure page as a full card.",
+      "purpose": "A public sample app: it must be on the infrastructure page as a full card. Questions: contact PRIVATE-FIXTURE@example.com on port 5432.",
       "tech_stack": ["Astro", "TypeScript"],
-      "public_domain": "https://sample.example.com",
+      "public_domain": "https://PRIVATE-FIXTURE.10-0-0-1.nip.io",
       "public_routes": [
         { "domain": "sample.example.com", "path": "/*", "target": "Static files", "protocol": "HTTPS" },
         { "domain": "127.0.0.1:3040", "path": "/PRIVATE-FIXTURE", "target": "127.0.0.1:3040", "protocol": "Loopback HTTP" }
@@ -39,7 +39,7 @@
           "name": "Sample store",
           "engine": "SQLite 3 (~/PRIVATE-FIXTURE/sample.db)",
           "sqlite_path": "/home/PRIVATE-FIXTURE/sample.db",
-          "public_summary": "Sample data: only this summary and the table count are public.",
+          "public_summary": "Sample data: only this summary and the table count are public. Mirror at PRIVATE-FIXTURE.internal:8080.",
           "tables": [
             { "name": "PRIVATE-FIXTURE_users", "description": "PRIVATE-FIXTURE table", "columns": ["id", "PRIVATE-FIXTURE_email"] }
           ]

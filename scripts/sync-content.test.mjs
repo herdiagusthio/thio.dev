@@ -387,6 +387,12 @@ test('loadPublicCatalog: the fixture catalog keeps every PRIVATE-FIXTURE sample 
   assert.deepEqual(out.applications.map((a) => a.id), ['sample-site']);
   assert.deepEqual(out.internal_services.map((a) => a.id), ['sample-worker']);
   assert.equal(out.applications[0].databases[0].table_count, 1);
+  // Markers inside fields that are kept but scrubbed: an email and port in the purpose, host:port in the
+  // summary, and a public_domain embedding a private address.
+  assert.match(out.applications[0].purpose, /^A public sample app: .* Questions: contact on \.$/);
+  assert.match(out.applications[0].databases[0].summary, /^Sample data: .* Mirror at$/);
+  assert.equal(out.applications[0].public_domain, null);
+  assert.deepEqual(out.applications[0].public_routes.map((r) => r.domain), ['sample.example.com']);
   assert.doesNotMatch(JSON.stringify(out), /private-fixture/i);
 });
 
