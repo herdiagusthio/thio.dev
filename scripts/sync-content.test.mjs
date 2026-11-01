@@ -412,3 +412,33 @@ test('sanitizeCatalogForPublic: a duplicate id keeps only its first entry', () =
   assert.deepEqual(out.applications.map((a) => a.title), ['first']);
   assert.deepEqual(out.internal_services, []);
 });
+
+test('sanitizeCatalogForPublic: hosts that embed a non-public IPv4 are dropped, the server\'s own nip.io hosts are kept', () => {
+  const cases = [
+    ['thio.103.217.144.64.nip.io', true],
+    ['math.103.217.144.64.nip.io', true],
+    ['103.217.144.64.nip.io', true],
+    ['api.thio.103.217.144.64.nip.io', true],
+    ['app-8-8-8-8.nip.io', true],
+    ['deadbeef.example.com', true],
+    ['10-0-0-1.nip.io', false],
+    ['192.168.1.5.sslip.io', false],
+    ['127.0.0.1.nip.io', false],
+    ['x-172-16-0-9.traefik.me', false],
+    ['169.254.1.1.nip.io', false],
+    ['100.64.0.1.nip.io', false],
+    ['0.0.0.0.nip.io', false],
+    ['224.0.0.1.nip.io', false],
+    ['240.1.2.3.nip.io', false],
+    ['198.18.0.1.nip.io', false],
+    ['app-10.0.0.1.nip.io', false],
+    ['1-2-10-0-0-1.nip.io', false],
+    ['app-c0a80001.nip.io', false],
+    ['fe80--1.sslip.io', false],
+  ];
+  for (const [host, kept] of cases) {
+    const out = sanitizeApps([app({ public_domain: `https://${host}`, public_routes: [{ domain: host, path: '/*', protocol: 'HTTPS' }] })]).applications[0];
+    assert.equal(out.public_domain, kept ? `https://${host}` : null, `public_domain ${host}`);
+    assert.equal(out.public_routes.length, kept ? 1 : 0, `route ${host}`);
+  }
+});

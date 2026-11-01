@@ -118,6 +118,32 @@ const text = (v, max = 160) =>
 const texts = (v) => (Array.isArray(v) ? v.map((x) => text(x, 60)).filter(Boolean).slice(0, 20) : []);
 const count = (v) => (Number.isInteger(v) && v >= 0 ? v : null);
 
+// IPv4 addresses a host embeds the way nip.io / sslip.io read them: dotted or dashed across labels
+// ("10.0.0.1", "app-10-0-0-1", overlapping runs too) and 8-digit hex segments ("app-0a000001").
+const EMBEDDED_IPV4 = /(?<!\d)(?=(\d{1,3})[.-](\d{1,3})[.-](\d{1,3})[.-](\d{1,3})(?!\d))/g;
+function embeddedIPv4s(host) {
+  const dotted = [...host.matchAll(EMBEDDED_IPV4)].map((m) => m.slice(1, 5).map(Number));
+  const hex = host
+    .split(/[.-]/)
+    .filter((part) => /^[0-9a-f]{8}$/.test(part))
+    .map((part) => part.match(/../g).map((byte) => parseInt(byte, 16)));
+  return [...dotted, ...hex].filter((ip) => ip.every((n) => n <= 255));
+}
+
+// Not internet-routable: 0/8, 10/8, 100.64/10, 127/8, 169.254/16, 172.16/12, 192.0.0/24, 192.0.2/24,
+// 192.168/16, 198.18/15, 198.51.100/24, 203.0.113/24, and 224/4 + 240/4 (multicast, reserved).
+function isNonPublicIPv4([a, b, c]) {
+  return (
+    a === 0 || a === 10 || a === 127 || a >= 224 ||
+    (a === 100 && b >= 64 && b <= 127) ||
+    (a === 169 && b === 254) ||
+    (a === 172 && b >= 16 && b <= 31) ||
+    (a === 192 && (b === 168 || (b === 0 && (c === 0 || c === 2)))) ||
+    (a === 198 && (b === 18 || b === 19 || (b === 51 && c === 100))) ||
+    (a === 203 && b === 0 && c === 113)
+  );
+}
+
 // "a.example.com" or "https://a.example.com/..." -> "a.example.com"; anything else -> null.
 function publicHost(value) {
   if (typeof value !== 'string') return null;
@@ -132,7 +158,10 @@ function publicHost(value) {
     if (url.protocol !== 'https:' || url.port || url.username || url.password) return null;
     host = url.hostname;
   }
-  return HOSTNAME.test(host) && !host.startsWith('127.') && !PRIVATE_TLD.test(host) ? host : null;
+  if (!HOSTNAME.test(host) || host.startsWith('127.') || PRIVATE_TLD.test(host)) return null;
+  // sslip.io writes IPv6 with dashes ("fe80--1"); only punycode labels may contain "--".
+  if (host.split('.').some((label) => label.includes('--') && !label.startsWith('xn--'))) return null;
+  return embeddedIPv4s(host).some(isNonPublicIPv4) ? null : host;
 }
 
 function publicRoute(r) {
