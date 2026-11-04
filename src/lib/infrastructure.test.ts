@@ -104,6 +104,10 @@ test('appLinks: one link per public host and path, labelled without the scheme',
       ],
     ],
     ['wildcard below a path', { public_routes: [route('a.example.com', '/api/*')] }, [{ href: 'https://a.example.com/api/', label: 'a.example.com/api/*' }]],
+    ['nip.io IP is masked in visible label', { public_domain: 'https://thio.103.217.144.64.nip.io', public_routes: [route('math.103.217.144.64.nip.io')] }, [
+      { href: 'https://thio.103.217.144.64.nip.io/', label: 'thio.dev' },
+      { href: 'https://math.103.217.144.64.nip.io/', label: 'math.thio.dev' },
+    ]],
   ];
   for (const [name, over, want] of cases) assert.deepEqual(appLinks(app(over)), want, name);
 });

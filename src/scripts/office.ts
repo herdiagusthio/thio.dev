@@ -16,7 +16,7 @@ declare global {
   }
 }
 
-const LIVE_API_URL = `https://api.${new URL(import.meta.env.SITE).host}/office`;
+const LIVE_API_URL = '/api/public/office';
 const FETCH_TIMEOUT_MS = 4000;
 const REFRESH_INTERVAL_MS = 30000;
 const ACTIVE_STATES = ['Working', 'Reviewing', 'Collaborating'];

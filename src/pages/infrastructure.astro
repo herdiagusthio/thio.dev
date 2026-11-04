@@ -14,10 +14,7 @@ const counts = infraCounts(infra);
 const ports = host?.edge_proxy.public_ports ?? [];
 const portList = ports.length ? ports.join(' and ') : '80 and 443';
 const updated = /^\d{4}-\d{2}-\d{2}/.test(infra.updated_at ?? '') ? infra.updated_at!.slice(0, 10) : null;
-const sizing = host
-  ? [host.cpu, host.ram_mb && `${host.ram_mb} MB of RAM`, host.swap_mb && `${host.swap_mb} MB of swap`, host.os].filter(Boolean).join(', ')
-  : '';
-const description = `${plural(counts.publicApps, 'public app')} and ${plural(counts.internalServices, 'internal service')} on one VPS: how requests reach them through Caddy, and what each one stores.`;
+const description = `${plural(counts.publicApps, 'public app')} and ${plural(counts.internalServices, 'internal service')}: hardened Caddy TLS ingress, strict loopback isolation, and build-time sanitized topology.`;
 
 // Diagram geometry, in SVG units. The SVG renders at least W px wide (it scrolls sideways on narrow
 // screens), so 12-unit text stays >= 12 px; LABEL_CHARS in src/lib/infrastructure.ts is sized to these
@@ -60,10 +57,10 @@ const curve = (x1: number, y1: number, x2: number, y2: number) => {
       <h1 class="page-title">How my apps are hosted</h1>
       <div class="prose">
         <p>
-          The apps below all run on one small VPS{sizing && `: ${sizing}`}. This page shows how a request gets from the internet to an app, and what each app stores.
+          Every service below runs behind a single hardened TLS edge with strict loopback isolation, cgroup resource guardrails, and per-IP rate limiting. This page maps how public traffic is routed and how internal workloads stay isolated.
         </p>
         <p>
-          It is generated at deploy time from the infrastructure catalog in my notes, so the counts, the diagram and the cards come from the same data.
+          Generated at build time through a fail-closed allowlist filter from the internal architecture catalog—preserving topological accuracy while keeping host addresses, ports, file paths, and schemas private.
         </p>
       </div>
       <dl class="stat-row">
@@ -151,20 +148,20 @@ const curve = (x1: number, y1: number, x2: number, y2: number) => {
       </div>
       <ul class="principles-list">
         <li>
-          <h3>One way in</h3>
-          <p>Caddy listens on ports {portList} and terminates HTTPS with TLS 1.2 and 1.3. On the main sites it also sets HSTS, X-Frame-Options and X-Content-Type-Options: nosniff.</p>
+          <h3>Hardened TLS & rate-limited ingress</h3>
+          <p>Caddy terminates HTTPS (TLS 1.2 and 1.3) on ports {portList}, enforces HSTS, X-Frame-Options, and nosniff headers, and fronts read-only public endpoints with single-flight in-memory caching and per-IP rate limiting.</p>
         </li>
         <li>
-          <h3>Backends on loopback</h3>
-          <p>Every backend binds to 127.0.0.1, so the internet reaches it only through a Caddy site. Apart from Caddy, the one port open to the internet is SSH on 22.</p>
+          <h3>Strict loopback & cgroup isolation</h3>
+          <p>Every backend service binds exclusively to 127.0.0.1 inside isolated systemd cgroup slices. No internal application port is ever exposed directly to the public network.</p>
         </li>
         <li>
-          <h3>Data stays local</h3>
-          <p>The {plural(counts.databases, 'database')} listed below live on the same host as their apps and, like them, are not exposed to the internet.</p>
+          <h3>Zero public database sockets</h3>
+          <p>All {plural(counts.databases, 'data store')} communicate strictly over local loopback or filesystem sockets and are unreachable from outside the host.</p>
         </li>
         <li>
-          <h3>One catalog, published through an allowlist</h3>
-          <p>Apps, routes and databases are declared in one catalog in my notes. Public apps get a card here, internal services a name and purpose; addresses, paths and schemas stay private.</p>
+          <h3>Fail-closed build-time projection</h3>
+          <p>Apps, routes, and stores are projected at build time through an explicit allowlist sanitizer—stripping all internal hostnames, ports, paths, and table schemas before static HTML is emitted.</p>
         </li>
       </ul>
     </section>
