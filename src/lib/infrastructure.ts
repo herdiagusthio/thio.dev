@@ -38,6 +38,14 @@ export interface Projection {
 
 export const EMPTY_PROJECTION: Projection = { updated_at: null, host: null, applications: [], internal_services: [] };
 
+// Mask raw nip.io IP segments in visible labels while keeping standard DNS names untouched.
+export function displayHost(domain: string): string {
+  return domain
+    .replace(/^thio\.\d{1,3}(?:\.\d{1,3}){3}\.nip\.io$/i, 'thio.dev')
+    .replace(/^([a-z0-9-]+)\.\d{1,3}(?:\.\d{1,3}){3}\.nip\.io$/i, '$1.thio.dev')
+    .replace(/^\d{1,3}(?:\.\d{1,3}){3}\.nip\.io$/i, 'thio.dev');
+}
+
 // Public HTTPS hosts of one app: its public_domain and route domains, deduplicated.
 export function appHosts(app: PublicApp): string[] {
   const hosts = app.public_domain ? [app.public_domain.replace(/^https:\/\//, '')] : [];
@@ -49,7 +57,7 @@ export function appLinks(app: PublicApp): { href: string; label: string }[] {
   const routes = app.public_domain ? [{ domain: app.public_domain.replace(/^https:\/\//, ''), path: '/*' }] : [];
   const links = [...routes, ...app.public_routes].map(({ domain, path }) => {
     const shown = path === '/*' || path === '/' ? '' : path;
-    return { href: `https://${domain}${shown.replace(/\*$/, '') || '/'}`, label: `${domain}${shown}` };
+    return { href: `https://${domain}${shown.replace(/\*$/, '') || '/'}`, label: `${displayHost(domain)}${shown}` };
   });
   return links.filter((link, i) => links.findIndex((l) => l.href === link.href) === i);
 }
@@ -90,7 +98,7 @@ export function diagramModel(p: Projection) {
     return {
       id: app.id,
       href: `#app-${app.id}`,
-      host: hosts.length ? fit(hosts[0], LABEL_CHARS.host) : null,
+      host: hosts.length ? fit(displayHost(hosts[0]), LABEL_CHARS.host) : null,
       hostNote: hosts.length > 1 ? `+${plural(hosts.length - 1, 'more host')}` : hosts.length ? 'HTTPS' : '',
       name: fit(app.name, LABEL_CHARS.name),
       stack: fit(app.tech_stack.slice(0, 2).join(' · '), LABEL_CHARS.stack),

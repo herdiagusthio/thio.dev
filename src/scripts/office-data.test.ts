@@ -60,6 +60,8 @@ test('normalizeSnapshot: validates stations and merges the static roster', () =>
   assert.equal(snap.activities, null);
   assert.equal(snap.channels, null);
   assert.equal(snap.summary, null);
+  assert.equal(snap.pipeline, null);
+  assert.equal(snap.channelStatus, null);
 });
 
 test('normalizeSnapshot: activities, channels and summary', () => {
@@ -83,7 +85,42 @@ test('normalizeSnapshot: activities, channels and summary', () => {
     { name: '#eng', target: 'Engineering' },
     { name: '#product-strategy', target: 'Product Strategy' },
   ]);
-  assert.deepEqual(snap.summary, { totalAgents: 7, active: 3, idle: 4 });
+  assert.deepEqual(snap.summary, { totalAgents: 7, active: 3, idle: 4, offline: 0 });
   assert.equal(snap.updatedAt, '2026-10-25T01:00:00Z');
   assert.equal(normalizeSnapshot({ stations: [station()], summary: { totalAgents: '7' } }, AGENTS)?.summary, null);
+});
+
+test('normalizeSnapshot: pipeline, lastActive, channel status and offline count', () => {
+  const snap = normalizeSnapshot(
+    {
+      stations: [station({ lastActive: 'this week' }), station({ id: 'lexa', name: 'Lexa', seat: 6, lastActive: '<b>soon</b>' })],
+      pipeline: { stage: 'Code review', ticketsDone: 2, ticketsTotal: 3, waitingForOwner: true },
+      channels: { status: 'Connected', topics: [{ category: 'engineering-architecture' }, { category: 'new-slug' }] },
+      summary: { totalAgents: 7, active: 1, idle: 5, offline: 1 },
+    },
+    AGENTS,
+  );
+  assert.ok(snap);
+  assert.equal(snap.agents[0].lastActive, 'this week');
+  assert.equal(snap.agents[1].lastActive, undefined, 'lastActive is an allowlisted bucket');
+  assert.deepEqual(snap.pipeline, { stage: 'Code review', ticketsDone: 2, ticketsTotal: 3, waitingForOwner: true });
+  assert.equal(snap.channelStatus, 'Connected');
+  assert.deepEqual(snap.channels, [
+    { name: '#engineering-architecture', target: 'Go systems, concurrency patterns, ADR review gate' },
+    { name: '#new-slug', target: 'new-slug' },
+  ]);
+  assert.deepEqual(snap.summary, { totalAgents: 7, active: 1, idle: 5, offline: 1 });
+  for (const bad of [null, 'x', {}, { stage: 'x', ticketsDone: '2', ticketsTotal: 3, waitingForOwner: true }, { stage: 'x', ticketsDone: 2, ticketsTotal: 3 }]) {
+    assert.equal(normalizeSnapshot({ stations: [station()], pipeline: bad }, AGENTS)?.pipeline, null, JSON.stringify(bad));
+  }
+});
+
+test('static roster: identity only, no invented live state', () => {
+  assert.equal(AGENTS.length, 7);
+  for (const a of AGENTS) {
+    assert.equal(a.state, 'Unknown');
+    assert.equal(a.room, 'Lounge');
+    assert.equal(a.currentTask, '');
+    assert.equal('model' in a, false);
+  }
 });

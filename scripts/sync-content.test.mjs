@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { copyDir, isPublic, loadPublicCatalog, NUMBERED_ADR, sanitizeCatalogForPublic } from './sync-content.mjs';
+import { copyDir, isPublic, loadPublicCatalog, NUMBERED_ADR, sanitizeCatalogForPublic, sanitizeMarkdownForPublic } from './sync-content.mjs';
 
 const PUBLISHED = ['published'];
 const ADR = ['accepted', 'superseded'];
@@ -76,6 +76,20 @@ test('copyDir: decisions publish only numbered ADRs, whatever a generated file c
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }
+});
+
+test('sanitizeMarkdownForPublic: scrubs file:/// links, OS username, private nip.io hosts, VPS IP, and internal ports', () => {
+  const raw = [
+    'See [`scripts/chatgpt-oauth.py`](file:///home/thiohermes/code-storage/second-brain/scripts/chatgpt-oauth.py).',
+    'Serving `https://vps.103.217.144.64.nip.io` on `127.0.0.1:3030` and `https://router.103.217.144.64.nip.io`.',
+    'Exposed on `http://103.217.144.64:3040` on host `103.217.144.64`.',
+    'Public site `https://thio.103.217.144.64.nip.io` owned by `/home/thiohermes/app` (user `thiohermes`).',
+  ].join('\n');
+  const clean = sanitizeMarkdownForPublic(raw);
+  assert.doesNotMatch(clean, /103\.217\.144\.64|thiohermes|file:\/\/\/|127\.0\.0\.1:3030|vps\.|router\./);
+  assert.match(clean, /See `scripts\/chatgpt-oauth\.py`\./);
+  assert.match(clean, /https:\/\/<internal-host>/);
+  assert.match(clean, /https:\/\/thio\.dev/);
 });
 
 test('main: a missing or incomplete source fails instead of building whatever content/ holds', () => {

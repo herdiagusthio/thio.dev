@@ -1,10 +1,11 @@
-// Live Office client — /office. Paints the static roster immediately, then refreshes from the
-// sanitized public API every 30s; any network or shape failure keeps the static fallback.
+// Live Office client — /office. Paints the roster (identity only, state Unknown) immediately, then
+// refreshes from the sanitized public API every 30s while the tab is visible. A network or shape
+// failure says "telemetry offline": nothing on this page is invented to look live.
 // Every API value is validated by normalizeSnapshot, then escaped by `html` (2D); the 3D bundle
 // writes its labels with textContent.
 
 import { AGENTS as ROSTER, type Agent } from '../data/agents';
-import { html, normalizeSnapshot, stateClass, STATIC_ACTIVITIES, STATIC_CHANNELS, type Activity, type Channel, type Summary } from './office-data';
+import { html, normalizeSnapshot, stateClass, STATIC_CHANNELS, type Activity, type Channel, type Snapshot } from './office-data';
 
 declare global {
   interface Window {
@@ -16,13 +17,13 @@ declare global {
   }
 }
 
-const LIVE_API_URL = `https://api.${new URL(import.meta.env.SITE).host}/office`;
+const LIVE_API_URL = '/api/public/office';
 const FETCH_TIMEOUT_MS = 4000;
 const REFRESH_INTERVAL_MS = 30000;
 const ACTIVE_STATES = ['Working', 'Reviewing', 'Collaborating'];
 
 let agents: Agent[] = ROSTER;
-let activities: Activity[] = STATIC_ACTIVITIES;
+let activities: Activity[] = [];
 let channels: Channel[] = STATIC_CHANNELS;
 let isLive = false;
 let lastUpdatedAt: string | null = null;
@@ -54,10 +55,10 @@ async function refreshLiveState() {
 
   isLive = snapshot !== null;
   agents = snapshot?.agents ?? ROSTER;
-  activities = snapshot?.activities ?? STATIC_ACTIVITIES;
+  activities = snapshot?.activities ?? [];
   channels = snapshot?.channels ?? STATIC_CHANNELS;
   lastUpdatedAt = snapshot ? (snapshot.updatedAt ?? new Date().toISOString()) : null;
-  updateHudStatus(snapshot?.summary ?? null);
+  updateHudStatus(snapshot);
   updateFreshness();
 }
 
@@ -65,7 +66,7 @@ function updateFreshness() {
   const label = $('freshnessLabel');
   if (!label) return;
   if (!isLive || !lastUpdatedAt) {
-    label.textContent = isLive ? 'Updated just now' : 'Static Fallback';
+    label.textContent = isLive ? 'Updated just now' : 'No live data';
     return;
   }
   const elapsedSec = Math.max(0, Math.floor((Date.now() - new Date(lastUpdatedAt).getTime()) / 1000));
@@ -75,27 +76,56 @@ function updateFreshness() {
   else label.textContent = `Updated ${Math.floor(elapsedSec / 3600)}h ago`;
 }
 
-function updateHudStatus(summary: Summary | null) {
+function setBadge(id: string, text: string, on: boolean) {
+  const el = $(id);
+  if (!el) return;
+  el.textContent = text;
+  el.classList.toggle('active', on);
+  el.classList.toggle('standby', !on);
+}
+
+function updateHudStatus(snapshot: Snapshot | null) {
+  const summary = snapshot?.summary ?? null;
   const pill = $('gatewayPill');
   pill?.classList.toggle('live', isLive);
   pill?.classList.toggle('static', !isLive);
   const pillText = $('gatewayStatusText');
-  if (pillText) pillText.textContent = isLive ? 'Swarm Fleet — Live Telemetry' : 'Swarm Fleet — Static Fallback';
-  // Announce only when live/fallback flips, never on a routine refresh (the first call sets the baseline).
+  if (pillText) pillText.textContent = isLive ? 'Swarm Fleet — Live Telemetry' : 'Swarm Fleet — Telemetry Offline';
+  // Announce only when live/offline flips, never on a routine refresh (the first call sets the baseline).
   const liveStatus = $('officeLiveStatus');
   if (liveStatus && announcedLive !== null && announcedLive !== isLive) {
-    liveStatus.textContent = isLive ? 'Live telemetry connected' : 'Live telemetry unavailable, showing static data';
+    liveStatus.textContent = isLive ? 'Live telemetry connected' : 'Live telemetry unavailable';
   }
   announcedLive = isLive;
 
   const monoLabels = document.querySelectorAll('.mono-label');
-  if (monoLabels[0]) monoLabels[0].textContent = isLive ? '[SWARM_TELEMETRY: LIVE]' : '[SWARM_TELEMETRY: STATIC FALLBACK]';
-  if (summary && monoLabels[1]) monoLabels[1].textContent = `[AGENTS: ${summary.totalAgents} TRACKED · ${summary.active} ACTIVE]`;
+  if (monoLabels[0]) monoLabels[0].textContent = isLive ? '[SWARM_TELEMETRY: LIVE]' : '[SWARM_TELEMETRY: OFFLINE]';
+  if (monoLabels[1]) monoLabels[1].textContent = summary ? `[AGENTS: ${summary.totalAgents} TRACKED · ${summary.active} ACTIVE]` : `[AGENTS: ${ROSTER.length} TRACKED]`;
 
-  const working = $('officeHeaderWorkingCount');
-  if (working) working.textContent = String(summary ? summary.active : agents.filter((a) => ACTIVE_STATES.includes(a.state)).length);
-  const idle = $('officeHeaderIdleCount');
-  if (idle) idle.textContent = String(summary ? summary.idle : agents.filter((a) => a.state === 'Idle').length);
+  const counts: Record<string, number | undefined> = {
+    officeHeaderWorkingCount: summary?.active,
+    officeHeaderIdleCount: summary?.idle,
+    officeHeaderOfflineCount: summary?.offline,
+  };
+  for (const [id, n] of Object.entries(counts)) {
+    const el = $(id);
+    if (el) el.textContent = n === undefined ? '—' : String(n);
+  }
+
+  setBadge('rosterBadge', summary ? `${summary.active} active` : 'no data', Boolean(summary?.active));
+  setBadge('activityBadge', isLive ? 'Live' : 'Offline', isLive);
+  const channelStatus = snapshot?.channelStatus ?? null;
+  setBadge('channelsBadge', channelStatus ?? 'Unknown', channelStatus === 'Connected');
+
+  // The AI-DLC pipeline: stage and ticket counts only, written with textContent.
+  const pipeline = snapshot?.pipeline ?? null;
+  const pipelinePill = $('pipelinePill');
+  if (pipelinePill) {
+    pipelinePill.textContent = pipeline
+      ? `AI-DLC · ${pipeline.stage}${pipeline.ticketsTotal ? ` · ${pipeline.ticketsDone}/${pipeline.ticketsTotal} tickets` : ''}${pipeline.waitingForOwner ? ' · waiting for approval' : ''}`
+      : '';
+    show('pipelinePill', pipeline !== null);
+  }
 }
 
 // --- 2D render -------------------------------------------------------------------------------
@@ -151,6 +181,9 @@ function setHtml(id: string, content: { value: string }) {
   if (el) el.innerHTML = content.value;
 }
 
+// The lounge seats everyone who is not at a desk; only Offline/Unknown look different from standby.
+const loungePose = (a: Agent) => (a.state === 'Offline' || a.state === 'Unknown' ? a.state : 'idle');
+
 function renderOffice2D() {
   const workspace = agents.filter((a) => a.room === 'Workspace');
   const lounge = agents.filter((a) => a.room === 'Lounge');
@@ -164,7 +197,7 @@ function renderOffice2D() {
     lead
       ? html`
         <div style="position: relative; display: flex; flex-direction: column; align-items: center;" ${agentAttrs(lead)} title="Inspect ${lead.name} (Armchair)">
-          <div style="position: absolute; bottom: 36px; z-index: 10;">${pixelCharacter(lead, 'idle')}</div>
+          <div style="position: absolute; bottom: 36px; z-index: 10;">${pixelCharacter(lead, loungePose(lead))}</div>
           <div class="lounge-armchair"></div>
           <div class="seated-agent-tag" style="margin-top: 4px;">${lead.name}</div>
         </div>`
@@ -177,7 +210,7 @@ function renderOffice2D() {
       .filter((a) => a !== lead)
       .map((a) => html`
         <div class="lounge-seated-agent" ${agentAttrs(a)} title="Inspect ${a.name} (Standby on sofa)">
-          <div class="seated-char-wrap">${pixelCharacter(a, 'idle')}</div>
+          <div class="seated-char-wrap">${pixelCharacter(a, loungePose(a))}</div>
           <div class="seated-agent-tag">${a.name}</div>
         </div>`)}`,
   );
@@ -197,7 +230,9 @@ function renderOffice2D() {
 
   setHtml(
     'sidebarActivityList',
-    html`${activities.map((item) => html`
+    activities.length === 0
+      ? html`<div class="sidebar-activity-item"><div class="activity-action">${isLive ? 'No recent activity.' : 'Telemetry offline — no live data.'}</div></div>`
+      : html`${activities.map((item) => html`
       <div class="sidebar-activity-item">
         <div class="activity-top">
           <span class="activity-agent"><span aria-hidden="true">${item.icon}</span> ${item.agent}</span>
@@ -218,7 +253,6 @@ function renderOffice2D() {
             <small>${c.target}</small>
           </div>
         </div>
-        <span class="badge active" style="font-size: 10px;">CONNECTED</span>
       </div>`)}`,
   );
 }
@@ -321,7 +355,7 @@ function openDossierModal(agentId: string) {
     modalAgentRole: agent.role,
     modalStateVal: agent.state,
     modalRoomVal: `${agent.room} (Desk #${agent.seat})`,
-    modalModelVal: agent.model,
+    modalLastActiveVal: agent.lastActive ?? (isLive ? 'unknown' : 'no live data'),
     modalCurrentTask: agent.currentTask,
     modalRecentActivity: agent.recentActivity,
     modalMission: agent.mission,
@@ -351,24 +385,36 @@ function rerender() {
   }
 }
 
-async function refreshAndRender() {
-  await refreshLiveState();
-  // Re-rendering under an open dossier would replace its opener (focus would return to <body>).
-  if (dossier()?.open) renderPending = true;
-  else rerender();
-  updateClockAndLighting();
+// One refresh at a time: the interval, the tab coming back and the refresh button share it, so an
+// older response can never land after a newer one.
+let refreshing: Promise<void> | null = null;
+function refreshAndRender(): Promise<void> {
+  refreshing ??= (async () => {
+    await refreshLiveState();
+    // Re-rendering under an open dossier would replace its opener (focus would return to <body>).
+    if (dossier()?.open) renderPending = true;
+    else rerender();
+    updateClockAndLighting();
+  })().finally(() => (refreshing = null));
+  return refreshing;
 }
 
 // --- Init (module scripts run after the document is parsed) ---------------------------------
 
 renderOffice2D();
+switchRoom(currentRoom);
 updateClockAndLighting();
-updateHudStatus(null);
 refreshAndRender();
 
 setInterval(updateClockAndLighting, 5000);
 setInterval(updateFreshness, 5000);
-setInterval(refreshAndRender, REFRESH_INTERVAL_MS); // aligned with the API's 30s TTL
+// Aligned with the API's 30s TTL; a hidden tab does not poll, and catches up when shown again.
+setInterval(() => {
+  if (!document.hidden) refreshAndRender();
+}, REFRESH_INTERVAL_MS);
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) refreshAndRender();
+});
 
 const agentTarget = (e: Event) => (e.target as Element).closest<HTMLElement>('[data-agent-id]')?.dataset.agentId;
 document.addEventListener('click', (e) => {

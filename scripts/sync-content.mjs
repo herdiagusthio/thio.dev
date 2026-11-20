@@ -30,6 +30,20 @@ export function isPublic(text, allowed) {
   return Boolean(status) && allowed.includes(status[1]);
 }
 
+export function sanitizeMarkdownForPublic(md) {
+  return md
+    .replace(/\[([^\]]+)\]\(file:\/\/\/[^)]+\)/g, '$1')
+    .replace(/file:\/\/\/home\/[^\s)"'`]+/g, '<local-path>')
+    .replace(/\/home\/thiohermes\b/g, '~')
+    .replace(/\bthiohermes\b/g, 'deploy')
+    .replace(/https?:\/\/(?:vps|router|hermes|a2a|admin)\.\d{1,3}(?:\.\d{1,3}){3}\.nip\.io(?:\/[^\s)"'`]*)?/gi, 'https://<internal-host>')
+    .replace(/\b(?:vps|router|hermes|a2a|admin)\.\d{1,3}(?:\.\d{1,3}){3}\.nip\.io\b/gi, '<internal-host>')
+    .replace(/https?:\/\/thio\.103\.217\.144\.64\.nip\.io\b/gi, 'https://thio.dev')
+    .replace(/https?:\/\/103\.217\.144\.64(?::\d+)?\b/g, 'http://<vps-ip>:<port>')
+    .replace(/\b103\.217\.144\.64(?::\d+)?\b/g, '<vps-ip>')
+    .replace(/\b127\.0\.0\.1:(?:3030|3040|3055|9119|9900|20128)\b/g, '127.0.0.1');
+}
+
 export function copyDir(srcDir, destDir, allowed, namePattern = /^/) {
   if (!fs.existsSync(srcDir)) {
     console.warn(`  ⚠ source missing, skipped: ${srcDir}`);
@@ -41,11 +55,12 @@ export function copyDir(srcDir, destDir, allowed, namePattern = /^/) {
   for (const name of fs.readdirSync(srcDir)) {
     if (!name.endsWith('.md')) continue;
     const fullPath = path.join(srcDir, name);
-    if (!namePattern.test(name) || !isPublic(fs.readFileSync(fullPath, 'utf8'), allowed)) {
+    const raw = fs.readFileSync(fullPath, 'utf8');
+    if (!namePattern.test(name) || !isPublic(raw, allowed)) {
       skipped.push(name);
       continue;
     }
-    fs.copyFileSync(fullPath, path.join(destDir, name));
+    fs.writeFileSync(path.join(destDir, name), sanitizeMarkdownForPublic(raw), 'utf8');
     validFiles.add(name);
   }
   if (skipped.length) console.log(`    not public (${allowed.join('|')}): ${skipped.join(', ')}`);

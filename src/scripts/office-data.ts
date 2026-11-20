@@ -50,12 +50,23 @@ export interface Summary {
   totalAgents: number;
   active: number;
   idle: number;
+  offline: number;
+}
+
+/** The AI-DLC run in flight: fixed stage labels and counts, never what it is about. */
+export interface Pipeline {
+  stage: string;
+  ticketsDone: number;
+  ticketsTotal: number;
+  waitingForOwner: boolean;
 }
 
 export interface Snapshot {
   agents: Agent[];
-  activities: Activity[] | null; // null: keep the static fallback
+  activities: Activity[] | null; // null: the live feed is empty
   channels: Channel[] | null;
+  channelStatus: string | null;
+  pipeline: Pipeline | null;
   summary: Summary | null;
   updatedAt: string | null;
 }
@@ -65,6 +76,7 @@ const HEX = /^#[0-9a-f]{3,8}$/i;
 // id and state are identifiers (map keys, class names, 3D animation switches), never free text.
 const ID = /^[\w-]+$/;
 const STATES = ['Working', 'Reviewing', 'Collaborating', 'Idle', 'Offline'];
+const LAST_ACTIVE = ['today', 'this week', 'dormant'];
 
 const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
 const str = (v: unknown) => (typeof v === 'string' ? v : undefined);
@@ -96,10 +108,10 @@ function toAgent(raw: unknown, roster: Agent[]): Agent | null {
     seat,
     role: str(raw.role) ?? known?.role ?? '',
     avatar: str(raw.avatar) ?? known?.avatar ?? '🤖',
-    model: str(raw.model) ?? known?.model ?? '',
     currentTask: str(raw.currentTask) ?? '',
     recentActivity: str(raw.recentActivity) ?? '',
     activityLabel: str(raw.activityLabel) ?? '',
+    lastActive: LAST_ACTIVE.find((v) => v === raw.lastActive),
     colors: colorsOf(raw.colors) ?? known?.colors ?? DEFAULT_COLORS,
     // Not exposed by the public API.
     focus: known?.focus ?? '',
@@ -108,13 +120,33 @@ function toAgent(raw: unknown, roster: Agent[]): Agent | null {
   };
 }
 
+// The API publishes category slugs only; what each channel is for is written here.
+const CHANNEL_NOTES: Record<string, string> = {
+  'engineering-architecture': 'Go systems, concurrency patterns, ADR review gate',
+  'tech-intelligence': 'AI breakthroughs, distributed systems radar',
+  'systems-reliability': 'VPS telemetry, Caddy proxy, memory guardrail',
+  'content-narrative': 'Technical blogging, case studies, JSON-LD schema',
+  'financial-intelligence': 'Portfolio and market briefs',
+  'general-operations': 'Coordination and daily operations',
+};
+
 function toChannel(t: unknown): Channel | null {
   if (typeof t === 'string') return { name: t, target: t };
   if (!isRecord(t)) return null;
   const name = str(t.name);
   const category = str(t.category);
   if (!name && !category) return null;
-  return { name: `#${category ?? name!.toLowerCase().replace(/\s+/g, '-')}`, target: name ?? category! };
+  const slug = category ?? name!.toLowerCase().replace(/\s+/g, '-');
+  return { name: `#${slug}`, target: (category && CHANNEL_NOTES[category]) ?? name ?? slug };
+}
+
+function toPipeline(v: unknown): Pipeline | null {
+  if (!isRecord(v)) return null;
+  const stage = str(v.stage);
+  const ticketsDone = num(v.ticketsDone);
+  const ticketsTotal = num(v.ticketsTotal);
+  if (!stage || ticketsDone === undefined || ticketsTotal === undefined || typeof v.waitingForOwner !== 'boolean') return null;
+  return { stage, ticketsDone, ticketsTotal, waitingForOwner: v.waitingForOwner };
 }
 
 /** Validate the public API payload; null means "use the static fallback". */
@@ -131,6 +163,7 @@ export function normalizeSnapshot(data: unknown, roster: Agent[]): Snapshot | nu
   const totalAgents = num(s?.totalAgents);
   const active = num(s?.active) ?? num(s?.working);
   const idle = num(s?.idle);
+  const offline = num(s?.offline) ?? 0;
 
   return {
     agents,
@@ -142,28 +175,13 @@ export function normalizeSnapshot(data: unknown, roster: Agent[]): Snapshot | nu
         timeAgo: str(a.timeAgo) ?? 'recently',
       })) ?? null,
     channels: topics?.map(toChannel).filter((c): c is Channel => c !== null) ?? null,
-    summary: totalAgents !== undefined && active !== undefined && idle !== undefined ? { totalAgents, active, idle } : null,
+    channelStatus: isRecord(data.channels) ? (str(data.channels.status) ?? null) : null,
+    pipeline: toPipeline(data.pipeline),
+    summary: totalAgents !== undefined && active !== undefined && idle !== undefined ? { totalAgents, active, idle, offline } : null,
     updatedAt: str(data.updatedAt) ?? str(data.fetchedAt) ?? null,
   };
 }
 
-// --- Static fallback (also the first paint) ---------------------------------------------------
+// --- Static channel list (configuration, shown until the API answers) -------------------------
 
-export const STATIC_ACTIVITIES: Activity[] = [
-  { icon: '📐', agent: 'Prime', action: 'Approved ADR-014 & ADR-015 architecture review gates', timeAgo: '2m ago' },
-  { icon: '⚡', agent: 'Antigravity', action: 'Shipped full-stack Cockpit & thio.dev overhaul (52/52 tests)', timeAgo: '5m ago' },
-  { icon: '🛡️', agent: 'Sysca', action: 'Verified TCP BBR, systemd slices & >= 500MB RAM headroom', timeAgo: '11m ago' },
-  { icon: '👑', agent: 'LEADYA', action: 'Synchronized 7-agent sprint backlog and Second-Brain SSOT', timeAgo: '18m ago' },
-  { icon: '✍️', agent: 'Lexa', action: 'Published bilingual deep-dives & JSON-LD schema on thio.dev', timeAgo: '24m ago' },
-  { icon: '🎯', agent: 'Luna', action: 'Finalized Cockpit & Showcase UX information architecture', timeAgo: '38m ago' },
-  { icon: '💼', agent: 'Caren', action: 'Synced Sharia portfolio brief & Google Workspace Sheet', timeAgo: '1h ago' },
-];
-
-export const STATIC_CHANNELS: Channel[] = [
-  { name: '#engineering-architecture', target: 'Go systems, concurrency patterns, ADR review gate' },
-  { name: '#tech-intelligence', target: 'AI breakthroughs, distributed systems radar' },
-  { name: '#systems-reliability', target: 'VPS telemetry, Caddy proxy, memory guardrail' },
-  { name: '#product-strategy', target: 'PRDs, backlog prioritization, user journey flows' },
-  { name: '#content-narrative', target: 'Technical blogging, case studies, JSON-LD schema' },
-  { name: '#executive-ops', target: 'Executive coordination, calendar, habits' },
-];
+export const STATIC_CHANNELS: Channel[] = Object.entries(CHANNEL_NOTES).map(([slug, note]) => ({ name: `#${slug}`, target: note }));

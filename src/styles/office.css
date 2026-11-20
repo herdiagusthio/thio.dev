@@ -934,6 +934,13 @@
 .character-leg.right { right: 16px; }
 
 /* Typing animation */
+/* No telemetry (Unknown) or no activity for 14+ days (Offline): greyed out, not "on a break". */
+.pixel-character.state-offline,
+.pixel-character.state-unknown {
+  filter: grayscale(1);
+  opacity: 0.45;
+}
+
 .state-working .character-arm.left {
   animation: mcTypeLeft 0.3s steps(2) infinite;
 }
