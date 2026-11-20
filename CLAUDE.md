@@ -18,10 +18,10 @@ Astro 7 static site — Herdi Agusthio's personal engineering console (blog, cas
 
 ## Office page
 
-- `src/scripts/office.ts` (bundled module) renders the 2D office; data comes from `src/data/agents.ts` (single roster, also used by /about) and the live API `https://api.<site host>/office`, validated by `normalizeSnapshot` in `src/scripts/office-data.ts`.
+- `src/scripts/office.ts` (bundled module) renders the 2D office; identity comes from `src/data/agents.ts` (single roster, also used by /about), state only from the same-origin live API `/api/public/office` (Caddy proxies it to vps-dashboard), validated by `normalizeSnapshot` in `src/scripts/office-data.ts`. Nothing is invented when the API is down: agents stay `Unknown` and the HUD says telemetry offline. The API's `pipeline` (AI-DLC stage + ticket counts) and per-agent `lastActive` are rendered with `textContent`.
 - All HTML built from data must go through the `html` tag in `office-data.ts` (escapes every interpolation); colors are hex-validated because they land in `style`; `id`/`state` must be identifiers. Clicks use `data-agent-id` delegation — no inline handlers.
 - The 3D bundle writes agent labels with `textContent`; its toolbar icons need the matching `#i-<name>` symbols in the sprite in `office.astro` (copied from vps-dashboard's `public/index.html`).
-- The API only allows the production origin (CORS), so local runs show the static fallback; mock `fetch` to test live mode.
+- Local runs have no `/api/public/office`, so they show the telemetry-offline state; mock `fetch` to test live mode.
 - `public/js/office3d.bundle.js` is prebuilt from `../vps-dashboard` (`bun run build:3d`); `office.ts` loads it on the first switch to 3D (`load3D`). The dossier is a native `<dialog>`. `public/k8s/index.html` is a standalone game.
 
 ## Config

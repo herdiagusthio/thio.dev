@@ -16,9 +16,8 @@ import '../styles/office.css';
       <section class="office-page-hero">
         <div class="meta-status">
           <span class="status-indicator"></span>
-          <span class="mono-label">[SWARM_TELEMETRY: OPERATIONAL]</span>
-          <span class="mono-label">[AGENTS: 7 ACTIVE]</span>
-          <span class="mono-label">[MEM_INVARIANT: &gt;=500MB HEADROOM OK]</span>
+          <span class="mono-label">[SWARM_TELEMETRY: CONNECTING]</span>
+          <span class="mono-label">[AGENTS: 7 TRACKED]</span>
         </div>
         <h1 class="page-title">Autonomous Multi-Agent Command Bridge</h1>
         <p class="hero-desc">
@@ -33,11 +32,11 @@ import '../styles/office.css';
           <!-- Top HUD Bar -->
           <div class="office-stage-header">
             <!-- Left: Gateway running pill (LIVE-004) -->
-            <div class="stage-gateway-pill live" id="gatewayPill">
+            <div class="stage-gateway-pill static" id="gatewayPill">
               <span class="gateway-pulse-icon">∿</span>
-              <span id="gatewayStatusText">Swarm Fleet — Live Telemetry</span>
+              <span id="gatewayStatusText">Swarm Fleet — Connecting…</span>
               <span class="gateway-live-dot"></span>
-              <span class="freshness-label" id="freshnessLabel">Updated just now</span>
+              <span class="freshness-label" id="freshnessLabel">Waiting for data</span>
             </div>
 
             <!-- Center: Room Navigator & 2D/3D View Toggle -->
@@ -46,7 +45,7 @@ import '../styles/office.css';
                 <button type="button" id="officeNavPrev" class="room-nav-arrow" aria-label="Previous room"><span aria-hidden="true">‹</span></button>
                 <div class="room-nav-title-box">
                   <span id="officeRoomTitle">Workspace</span>
-                  <span id="officeRoomCount" class="room-nav-count-badge">5</span>
+                  <span id="officeRoomCount" class="room-nav-count-badge">0</span>
                 </div>
                 <button type="button" id="officeNavNext" class="room-nav-arrow" aria-label="Next room"><span aria-hidden="true">›</span></button>
                 <span id="officeDayNightPill" class="day-night-chip"><span aria-hidden="true">☀️</span> daytime</span>
@@ -59,9 +58,10 @@ import '../styles/office.css';
 
             <!-- Right: Status Summary Pills -->
             <div class="stage-status-pills">
-              <span class="status-summary-pill working"><span class="summary-dot green"></span> <b id="officeHeaderWorkingCount">5</b> working</span>
-              <span class="status-summary-pill idle"><span class="summary-dot gray"></span> <b id="officeHeaderIdleCount">3</b> standby</span>
-              <span class="status-summary-pill offline"><span class="summary-dot dark"></span> <b>0</b> offline</span>
+              <span class="status-summary-pill working"><span class="summary-dot green"></span> <b id="officeHeaderWorkingCount">—</b> working</span>
+              <span class="status-summary-pill idle"><span class="summary-dot gray"></span> <b id="officeHeaderIdleCount">—</b> standby</span>
+              <span class="status-summary-pill offline"><span class="summary-dot dark"></span> <b id="officeHeaderOfflineCount">—</b> offline</span>
+              <span class="status-summary-pill" id="pipelinePill" style="display: none;"></span>
               <button type="button" id="refreshOfficeBtn" class="office-refresh-btn" aria-label="Refresh live data"><span aria-hidden="true">🔄</span></button>
               <span id="officeLiveStatus" class="sr-only" role="status"></span>
             </div>
@@ -295,7 +295,7 @@ import '../styles/office.css';
               <h2 class="sidebar-card-title">
                 <span><span aria-hidden="true">🤖</span> Fleet Roster (7)</span>
               </h2>
-              <span class="badge active" style="font-size: 10px;">7 Online</span>
+              <span class="badge standby" id="rosterBadge" style="font-size: 10px;">no data</span>
             </div>
             <div class="agent-chip-list" id="agentRosterChips">
               <!-- Dynamically populated -->
@@ -309,7 +309,7 @@ import '../styles/office.css';
                 <span class="sidebar-pulse-icon" aria-hidden="true">∿</span>
                 <span>Live Engineering Activity</span>
               </h2>
-              <span class="badge active" style="font-size: 10px;">Live Stream</span>
+              <span class="badge standby" id="activityBadge" style="font-size: 10px;">Connecting</span>
             </div>
             <div class="live-activity-list" id="sidebarActivityList">
               <!-- Dynamically populated with sanitized engineering activities -->
@@ -322,7 +322,7 @@ import '../styles/office.css';
               <h2 class="sidebar-card-title">
                 <span><span aria-hidden="true">💬</span> Architecture Channels (6)</span>
               </h2>
-              <span class="badge active" style="font-size: 10px;">Connected</span>
+              <span class="badge standby" id="channelsBadge" style="font-size: 10px;">Unknown</span>
             </div>
             <div class="sidebar-channels-list" id="sidebarChannelsList">
               <!-- Dynamically populated with sanitized topic routes -->
@@ -353,15 +353,15 @@ import '../styles/office.css';
           <div class="cyber-meta-grid">
             <div class="cyber-meta-cell">
               <span class="meta-label">Current Status</span>
-              <strong id="modalStateVal" style="color: #38bdf8;">Working</strong>
+              <strong id="modalStateVal" style="color: #38bdf8;">—</strong>
             </div>
             <div class="cyber-meta-cell">
               <span class="meta-label">Location / Zone</span>
               <strong id="modalRoomVal">Command Bridge (Station #1)</strong>
             </div>
             <div class="cyber-meta-cell">
-              <span class="meta-label">Inference Engine & Tier</span>
-              <strong id="modalModelVal">Frontier Reasoning (agenticprojectcombo)</strong>
+              <span class="meta-label">Last Active</span>
+              <strong id="modalLastActiveVal">—</strong>
             </div>
             <div class="cyber-meta-cell">
               <span class="meta-label">Execution Invariant</span>
