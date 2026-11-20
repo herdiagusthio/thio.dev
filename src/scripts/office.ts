@@ -181,6 +181,9 @@ function setHtml(id: string, content: { value: string }) {
   if (el) el.innerHTML = content.value;
 }
 
+// The lounge seats everyone who is not at a desk; only Offline/Unknown look different from standby.
+const loungePose = (a: Agent) => (a.state === 'Offline' || a.state === 'Unknown' ? a.state : 'idle');
+
 function renderOffice2D() {
   const workspace = agents.filter((a) => a.room === 'Workspace');
   const lounge = agents.filter((a) => a.room === 'Lounge');
@@ -194,7 +197,7 @@ function renderOffice2D() {
     lead
       ? html`
         <div style="position: relative; display: flex; flex-direction: column; align-items: center;" ${agentAttrs(lead)} title="Inspect ${lead.name} (Armchair)">
-          <div style="position: absolute; bottom: 36px; z-index: 10;">${pixelCharacter(lead, 'idle')}</div>
+          <div style="position: absolute; bottom: 36px; z-index: 10;">${pixelCharacter(lead, loungePose(lead))}</div>
           <div class="lounge-armchair"></div>
           <div class="seated-agent-tag" style="margin-top: 4px;">${lead.name}</div>
         </div>`
@@ -207,7 +210,7 @@ function renderOffice2D() {
       .filter((a) => a !== lead)
       .map((a) => html`
         <div class="lounge-seated-agent" ${agentAttrs(a)} title="Inspect ${a.name} (Standby on sofa)">
-          <div class="seated-char-wrap">${pixelCharacter(a, 'idle')}</div>
+          <div class="seated-char-wrap">${pixelCharacter(a, loungePose(a))}</div>
           <div class="seated-agent-tag">${a.name}</div>
         </div>`)}`,
   );
@@ -382,12 +385,18 @@ function rerender() {
   }
 }
 
-async function refreshAndRender() {
-  await refreshLiveState();
-  // Re-rendering under an open dossier would replace its opener (focus would return to <body>).
-  if (dossier()?.open) renderPending = true;
-  else rerender();
-  updateClockAndLighting();
+// One refresh at a time: the interval, the tab coming back and the refresh button share it, so an
+// older response can never land after a newer one.
+let refreshing: Promise<void> | null = null;
+function refreshAndRender(): Promise<void> {
+  refreshing ??= (async () => {
+    await refreshLiveState();
+    // Re-rendering under an open dossier would replace its opener (focus would return to <body>).
+    if (dossier()?.open) renderPending = true;
+    else rerender();
+    updateClockAndLighting();
+  })().finally(() => (refreshing = null));
+  return refreshing;
 }
 
 // --- Init (module scripts run after the document is parsed) ---------------------------------
