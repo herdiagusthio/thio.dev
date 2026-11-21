@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description" content="KubeQuest: a hands-on, gamified tour of Kubernetes, from clusters and pods to scheduling and troubleshooting, right in your browser.">
+  <meta http-equiv="content-security-policy" content="default-src 'self'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; font-src 'self'; script-src 'self' 'sha256-toBSqga4y2QKBsOaasMfwRpPkvwfaNppkcU/NwGe3co='; style-src 'self' 'unsafe-inline';">
   <title>KubeQuest — The Fun Interactive Kubernetes Odyssey</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☸️</text></svg>">
   <style>
@@ -938,7 +939,7 @@ spec:
             <div style="font-size:12px; font-weight:700; color:#9ca3af; margin-bottom:8px;">${s.diagram.title}</div>
             <div class="diagram-grid">
               ${s.diagram.items.map((item, i) => `
-                <div class="diagram-item ${i === 0 ? 'active' : ''}" onclick="selectDiagramItem(${i}, '${encodeURIComponent(item.desc)}')">
+                <div class="diagram-item ${i === 0 ? 'active' : ''}" data-diagram-idx="${i}" data-diagram-desc="${encodeURIComponent(item.desc)}">
                   <div class="icon">${item.icon}</div>
                   <div class="label">${item.label}</div>
                 </div>
@@ -968,7 +969,7 @@ spec:
                   if (i === s.quiz.answer) cls = "correct";
                   else if (i === savedAns) cls = "wrong";
                 }
-                return `<button class="quiz-opt ${cls}" onclick="handleQuiz(${index}, ${i})">${opt}</button>`;
+                return `<button class="quiz-opt ${cls}" data-quiz-slide="${index}" data-quiz-opt="${i}">${opt}</button>`;
               }).join("")}
             </div>
             <div class="quiz-feedback" id="quiz-fb-${index}" style="${savedAns !== null ? 'display:block; color:#93c5fd;' : ''}">
@@ -1103,7 +1104,7 @@ spec:
     // Drawer Table of Contents
     function buildDrawer() {
       drawerList.innerHTML = slides.map((s, idx) => `
-        <div class="drawer-item ${idx === currentSlide ? 'active' : ''}" onclick="jumpToSlide(${idx})">
+        <div class="drawer-item ${idx === currentSlide ? 'active' : ''}" data-slide-idx="${idx}">
           <div class="num">${idx + 1}</div>
           <div style="flex:1;">
             <div style="font-size:11px; color:#6b7280;">${s.chapter.split(':')[0]}</div>
@@ -1138,6 +1139,34 @@ spec:
     document.getElementById("btn-toc").addEventListener("click", openDrawer);
     document.getElementById("btn-close-drawer").addEventListener("click", closeDrawer);
     drawerOverlay.addEventListener("click", closeDrawer);
+
+    container.addEventListener("click", (e) => {
+      const target = e.target instanceof Element ? e.target : null;
+      if (!target) return;
+      const diagramItem = target.closest("[data-diagram-idx]");
+      if (diagramItem) {
+        const idx = parseInt(diagramItem.getAttribute("data-diagram-idx"), 10);
+        const desc = diagramItem.getAttribute("data-diagram-desc") || "";
+        window.selectDiagramItem(idx, desc);
+        return;
+      }
+      const quizOpt = target.closest("[data-quiz-slide]");
+      if (quizOpt) {
+        const slideIdx = parseInt(quizOpt.getAttribute("data-quiz-slide"), 10);
+        const optIdx = parseInt(quizOpt.getAttribute("data-quiz-opt"), 10);
+        window.handleQuiz(slideIdx, optIdx);
+      }
+    });
+
+    drawerList.addEventListener("click", (e) => {
+      const target = e.target instanceof Element ? e.target : null;
+      if (!target) return;
+      const drawerItem = target.closest("[data-slide-idx]");
+      if (drawerItem) {
+        const idx = parseInt(drawerItem.getAttribute("data-slide-idx"), 10);
+        window.jumpToSlide(idx);
+      }
+    });
 
     // Reset Progress Button
     document.getElementById("btn-restart").addEventListener("click", () => {
