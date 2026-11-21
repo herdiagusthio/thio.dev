@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import astroConfig from '../astro.config.mjs';
 import {
   CSP_DIRECTIVES,
   extractK8sScriptHash,
@@ -334,4 +335,18 @@ test('public/k8s/index.html is CSP-compliant, uses delegated click attributes, a
   assert.match(html, /data-quiz-slide=/);
   assert.match(html, /data-quiz-opt=/);
   assert.match(html, /data-slide-idx=/);
+});
+
+test('astro.config.mjs configures security.csp with CSP_DIRECTIVES, scriptDirective hashes, and styleDirective', () => {
+  assert.ok(astroConfig.security && typeof astroConfig.security.csp === 'object');
+  assert.deepEqual(astroConfig.security.csp, {
+    directives: CSP_DIRECTIVES,
+    scriptDirective: {
+      resources: ["'self'"],
+      hashes: [extractK8sScriptHash()],
+    },
+    styleDirective: {
+      resources: ["'self'", "'unsafe-inline'"],
+    },
+  });
 });
