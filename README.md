@@ -11,7 +11,7 @@ Static engineering platform, architecture lab, and live 2D/3D Agent Command Brid
 - **Architecture Showcase, Labs & ADRs**: [`/showcase`](https://thio.103.217.144.64.nip.io/showcase)
 - **Autonomous 7-Agent Command Bridge (2D/3D Live Office)**: [`/office`](https://thio.103.217.144.64.nip.io/office)
 - **KubeQuest Interactive Kubernetes Odyssey**: [`/k8s/`](https://thio.103.217.144.64.nip.io/k8s/)
-- **Sanitized Public Telemetry Bridge API**: [`https://api.thio.103.217.144.64.nip.io/office`](https://api.thio.103.217.144.64.nip.io/office)
+- **Sanitized Public Telemetry Bridge API**: [`https://api.thio.103.217.144.64.nip.io/api/public/office`](https://api.thio.103.217.144.64.nip.io/api/public/office)
 - **Crawlers**: [`/sitemap-index.xml`](https://thio.103.217.144.64.nip.io/sitemap-index.xml) · [`/robots.txt`](https://thio.103.217.144.64.nip.io/robots.txt)
 
 ---
@@ -59,7 +59,7 @@ It exposes `window.Office3D.{init, update, destroy}`; `src/scripts/office.ts` lo
 `ship.sh` ends with `scripts/smoke-check.sh`: every page in `dist/`'s sitemap plus the RSS, robots, sitemap index, `/k8s/`, og image and 3D bundle must return 200 from the live site, and the live homepage must be byte-identical to `dist/index.html` (so Caddy is serving this build). Re-run it on the VPS after a deploy, or pass a base URL that serves `dist/` as-is (e.g. `python3 -m http.server 8000 -d dist`, then `scripts/smoke-check.sh http://localhost:8000`; `astro dev`/`preview` inject scripts, so the homepage check fails there).
 
 ```bash
-curl -s https://api.thio.103.217.144.64.nip.io/office | jq .summary   # live office API
+curl -s https://api.thio.103.217.144.64.nip.io/api/public/office | jq .summary   # live office API
 ```
 
 ### Content-Security-Policy (CSP)
