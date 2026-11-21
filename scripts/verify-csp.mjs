@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { transform } from '@astrojs/compiler-rs';
 
 export const CSP_DIRECTIVES = [
@@ -31,14 +32,14 @@ const TEMPLATE_INLINE_HANDLER_RE =
 const SHA256_TOKEN_RE = /^'sha256-[A-Za-z0-9+/]+=*'$/;
 const ASTRO_DYNAMIC_HANDLER_RE = /\$\$addAttribute\([^,]+,\s*["'](on[a-z]+)["']\)/i;
 
-function collectAstroFiles(dirPath) {
+function collectFilesWithExtension(dirPath, extension) {
   const entries = fs.readdirSync(dirPath, { withFileTypes: true });
   const files = [];
   for (const entry of entries) {
     const fullPath = path.join(dirPath, entry.name);
     if (entry.isDirectory()) {
-      files.push(...collectAstroFiles(fullPath));
-    } else if (entry.isFile() && entry.name.endsWith('.astro')) {
+      files.push(...collectFilesWithExtension(fullPath, extension));
+    } else if (entry.isFile() && entry.name.endsWith(extension)) {
       files.push(fullPath);
     }
   }
@@ -62,7 +63,7 @@ export function verifyAstroSourceScripts(srcDir = 'src') {
     throw new Error(`Astro source directory not found: ${srcDir}`);
   }
 
-  const astroFiles = collectAstroFiles(srcDir);
+  const astroFiles = collectFilesWithExtension(srcDir, '.astro');
   if (astroFiles.length === 0) {
     throw new Error(`No .astro files found under: ${srcDir}`);
   }
@@ -364,4 +365,106 @@ export function verifyHtmlCsp(html, filePath = '<html string>') {
     scriptHashes,
     inlineScriptHashes,
   };
+}
+
+/**
+ * Format a single-line Caddy `header Content-Security-Policy "..."` directive
+ * containing all unique `sha256-...` inline script hashes.
+ */
+export function formatCaddyCspHeader(hashes = []) {
+  if (!Array.isArray(hashes)) {
+    throw new TypeError('formatCaddyCspHeader expects an array of CSP hashes');
+  }
+
+  const uniqueHashes = [];
+  const seen = new Set();
+  for (const raw of hashes) {
+    if (typeof raw !== 'string') {
+      throw new TypeError('Invalid CSP hash entry: expected string');
+    }
+    const normalized = raw.trim().replace(/^'|'$/g, '');
+    if (!SHA256_TOKEN_RE.test(`'${normalized}'`)) {
+      throw new Error(`Invalid CSP hash token: "${raw}"`);
+    }
+    if (!seen.has(normalized)) {
+      seen.add(normalized);
+      uniqueHashes.push(normalized);
+    }
+  }
+
+  const scriptSrc = ["'self'", ...uniqueHashes.map((h) => `'${h}'`)].join(' ');
+  const policy = [
+    ...CSP_DIRECTIVES,
+    "font-src 'self'",
+    `script-src ${scriptSrc}`,
+    "style-src 'self' 'unsafe-inline'",
+  ].join('; ');
+
+  return `header Content-Security-Policy "${policy}"`;
+}
+
+/**
+ * Verify all built HTML pages in `distDir` against the hash-based CSP policy
+ * and return aggregated verification stats plus the canonical Caddy header.
+ */
+export function verifyDistCsp(distDir = 'dist') {
+  if (!fs.existsSync(distDir) || !fs.statSync(distDir).isDirectory()) {
+    throw new Error(`Dist directory not found: ${distDir}`);
+  }
+
+  const requiredEntries = [
+    path.join(distDir, 'index.html'),
+    path.join(distDir, 'k8s', 'index.html'),
+  ];
+  for (const requiredPath of requiredEntries) {
+    if (!fs.existsSync(requiredPath) || !fs.statSync(requiredPath).isFile()) {
+      throw new Error(`Required HTML entry missing: ${requiredPath}`);
+    }
+  }
+
+  const htmlFiles = collectFilesWithExtension(distDir, '.html');
+  const allHashes = new Set();
+  let redirectFiles = 0;
+
+  for (const filePath of htmlFiles) {
+    const html = fs.readFileSync(filePath, 'utf8');
+    const result = verifyHtmlCsp(html, filePath);
+    if (result.isRedirect) {
+      redirectFiles += 1;
+    }
+    for (const hash of [...result.scriptHashes, ...result.inlineScriptHashes]) {
+      allHashes.add(hash);
+    }
+  }
+
+  const scriptHashes = [...allHashes];
+  return {
+    filesChecked: htmlFiles.length,
+    redirectFiles,
+    scriptHashes,
+    caddyHeader: formatCaddyCspHeader(scriptHashes),
+  };
+}
+
+/**
+ * CLI entrypoint: verify source `.astro` files (when run with default `dist`) and all built HTML pages.
+ */
+export function main(argv = process.argv.slice(2)) {
+  const distDir = argv[0] || 'dist';
+  if (argv.length === 0 && fs.existsSync('src')) {
+    verifyAstroSourceScripts('src');
+  }
+  const result = verifyDistCsp(distDir);
+  console.log(`CSP verified across ${result.filesChecked} HTML files in ${distDir}`);
+  console.log(result.caddyHeader);
+  return result;
+}
+
+if (process.argv[1] && fs.realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  try {
+    main();
+  } catch (err) {
+    console.error(err instanceof Error ? err.message : String(err));
+    process.exit(1);
+  }
 }
