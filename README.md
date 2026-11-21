@@ -20,7 +20,7 @@ Static engineering platform, architecture lab, and live 2D/3D Agent Command Brid
 
 ```bash
 npm run dev      # sync content from ../second-brain, then astro dev
-npm run build    # sync content from ../second-brain, then astro build
+npm run build    # sync content from ../second-brain, astro build, then verify dist/ CSP
 npx astro build  # build from the current content/ without re-syncing
 SECOND_BRAIN_DIR=fixtures/second-brain npm run dev   # no second-brain checkout: sample content
 npm run check    # astro check (type errors)
@@ -60,6 +60,16 @@ It exposes `window.Office3D.{init, update, destroy}`; `src/scripts/office.ts` lo
 
 ```bash
 curl -s https://api.thio.103.217.144.64.nip.io/office | jq .summary   # live office API
+```
+
+### Content-Security-Policy (CSP)
+
+- Astro 7's `security.csp` (`astro.config.mjs`) emits `<meta http-equiv="content-security-policy">` in every built page's `<head>`, and standalone `public/k8s/index.html` carries its own hashed `<meta http-equiv="content-security-policy">` policy using delegated click listeners instead of inline `onclick=` attributes.
+- `node scripts/verify-csp.mjs` runs automatically at the end of `npm run build` to verify `src/**/*.astro` (no `<script is:inline>`, no unhoisted executable scripts, no inline `on*=` handlers) and every `dist/**/*.html` file against the target directives (requiring `dist/index.html` and `dist/k8s/index.html`, rejecting unhashed inline scripts, `'unsafe-inline'`/`'unsafe-eval'` in `script-src`, or inline `on*=` attributes), then prints the canonical Caddy header.
+- Per the W3C CSP specification, browsers enforce `frame-ancestors 'none'` only via HTTP response headers (while `<meta>` enforces all other directives). Configure Caddy with the exact `header Content-Security-Policy "..."` directive printed by `node scripts/verify-csp.mjs`:
+
+```caddyfile
+header Content-Security-Policy "default-src 'self'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; font-src 'self'; script-src 'self' 'sha256-toBSqga4y2QKBsOaasMfwRpPkvwfaNppkcU/NwGe3co=' 'sha256-7/JBIo5kGUP/NlQQfBSkn5nCaltLDEHZDWhfk8BR8AM=' 'sha256-/RlTZ7FXuzPC/nCKIhm1+lPF+/fly1fx75EsKyucWCs=' 'sha256-xIb/Pa7FUshAu4ihwjchYcQpyCI8eS8kt40GpOAYCz8=' 'sha256-1BvDVWLr3QCC20uHhUDi27eDFVJpk1uMQJGIWKUks2I=' 'sha256-kmZE/W8I1iuTnl1b3yqzv9/DQZenPngd3NjSKMQl7y0=' 'sha256-Y8t0ntteBwH+PqGKUyjWW3CAk+BNJKSoQc0xZ68FjhM=' 'sha256-0O7iB6zr9x0r6X6eWYITC9V5q+yWCGAoFvcysBGbY9Q='; style-src 'self' 'unsafe-inline'"
 ```
 
 Security & quality gate: `/home/thiohermes/.hermes/scripts/sdlc-scanner.sh ~/code-storage/thio.dev`
