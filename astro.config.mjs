@@ -2,6 +2,7 @@
 import { defineConfig, fontProviders } from 'astro/config';
 import { satteri } from '@astrojs/markdown-satteri';
 import sitemap from '@astrojs/sitemap';
+import { CSP_DIRECTIVES, extractK8sScriptHash } from './scripts/verify-csp.mjs';
 
 // Single source of the public origin: canonical URLs, JSON-LD, sitemap and the office API host
 // (api.<site host>) all derive from it. Override with SITE_URL when the domain moves.
@@ -62,5 +63,17 @@ export default defineConfig({
     // Match the previous marked output: no curly quotes, no Shiki colors.
     processor: satteri({ mdastPlugins: [stripFirstH1], features: { smartPunctuation: false } }),
     syntaxHighlight: false,
+  },
+  security: {
+    csp: {
+      directives: /** @type {any} */ (CSP_DIRECTIVES),
+      scriptDirective: {
+        resources: ["'self'"],
+        hashes: [/** @type {import('astro').CspHash} */ (extractK8sScriptHash())],
+      },
+      styleDirective: {
+        resources: ["'self'", "'unsafe-inline'"],
+      },
+    },
   },
 });
